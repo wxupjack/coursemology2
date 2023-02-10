@@ -5625,7 +5625,7 @@
     "defaultMessage": "无法创建尝试 - {error}"
   },
   "course.video.WatchVideoButton.reWatch": {
-    "defaultMessage": "在看一遍"
+    "defaultMessage": "重看"
   },
   "course.video.WatchVideoButton.watch": {
     "defaultMessage": "观看"

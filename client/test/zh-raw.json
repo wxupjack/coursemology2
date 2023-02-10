@@ -7587,7 +7587,7 @@
       "en": "Failed to create an attempt - {error}"
     },
     "course.video.WatchVideoButton.reWatch": {
-      "defaultMessage": "在看一遍",
+      "defaultMessage": "重看",
       "en": "Rewatch"
     },
     "course.video.WatchVideoButton.watch": {

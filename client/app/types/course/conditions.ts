@@ -37,9 +37,18 @@ export interface SurveyConditionData extends ConditionData {
   surveyId?: number;
 }
 
-export type AvailableAssessments = Record<string, string>;
+export interface AvailableAssessments {
+  ids: AssessmentConditionData['id'][];
+  assessments: Record<
+    AssessmentConditionData['id'],
+    { title: string; url: string }
+  >;
+}
 
-export type AvailableSurveys = Record<string, string>;
+export interface AvailableSurveys {
+  ids: SurveyConditionData['id'][];
+  surveys: Record<SurveyConditionData['id'], { title: string; url: string }>;
+}
 
 export type AvailableAchievements = Record<
   string,

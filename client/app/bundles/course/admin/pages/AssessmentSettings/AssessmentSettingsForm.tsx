@@ -1,10 +1,12 @@
 import { Emits } from 'react-emitter-factory';
 import { Controller } from 'react-hook-form';
 import { AssessmentSettingsData } from 'types/course/admin/assessments';
+import * as yup from 'yup';
 
 import Section from 'lib/components/core/layouts/Section';
 import Subsection from 'lib/components/core/layouts/Subsection';
 import FormCheckboxField from 'lib/components/form/fields/CheckboxField';
+import FormTextField from 'lib/components/form/fields/TextField';
 import Form, { FormEmitter } from 'lib/components/form/Form';
 import useTranslation from 'lib/hooks/useTranslation';
 
@@ -21,6 +23,13 @@ const AssessmentsSettingsForm = (
   props: AssessmentsSettingsFormProps,
 ): JSX.Element => {
   const { t } = useTranslation();
+  const validationSchema = yup.object({
+    maxProgrammingTimeLimit: yup
+      .number()
+      .nullable()
+      .typeError(t(translations.maxTimeLimitRequired))
+      .min(1, t(translations.positiveMaxTimeLimitRequired)),
+  });
 
   return (
     <Form
@@ -29,6 +38,7 @@ const AssessmentsSettingsForm = (
       headsUp
       initialValues={props.data}
       onSubmit={props.onSubmit}
+      validates={validationSchema}
     >
       {(control): JSX.Element => (
         <>
@@ -93,6 +103,30 @@ const AssessmentsSettingsForm = (
                 )}
               />
             </Subsection>
+
+            {props.data.maxProgrammingTimeLimit && (
+              <Subsection
+                className="!mt-8"
+                spaced
+                title={t(translations.maxProgrammingTimeLimit)}
+              >
+                <Controller
+                  control={control}
+                  name="maxProgrammingTimeLimit"
+                  render={({ field, fieldState }): JSX.Element => (
+                    <FormTextField
+                      disabled={props.disabled}
+                      field={field}
+                      fieldState={fieldState}
+                      fullWidth
+                      label={t(translations.maxProgrammingTimeLimit)}
+                      type="number"
+                      variant="filled"
+                    />
+                  )}
+                />
+              </Subsection>
+            )}
           </Section>
 
           <Section

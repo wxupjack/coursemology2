@@ -51,6 +51,7 @@ export const updateAssessmentSettings = async (
       show_stdout_and_stderr: data.showStdoutAndStderr,
       allow_randomization: data.allowRandomization,
       allow_mrq_options_randomization: data.allowMrqOptionsRandomization,
+      programming_max_time_limit: data.maxProgrammingTimeLimit,
       assessment_categories_attributes: data.categories.map((category) => ({
         id: category.id,
         title: category.title,

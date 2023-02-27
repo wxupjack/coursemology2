@@ -6,6 +6,7 @@ class Course::Assessment::Question::ProgrammingController < Course::Assessment::
                               class: Course::Assessment::Question::Programming,
                               through: :assessment, parent: false, except: [:new, :create]
   before_action :load_question_assessment, only: [:edit, :update]
+  before_action :set_attributes_for_programming_question
 
   def new
     @template = 'course/assessment/question/programming/new.json.jbuilder'
@@ -65,6 +66,10 @@ class Course::Assessment::Question::ProgrammingController < Course::Assessment::
   end
 
   private
+
+  def set_attributes_for_programming_question
+    @programming_question.max_time_limit = current_course.programming_max_time_limit
+  end
 
   def programming_question_params
     params.require(:question_programming).permit(

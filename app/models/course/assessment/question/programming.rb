@@ -6,7 +6,7 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
   self.table_name = table_name.singularize
 
   # Maximum CPU time a programming question can allow before the evaluation gets killed.
-  CPU_TIMEOUT = 300.seconds
+  DEFAULT_CPU_TIMEOUT = 30.seconds
 
   # Maximum memory (in MB) the programming question can allow.
   # Do NOT change this to num.megabytes as the ProgramingEvaluationService expects it in MB.
@@ -15,14 +15,16 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
   MEMORY_LIMIT = nil
 
   include DuplicationStateTrackingConcern
+  attr_accessor :max_time_limit
+
   acts_as :question, class_name: Course::Assessment::Question.name
 
+  after_initialize :set_defaults
   before_save :process_package, unless: :skip_process_package?
   before_validation :assign_template_attributes
   before_validation :assign_test_case_attributes
 
   validates :memory_limit, numericality: { greater_than: 0, less_than: 2_147_483_648 }, allow_nil: true
-  validates :time_limit, numericality: { greater_than: 0, less_than_or_equal_to: CPU_TIMEOUT }, allow_nil: true
   validates :attempt_limit, numericality: { only_integer: true,
                                             greater_than: 0, less_than: 2_147_483_648 }, allow_nil: true
   validates :package_type, presence: true
@@ -30,6 +32,7 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
   validates :import_job_id, uniqueness: { allow_nil: true, if: :import_job_id_changed? }
   validates :language, presence: true
 
+  validate -> { validate_time_limit }
   validate :validate_codaveri_question
 
   belongs_to :import_job, class_name: TrackableJob::Job.name, inverse_of: nil, optional: true
@@ -153,6 +156,10 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
 
   private
 
+  def set_defaults
+    self.max_time_limit = DEFAULT_CPU_TIMEOUT
+  end
+
   # Create new package or re-evaluate the old package.
   def process_package # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     if attachment_changed?
@@ -210,6 +217,17 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
     duplicating?
   end
 
+  # time limit validation during duplication is skipped, and time limit is allowed to be nil
+  def validate_time_limit
+    return if duplicating? ||
+              time_limit.nil? ||
+              (time_limit > 0 && time_limit <= max_time_limit)
+
+    errors.add(:base, "Time limit needs to be a positive integer less than or equal to #{max_time_limit} seconds")
+
+    nil
+  end
+
   def validate_codaveri_question # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     return if !is_codaveri || duplicating?
 
@@ -223,8 +241,6 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
                  'Codaveri component is deactivated.'\
                  'Activate it in the course setting or switch this question into a non-codaveri type.')
     end
-
-    nil
   end
 
   def codaveri_language_whitelist

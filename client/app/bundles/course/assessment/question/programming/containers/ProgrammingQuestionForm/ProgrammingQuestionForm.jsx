@@ -55,12 +55,13 @@ const propTypes = {
 };
 
 const DEFAULT_TIME_LIMIT = 10;
-const HARD_TIME_LIMIT = 300;
 
 function validation(data, pathOfKeysToData, intl) {
   const errors = [];
   const questionErrors = {};
   let hasError = false;
+
+  const HARD_TIME_LIMIT = data.get('max_time_limit');
 
   // Check maximum grade
   const maximumGrade = data.get('maximum_grade');
@@ -89,6 +90,9 @@ function validation(data, pathOfKeysToData, intl) {
   if (timeLimit && (timeLimit > HARD_TIME_LIMIT || timeLimit <= 0)) {
     questionErrors.time_limit = intl.formatMessage(
       translations.timeLimitRangeValidationError,
+      {
+        hard_time_limit: HARD_TIME_LIMIT,
+      },
     );
     hasError = true;
   }

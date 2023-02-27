@@ -230,6 +230,9 @@
   "course.achievement.AchievementTable.noAchievement": {
     "defaultMessage": "暂无成就"
   },
+  "course.achievement.AchievementsIndex.header": {
+    "defaultMessage": "成就"
+  },
   "course.achievement.AchievementsIndex.fetchAchievementsFailure": {
     "defaultMessage": "无法检索成就。"
   },
@@ -1419,7 +1422,7 @@
     "defaultMessage": "时间限制 (s)"
   },
   "course.assessment.question.programming.ProgrammingQuestionForm.timeLimitRangeValidationError": {
-    "defaultMessage": "时间限制必须在 1 到 30 之间。"
+    "defaultMessage": "时间限制必须在 1 到 {hard_time_limit} 之间。"
   },
   "course.assessment.question.programming.ProgrammingQuestionForm.titleFieldLabel": {
     "defaultMessage": "标题"

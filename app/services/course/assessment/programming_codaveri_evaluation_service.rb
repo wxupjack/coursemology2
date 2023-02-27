@@ -3,7 +3,6 @@
 class Course::Assessment::ProgrammingCodaveriEvaluationService
   # The default timeout for the job to finish.
   DEFAULT_TIMEOUT = 5.minutes
-  CPU_TIMEOUT = Course::Assessment::Question::Programming::CPU_TIMEOUT
   MEMORY_LIMIT = Course::Assessment::Question::Programming::MEMORY_LIMIT
 
   # Represents a result of evaluating an answer.
@@ -68,14 +67,15 @@ class Course::Assessment::ProgrammingCodaveriEvaluationService
   class << self
     # Executes the provided answer.
     #
+    # @param [string] course_title Title of the course.
     # @param [Course::Assessment::Question::Programming] question The programming question being
     #   graded.
     # @param [Course::Assessment::Answer::Programming] answer The answer specified by the student.
     # @return [Course::Assessment::ProgrammingCodaveriEvaluationService::Result]
     #
     # @raise [Timeout::Error] When the operation times out.
-    def execute(question, answer, timeout = nil)
-      new(question, answer, timeout).execute
+    def execute(course_title, question, answer, timeout = nil)
+      new(course_title, question, answer, timeout).execute
     end
   end
 
@@ -90,18 +90,19 @@ class Course::Assessment::ProgrammingCodaveriEvaluationService
 
   private
 
-  def initialize(question, answer, timeout)
+  def initialize(course_title, question, answer, timeout)
     @question = question
     @answer = answer
     @language = question.language
     @memory_limit = question.memory_limit || MEMORY_LIMIT
-    @time_limit = question.time_limit || CPU_TIMEOUT
+    @time_limit = question.time_limit ? [question.time_limit, question.max_time_limit].min : question.max_time_limit
     @timeout = timeout || DEFAULT_TIMEOUT
 
     @answer_object = { api_version: 'latest',
                        language_version: { language: '', version: '' },
                        files: [],
-                       problem_id: '' }
+                       problem_id: '',
+                       course_name: course_title }
 
     @codaveri_evaluation_results = nil
   end

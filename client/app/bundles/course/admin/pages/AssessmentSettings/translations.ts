@@ -42,6 +42,10 @@ export default defineMessages({
     id: 'course.admin.AssessmentSettings.outputsOfPublicTestCases',
     defaultMessage: 'Outputs of Public test cases',
   },
+  maxProgrammingTimeLimit: {
+    id: 'course.admin.AssessmentSettings.maxProgrammingTimeLimit',
+    defaultMessage: 'Maximum programming time limit',
+  },
   standardOutputsAndStandardErrors: {
     id: 'course.admin.AssessmentSettings.standardOutputsAndStandardErrors',
     defaultMessage: 'Standard outputs and Standard errors',
@@ -99,6 +103,14 @@ export default defineMessages({
   moveTabsThenDelete: {
     id: 'course.admin.AssessmentSettings.moveTabsThenDelete',
     defaultMessage: 'Move tabs then delete',
+  },
+  maxTimeLimitRequired: {
+    id: 'course.admin.AssessmentSettings.maxTimeLimitRequired',
+    defaultMessage: 'Maximum programming time limit is required',
+  },
+  positiveMaxTimeLimitRequired: {
+    id: 'course.admin.AssessmentSettings.positiveMaxTimeLimitRequired',
+    defaultMessage: 'Maximum programming time limit must be a positive integer',
   },
   toTab: {
     id: 'course.admin.AssessmentSettings.toTab',

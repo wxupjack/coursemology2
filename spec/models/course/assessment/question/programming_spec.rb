@@ -23,13 +23,67 @@ RSpec.describe Course::Assessment::Question::Programming do
   let(:instance) { Instance.default }
   with_tenant(:instance) do
     describe 'validations' do
-      subject { build(:course_assessment_question_programming) }
+      let(:programming_max_time_limit_setting) do
+        ActiveSupport::HashWithIndifferentAccess.new(programming_max_time_limit: 170)
+      end
+      let(:assessments_component_setting) do
+        ActiveSupport::HashWithIndifferentAccess.new(course_assessments_component: programming_max_time_limit_setting)
+      end
+      let(:course) { create(:course, settings: assessments_component_setting) }
+      let(:time_limit) { nil }
+      let(:question_programming) { build(:course_assessment_question_programming, time_limit: time_limit) }
 
-      it { is_expected.to validate_numericality_of(:time_limit).allow_nil }
-      it { is_expected.to validate_numericality_of(:memory_limit).allow_nil }
-      it 'validates time_limit' do
-        expect(subject).to validate_numericality_of(:time_limit).is_greater_than(0).
-          is_less_than_or_equal_to(300)
+      context 'when the time limit is set to be higher than the max programming time limit in course settings' do
+        let(:time_limit) { 171 }
+        before do
+          question_programming.max_time_limit = course.programming_max_time_limit
+        end
+
+        it 'is expected to be valid' do
+          expect(question_programming).to_not be_valid
+        end
+      end
+
+      context 'when the time limit is not set to be an integer' do
+        let(:time_limit) { 'abcd' }
+        before do
+          question_programming.max_time_limit = course.programming_max_time_limit
+        end
+
+        it 'is expected to be invalid' do
+          question_programming.max_time_limit = course.programming_max_time_limit
+          expect(question_programming).to_not be_valid
+        end
+      end
+
+      context 'when the time limit is set to zero' do
+        let(:time_limit) { 0 }
+
+        it 'is expected to be invalid' do
+          expect(question_programming).to_not be_valid
+        end
+      end
+
+      context 'when the time limit is set to be within the stipulated range (between 0 and an upper bound)' do
+        let(:time_limit) { 170 }
+        before do
+          question_programming.max_time_limit = course.programming_max_time_limit
+        end
+
+        it 'is expected to be valid (upper bound checked)' do
+          expect(question_programming).to be_valid
+        end
+
+        it 'is expected to be valid (lower bound checked)' do
+          question_programming.time_limit = 1
+          expect(question_programming).to be_valid
+        end
+      end
+
+      context 'when the time limit is not set for the question' do
+        it 'is expected to be valid' do
+          expect(question_programming).to be_valid
+        end
       end
     end
 

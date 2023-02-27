@@ -15,8 +15,10 @@ class Course::Assessment::Answer::ProgrammingAutoGradingService < \
   # @return [Array<(Boolean, Integer, Course::Assessment::Answer::ProgrammingAutoGrading)>] The
   #   correct status, grade and the programming auto grading record.
   def evaluate_answer(answer)
+    course = answer.submission.assessment.course
     question = answer.question.actable
     assessment = answer.submission.assessment
+    question.max_time_limit = course.programming_max_time_limit
     question.attachment.open(binmode: true) do |temporary_file|
       package = Course::Assessment::ProgrammingPackage.new(temporary_file)
       package.submission_files = build_submission_files(answer)
@@ -46,7 +48,7 @@ class Course::Assessment::Answer::ProgrammingAutoGradingService < \
   # @return [Course::Assessment::ProgrammingEvaluationService::Result]
   def evaluate_package(question, package)
     Course::Assessment::ProgrammingEvaluationService.
-      execute(question.language, question.memory_limit, question.time_limit, package.path)
+      execute(question.language, question.memory_limit, question.time_limit, question.max_time_limit, package.path)
   end
 
   # Builds the result of the auto grading from the evaluation result.

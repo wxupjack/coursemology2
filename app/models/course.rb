@@ -225,6 +225,15 @@ class Course < ApplicationRecord
     settings(:course_assessments_component).allow_mrq_options_randomization = option
   end
 
+  # Setting to allow customization of max CPU time limit for programming question
+  def programming_max_time_limit
+    settings(:course_assessments_component).programming_max_time_limit || 30.seconds
+  end
+
+  def programming_max_time_limit=(time)
+    settings(:course_assessments_component).programming_max_time_limit = time
+  end
+
   def codaveri_itsp_enabled?
     settings(:course_codaveri_component).is_only_itsp
   end

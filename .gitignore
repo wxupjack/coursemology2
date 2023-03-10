@@ -38,7 +38,7 @@
 /client/coverage/*
 
 # Ignore additional themes
-/app/themes/*
+# /app/themes/*
 !/app/themes/default/*
 
 # Ignore public download/upload folders

@@ -32,6 +32,7 @@ import {
   VolumeSlider,
 } from './VideoControls';
 import styles from './VideoPlayer.scss';
+import ReactPlayer from 'react-player';
 
 const tickMilliseconds = 5000;
 
@@ -41,6 +42,7 @@ const reactPlayerStyle = {
   left: '0',
   height: '100%',
   width: '100%',
+  border: 0,
 };
 
 const propTypes = {
@@ -200,6 +202,24 @@ class VideoPlayer extends Component {
           volume={this.props.playerVolume}
           width="100%"
         />
+
+        {/* <iframe
+          id='videoFrame'
+          // ref={this.setRef}
+          // config={{ youtube: youtubeOpts }}
+          height="100%"
+          onEnded={() => this.props.onPlayerStateChanged(playerStates.ENDED)}
+          onPause={() => this.props.onPlayerStateChanged(playerStates.PAUSED)}
+          onPlay={() => this.props.onPlayerStateChanged(playerStates.PLAYING)}
+          onProgress={({ playedSeconds, loadedSeconds }) => {
+            this.props.onPlayerProgress(playedSeconds, loadedSeconds);
+          }}
+          allowFullScreen
+          style={reactPlayerStyle}
+          src={this.props.videoUrl}
+          volume={this.props.playerVolume}
+          width="100%"
+        /> */}
       </div>
     );
 
@@ -226,13 +246,14 @@ class VideoPlayer extends Component {
     return (
       <Paper className={styles.videoPaperContainer} elevation={2}>
         {videoPlayer}
-        {controls}
+        {/* {controls} */}
       </Paper>
     );
   }
 }
 
 VideoPlayer.propTypes = propTypes;
+// console.log("video props11111", propTypes.videoUrl);
 VideoPlayer.defaultProps = defaultProps;
 
 function mapDispatchToProps(dispatch) {

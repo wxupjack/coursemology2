@@ -19,7 +19,9 @@ module ApplicationHTMLFormattersHelper
     /\A(?:https?:)?\/\/(?:www\.)?vine\.co\//,
     /\A(?:https?:)?\/\/(?:www\.)?instagram\.com\//,
     /\A(?:https?:)?\/\/(?:www\.)?dailymotion\.com\//,
-    /\A(?:https?:)?\/\/(?:www\.)?youku\.com\//
+    /\A(?:https?:)?\/\/(?:www\.)?youku\.com\//,
+    /\A(?:https?:)?\/\/(?:www\.)?bilibili\.com\//,
+    /\A(?:https?:)?\/\/(?:player\.)?bilibili\.com\//,
   )
 
   # Transformer to whitelist iframes containing embedded video content

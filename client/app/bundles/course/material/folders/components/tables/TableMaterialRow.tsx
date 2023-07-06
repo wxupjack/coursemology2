@@ -4,6 +4,7 @@ import { Stack, TableCell, TableRow } from '@mui/material';
 import equal from 'fast-deep-equal';
 import { MaterialMiniEntity } from 'types/course/material/folders';
 
+import Link from 'lib/components/core/Link';
 import { getCourseId } from 'lib/helpers/url-helpers';
 import { formatFullDateTime } from 'lib/moment';
 
@@ -21,22 +22,22 @@ const TableMaterialRow: FC<Props> = (props) => {
 
   return (
     <TableRow id={`material-${material.id}`}>
-      <TableCell style={{ padding: 2, minWidth: '200px' }}>
+      <TableCell style={{ minWidth: '200px' }}>
         <Stack spacing={1}>
           <Stack alignItems="center" direction="row" spacing={0.5}>
             <DescriptionIcon htmlColor="grey" />
-            <a
+            <Link
               href={material.materialUrl}
-              rel="noopener noreferrer"
+              opensInNewTab
               style={{
                 textOverflow: 'initial',
                 whiteSpace: 'normal',
                 wordBreak: 'break-word',
               }}
-              target="_blank"
+              underline="hover"
             >
               {material.name}
-            </a>
+            </Link>
           </Stack>
           {material.description !== null &&
             material.description.length !== 0 && (
@@ -55,21 +56,21 @@ const TableMaterialRow: FC<Props> = (props) => {
       </TableCell>
       <TableCell
         style={{
-          padding: 2,
           width: '240px',
           maxWidth: '240px',
           minWidth: '60px',
         }}
       >
-        <Stack>
+        <Stack className="items-start">
           <div>{formatFullDateTime(material.updatedAt)}</div>
-          <a href={material.updater.userUrl ?? '#'}>{material.updater.name}</a>
+          <Link to={material.updater.userUrl} underline="hover">
+            {material.updater.name}
+          </Link>
         </Stack>
       </TableCell>
       {!isCurrentCourseStudent && (
         <TableCell
           style={{
-            padding: 2,
             width: '240px',
             maxWidth: '240px',
             minWidth: '60px',
@@ -78,14 +79,7 @@ const TableMaterialRow: FC<Props> = (props) => {
           -
         </TableCell>
       )}
-      <TableCell
-        style={{
-          padding: 2,
-          width: '60px',
-          maxWidth: '60px',
-          minWidth: '30px',
-        }}
-      >
+      <TableCell style={{ width: '60px' }}>
         <WorkbinTableButtons
           canDelete={material.permissions.canDelete}
           canEdit={material.permissions.canEdit}

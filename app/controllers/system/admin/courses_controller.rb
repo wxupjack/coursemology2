@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 class System::Admin::CoursesController < System::Admin::Controller
   around_action :unscope_resources
-  add_breadcrumb :index, :admin_courses_path
 
   def index
     respond_to do |format|
@@ -38,7 +37,6 @@ class System::Admin::CoursesController < System::Admin::Controller
 
     @courses = @courses.ordered_by_title
     @courses_count = @courses.count.is_a?(Hash) ? @courses.count.count : @courses.count
-    @courses = @courses.paginated(new_page_params)
 
     @owner_preload_service = Course::CourseOwnerPreloadService.new(@courses.map(&:id))
   end

@@ -31,6 +31,8 @@ class Course::Assessment < ApplicationRecord
 
   belongs_to :tab, inverse_of: :assessments
 
+  belongs_to :monitor, class_name: Course::Monitoring::Monitor.name, optional: true
+
   # `submissions` association must be put before `questions`, so that all answers will be deleted
   # first when deleting the course. Otherwise due to the foreign key `question_id` in answers table,
   # questions cannot be deleted.
@@ -172,11 +174,6 @@ class Course::Assessment < ApplicationRecord
   # - Switching from autograded mode to manually graded mode.
   def allow_mode_switching?
     submissions.count == 0 || autograded?
-  end
-
-  # To check if there is any codaveri question type in this assessment
-  def contains_programming_codaveri?
-    programming_questions.pluck(:is_codaveri).include?(true)
   end
 
   # @override ConditionalInstanceMethods#permitted_for!

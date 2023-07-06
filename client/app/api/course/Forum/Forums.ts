@@ -15,8 +15,8 @@ import { APIResponse } from 'api/types';
 import BaseCourseAPI from '../Base';
 
 export default class ForumsAPI extends BaseCourseAPI {
-  _getUrlPrefix(): string {
-    return `/courses/${this.getCourseId()}/forums`;
+  get #urlPrefix(): string {
+    return `/courses/${this.courseId}/forums`;
   }
 
   /**
@@ -27,7 +27,7 @@ export default class ForumsAPI extends BaseCourseAPI {
     metadata: ForumMetadata;
     permissions: ForumPermissions;
   }> {
-    return this.getClient().get(this._getUrlPrefix());
+    return this.client.get(this.#urlPrefix);
   }
 
   /**
@@ -36,28 +36,28 @@ export default class ForumsAPI extends BaseCourseAPI {
   fetch(
     forumId: string,
   ): APIResponse<{ forum: ForumData; topics: ForumTopicListData[] }> {
-    return this.getClient().get(`${this._getUrlPrefix()}/${forumId}`);
+    return this.client.get(`${this.#urlPrefix}/${forumId}`);
   }
 
   /**
    * Creates a new forum.
    */
   create(params: ForumPostData): APIResponse<ForumListData> {
-    return this.getClient().post(this._getUrlPrefix(), params);
+    return this.client.post(this.#urlPrefix, params);
   }
 
   /**
    * Updates an existing forum.
    */
   update(forumId: number, params: ForumPatchData): APIResponse<ForumListData> {
-    return this.getClient().patch(`${this._getUrlPrefix()}/${forumId}`, params);
+    return this.client.patch(`${this.#urlPrefix}/${forumId}`, params);
   }
 
   /**
    * Deletes an existing forum.
    */
   delete(forumId: number): APIResponse {
-    return this.getClient().delete(`${this._getUrlPrefix()}/${forumId}`);
+    return this.client.delete(`${this.#urlPrefix}/${forumId}`);
   }
 
   /**
@@ -65,16 +65,16 @@ export default class ForumsAPI extends BaseCourseAPI {
    */
   updateSubscription(url: string, isCurrentlySubscribed: boolean): APIResponse {
     if (isCurrentlySubscribed) {
-      return this.getClient().delete(`${url}/unsubscribe`);
+      return this.client.delete(`${url}/unsubscribe`);
     }
-    return this.getClient().post(`${url}/subscribe`);
+    return this.client.post(`${url}/subscribe`);
   }
 
   /**
    * Mark all topics as read in a forum.
    */
   markAllAsRead(): APIResponse {
-    return this.getClient().patch(`${this._getUrlPrefix()}/mark_all_as_read`);
+    return this.client.patch(`${this.#urlPrefix}/mark_all_as_read`);
   }
 
   /**
@@ -83,9 +83,7 @@ export default class ForumsAPI extends BaseCourseAPI {
   markAsRead(
     forumId: number,
   ): APIResponse<{ nextUnreadTopicUrl: string | null }> {
-    return this.getClient().patch(
-      `${this._getUrlPrefix()}/${forumId}/mark_as_read`,
-    );
+    return this.client.patch(`${this.#urlPrefix}/${forumId}/mark_as_read`);
   }
 
   /**
@@ -94,6 +92,6 @@ export default class ForumsAPI extends BaseCourseAPI {
   search(
     params: ForumSearchParams,
   ): APIResponse<{ userPosts: ForumDisbursementPostData[] }> {
-    return this.getClient().get(`${this._getUrlPrefix()}/search`, params);
+    return this.client.get(`${this.#urlPrefix}/search`, params);
   }
 }

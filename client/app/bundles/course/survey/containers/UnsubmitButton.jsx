@@ -58,7 +58,7 @@ class UnsubmitButton extends Component {
     return (
       <>
         {isIcon ? (
-          <span className="unsubmit-button" data-for="unsubmit-button" data-tip>
+          <span className="unsubmit-button" data-tooltip-id="unsubmit-button">
             <IconButton
               disabled={disabled}
               id={`unsubmit-button-${responseId}`}
@@ -101,6 +101,6 @@ UnsubmitButton.propTypes = {
   color: PropTypes.string,
 };
 
-export default connect((state) => ({
-  disabled: state.surveysFlags.isUnsubmittingResponse,
+export default connect(({ surveys }) => ({
+  disabled: surveys.surveysFlags.isUnsubmittingResponse,
 }))(UnsubmitButton);

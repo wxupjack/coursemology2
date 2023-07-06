@@ -77,6 +77,7 @@ Rails.application.routes.draw do
   resources :announcements, only: [:index] do
     post 'mark_as_read'
   end
+
   resources :jobs, only: [:show]
 
   resources :instance_user_role_requests, path: 'role_requests' do
@@ -126,6 +127,8 @@ Rails.application.routes.draw do
 
   scope module: 'course' do
     resources :courses, except: [:new, :edit, :update] do
+      get 'sidebar', on: :member
+
       namespace :admin do
         get '/' => 'admin#index'
         patch '/' => 'admin#update'
@@ -199,6 +202,8 @@ Rails.application.routes.draw do
           post 'authenticate', on: :member
           post 'remind', on: :member
           get :requirements, on: :member
+          get :statistics, on: :member
+          get :monitoring, on: :member
 
           resources :questions, only: [] do
             post 'duplicate/:destination_assessment_id', on: :member, action: 'duplicate', as: :duplicate
@@ -219,6 +224,7 @@ Rails.application.routes.draw do
               post :auto_grade, on: :member
               post :reload_answer, on: :member
               post :reevaluate_answer, on: :member
+              post :generate_feedback, on: :member
               patch :submit_answer, on: :member
               get :download_all, on: :collection
               get :download_statistics, on: :collection
@@ -403,6 +409,9 @@ Rails.application.routes.draw do
         get 'course/staff' => 'aggregate#all_staff'
         get 'course/course/progression' => 'aggregate#course_progression'
         get 'course/course/performance' => 'aggregate#course_performance'
+        get 'user/:user_id/learning_rate_records' => 'users#learning_rate_records'
+        get 'assessment/:id' => 'assessments#assessment'
+        get 'assessment/:id/ancestors' => 'assessments#ancestors'
       end
 
       scope module: :video do

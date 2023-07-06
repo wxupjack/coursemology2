@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { AppState } from 'types/store';
+import { AppState } from 'store';
 import { selectMiniEntities } from 'utilities/store';
 
 function getLocalState(state: AppState) {
@@ -22,10 +22,6 @@ export function getFolderMaterials(state: AppState) {
     getLocalState(state).materials,
     getLocalState(state).materials.ids,
   );
-}
-
-export function getBreadcrumbs(state: AppState) {
-  return getLocalState(state).breadcrumbs;
 }
 
 export function getAdvanceStartAt(state: AppState) {

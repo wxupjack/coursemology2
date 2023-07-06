@@ -1,12 +1,11 @@
 import { FC, ReactElement, useEffect, useState } from 'react';
 import { defineMessages } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { AppDispatch, AppState } from 'types/store';
 
 import AddButton from 'lib/components/core/buttons/AddButton';
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import AchievementReordering from '../../components/misc/AchievementReordering';
@@ -38,19 +37,20 @@ const translations = defineMessages({
     id: 'course.achievement.AchievementsIndex.toggleFailure',
     defaultMessage: 'Failed to update achievement.',
   },
+  achievements: {
+    id: 'course.achievement.AchievementsIndex.achievements',
+    defaultMessage: 'Achievements',
+  },
 });
 
 const AchievementsIndex: FC = () => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const achievements = useSelector((state: AppState) =>
-    getAllAchievementMiniEntities(state),
-  );
-  const achievementPermissions = useSelector((state: AppState) =>
-    getAchievementPermissions(state),
-  );
-  const dispatch = useDispatch<AppDispatch>();
+  const [isReordering, setIsReordering] = useState(false);
+  const achievements = useAppSelector(getAllAchievementMiniEntities);
+  const achievementPermissions = useAppSelector(getAchievementPermissions);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(fetchAchievements())
@@ -62,7 +62,13 @@ const AchievementsIndex: FC = () => {
 
   if (achievementPermissions?.canReorder) {
     headerToolbars.push(
-      <AchievementReordering key="achievementReorderingButton" />,
+      <AchievementReordering
+        key="achievementReorderingButton"
+        handleReordering={(state: boolean): void => {
+          setIsReordering(state);
+        }}
+        isReordering={isReordering}
+      />,
     );
   }
 
@@ -90,14 +96,11 @@ const AchievementsIndex: FC = () => {
       });
 
   return (
-    <>
-      <PageHeader
-        title={t({
-          id: 'course.achievement.AchievementsIndex.header',
-          defaultMessage: 'Achievements',
-        })}
-        toolbars={headerToolbars}
-      />
+    <Page
+      actions={headerToolbars}
+      title={t(translations.achievements)}
+      unpadded
+    >
       {isLoading ? (
         <LoadingIndicator />
       ) : (
@@ -108,13 +111,16 @@ const AchievementsIndex: FC = () => {
           />
           <AchievementTable
             achievements={achievements}
+            isReordering={isReordering}
             onTogglePublished={onTogglePublished}
             permissions={achievementPermissions}
           />
         </>
       )}
-    </>
+    </Page>
   );
 };
 
-export default AchievementsIndex;
+const handle = translations.achievements;
+
+export default Object.assign(AchievementsIndex, { handle });

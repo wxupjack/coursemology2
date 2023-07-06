@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { Pause, PlayArrow } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 
 import { playerStates } from 'lib/constants/videoConstants';
@@ -13,17 +14,14 @@ const propTypes = {
   onClick: PropTypes.func,
 };
 
-const PlayButton = (props) => {
-  const playIconClass = props.playing ? 'fa fa-pause' : 'fa fa-play';
-  return (
-    <span
-      className={styles.playButton}
-      onClick={() => props.onClick(props.playing)}
-    >
-      <i className={playIconClass} />
-    </span>
-  );
-};
+const PlayButton = (props) => (
+  <span
+    className={styles.playButton}
+    onClick={() => props.onClick(props.playing)}
+  >
+    {props.playing ? <Pause /> : <PlayArrow />}
+  </span>
+);
 
 PlayButton.propTypes = propTypes;
 

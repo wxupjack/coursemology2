@@ -27,7 +27,7 @@ RSpec.feature 'System: Administration: Courses', js: true do
       scenario 'I can view courses in the system' do
         visit admin_courses_path
         courses.each do |course|
-          expect(page).to have_selector('p.course_title', text: course.title)
+          expect(page).to have_selector("tr.course_#{course.id}", text: course.title)
           expect(page).
             to have_link(nil, href: "//#{course.instance.host}/courses/#{course.id}")
         end
@@ -39,11 +39,20 @@ RSpec.feature 'System: Administration: Courses', js: true do
 
         visit admin_courses_path
 
-        find(:xpath, '//*[@id="system-admin-component"]/div[1]/div[4]/div[2]/div[2]/p[2]/button').click
-        expect(page).to have_selector('p.course_title', text: active_course.title)
-        expect(page).to have_link(nil, href: "//#{active_course.instance.host}/courses/#{active_course.id}")
+        within find('p', text: 'Active Courses', exact_text: false) do
+          find_all('a').first.click
+        end
 
-        expect(page).not_to have_selector('p.course_title', text: inactive_course.title)
+        search_field = find_field('Search courses by title or owner')
+
+        search_field.set(active_course.title)
+        expect(page).to have_link(
+          active_course.title,
+          href: "//#{active_course.instance.host}/courses/#{active_course.id}"
+        )
+
+        search_field.set(inactive_course.title)
+        expect(page).not_to have_text(inactive_course.title)
       end
 
       scenario 'I can delete a course' do

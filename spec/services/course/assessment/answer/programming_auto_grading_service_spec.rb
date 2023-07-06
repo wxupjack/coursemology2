@@ -34,6 +34,12 @@ RSpec.describe Course::Assessment::Answer::ProgrammingAutoGradingService do
       let(:answer_traits) { [{ file_count: 1 }] }
       let!(:grading) { create(:course_assessment_answer_auto_grading, answer: answer) }
 
+      before do
+        Course::Assessment::ProgrammingEvaluationService.class_eval do
+          prepend Course::Assessment::StubbedProgrammingEvaluationService
+        end
+      end
+
       context 'with a test report' do
         before do
           allow(Course::Assessment::ProgrammingEvaluationService).to \
@@ -198,7 +204,7 @@ RSpec.describe Course::Assessment::Answer::ProgrammingAutoGradingService do
             subject
             answer.auto_grading.specific.test_results.each do |test_result|
               expect(test_result.messages['error']).
-                to eq 'course.assessment.answer.programming_auto_grading.grade.evaluation_failed'
+                to eq 'course.assessment.answer.programming_auto_grading.grade.evaluation_failed_syntax'
             end
           end
 

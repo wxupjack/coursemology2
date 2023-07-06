@@ -1,63 +1,3 @@
-import { AnyAction } from 'redux';
-import { ThunkAction, ThunkDispatch } from 'redux-thunk';
-
-import { GlobalAnnouncementState } from 'bundles/announcements/types';
-import { AchievementsState } from 'bundles/course/achievement/types';
-import { AnnouncementsState } from 'bundles/course/announcements/types';
-import { SkillState } from 'bundles/course/assessment/skills/types';
-import { SubmissionsState } from 'bundles/course/assessment/submissions/types';
-import { CoursesState } from 'bundles/course/courses/types';
-import { CommentState } from 'bundles/course/discussion/topics/types';
-import { EnrolRequestsState } from 'bundles/course/enrol-requests/types';
-import { DisbursementState } from 'bundles/course/experience-points/disbursement/types';
-import { ForumsState } from 'bundles/course/forum/types';
-import { LeaderboardState } from 'bundles/course/leaderboard/types';
-import { FoldersState } from 'bundles/course/material/folders/types';
-import { TimelinesState } from 'bundles/course/reference-timelines/types';
-import { InvitationsState } from 'bundles/course/user-invitations/types';
-import { UsersState } from 'bundles/course/users/types';
-import { VideosState } from 'bundles/course/video/types';
-import { AdminState } from 'bundles/system/admin/admin/types';
-import { InstanceAdminState } from 'bundles/system/admin/instance/instance/types';
-import { GlobalUserState } from 'bundles/users/types';
-
-/**
- * Describes the overall shape of the application's Redux store state.
- */
-export interface AppState {
-  admin: AdminState;
-  instanceAdmin: InstanceAdminState;
-  achievements: AchievementsState;
-  announcements: AnnouncementsState;
-  courses: CoursesState;
-  folders: FoldersState;
-  forums: ForumsState;
-  users: UsersState;
-  leaderboard: LeaderboardState;
-  skills: SkillState;
-  submissions: SubmissionsState;
-  invitations: InvitationsState;
-  enrolRequests: EnrolRequestsState;
-  disbursement: DisbursementState;
-  comments: CommentState;
-  videos: VideosState;
-  global: { user: GlobalUserState; announcements: GlobalAnnouncementState };
-  timelines: TimelinesState;
-}
-
-export type Operation<R = void> = ThunkAction<
-  Promise<R>,
-  AppState,
-  Record<string, unknown>,
-  AnyAction
->;
-
-export type AppDispatch = ThunkDispatch<
-  AppState,
-  Record<string, unknown>,
-  AnyAction
->;
-
 interface EntityMetadata {
   // The timestamp at which the entity was last updated, in number of milliseconds since UTC.
   lastUpdate: number;
@@ -93,6 +33,6 @@ export type EntitySelection<T> = (T & EntityMetadata) | null;
  * functions found in `utils/store.ts`.
  */
 export interface EntityStore<M, E extends M = M> {
-  ids: Set<SelectionKey>;
+  ids: Array<SelectionKey>;
   byId: { [key: number]: (M & Partial<E> & EntityMetadata) | undefined };
 }

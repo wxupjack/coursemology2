@@ -6,18 +6,18 @@ class Course::Settings::CodaveriComponent < Course::Settings::Component
     Course::CodaveriComponent
   end
 
-  # Returns the title of forums component
+  # Returns the ITSP requirement of codaveri component
   #
-  # @return [String] The custom or default title of forums component
+  # @return [String] The custom or default ITSP requirement of codaveri component
   def is_only_itsp
     settings.is_only_itsp
   end
 
-  # Sets the title of forums component
+  # Sets the ITSP requirement of codaveri component
   #
-  # @param [String] title The new title
+  # @param [String] title The new ITSP requirement
   def is_only_itsp=(is_only_itsp)
-    is_only_itsp = nil if is_only_itsp.blank?
+    is_only_itsp = nil if is_only_itsp.nil?
     settings.is_only_itsp = is_only_itsp
   end
 end

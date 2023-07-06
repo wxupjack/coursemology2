@@ -2,6 +2,9 @@
 class Course::Assessment::AssessmentsController < Course::Assessment::Controller
   include Course::Assessment::AssessmentsHelper
   before_action :load_question_duplication_data, only: [:show, :reorder]
+  before_action :load_monitor, only: [:edit, :show]
+  before_action :check_can_manage_monitor, only: [:index, :edit]
+  before_action :check_monitoring_component_enabled, only: [:index, :edit]
 
   COURSE_USERS = { my_students: 'my_students',
                    my_students_w_phantom: 'my_students_w_phantom',
@@ -29,19 +32,15 @@ class Course::Assessment::AssessmentsController < Course::Assessment::Controller
   end
 
   def show
-    unless can_access_assessment?
-      render 'authenticate'
-      return
-    end
-
     respond_to do |format|
       format.html
       format.json do
+        @assessment_time = @assessment.time_for(current_course_user)
+        return render 'authenticate' unless can_access_assessment?
+
         @question_assessments = @assessment.question_assessments.with_question_actables
         @assessment_conditions = @assessment.assessment_conditions.includes({ conditional: :actable })
         @questions = @assessment.questions.includes({ actable: :test_cases })
-
-        @assessment_time = @assessment.time_for(current_course_user)
 
         @requirements = @assessment.specific_conditions.map do |condition|
           {
@@ -60,11 +59,14 @@ class Course::Assessment::AssessmentsController < Course::Assessment::Controller
     # Randomized Assessment is temporarily hidden (PR#5406)
     # @assessment.update_randomization(randomization_params)
 
-    if @assessment.save
-      render json: { id: @assessment.id }, status: :ok
-    else
-      render json: { errors: @assessment.errors }, status: :bad_request
+    ActiveRecord::Base.transaction do
+      monitoring_service&.upsert!(monitoring_params) if @assessment.view_password_protected? && can_manage_monitor?
+      @assessment.save!
+
+      render json: { id: @assessment.id }
     end
+  rescue StandardError
+    render json: { errors: @assessment.errors }, status: :bad_request
   end
 
   def edit
@@ -77,11 +79,14 @@ class Course::Assessment::AssessmentsController < Course::Assessment::Controller
     # Randomized Assessment is temporarily hidden (PR#5406)
     # @assessment.update_randomization(randomization_params)
 
-    if @assessment.update(assessment_params)
+    ActiveRecord::Base.transaction do
+      monitoring_service&.upsert!(monitoring_params) if @assessment.view_password_protected? && can_manage_monitor?
+      @assessment.update!(assessment_params)
+
       head :ok
-    else
-      render json: { errors: @assessment.errors }, status: :bad_request
     end
+  rescue StandardError
+    render json: { errors: @assessment.errors }, status: :bad_request
   end
 
   def destroy
@@ -116,12 +121,11 @@ class Course::Assessment::AssessmentsController < Course::Assessment::Controller
   end
 
   def authenticate
-    if assessment_not_started(@assessment.time_for(current_course_user))
-      render json: { success: false }
-    elsif authentication_service.authenticate(params.require(:assessment).permit(:password)[:password])
-      render json: { success: true }
+    if assessment_not_started(@assessment.time_for(current_course_user)) ||
+       authentication_service.authenticate(params.require(:assessment).permit(:password)[:password])
+      render json: { redirectUrl: course_assessment_path(current_course, @assessment) }
     else
-      render json: { success: false }
+      render json: { errors: @assessment.errors }, status: :bad_request
     end
   end
 
@@ -140,6 +144,22 @@ class Course::Assessment::AssessmentsController < Course::Assessment::Controller
     end
 
     render json: requirements
+  end
+
+  # This endpoint provides the view. The actual data is fetched client-side from the statistics module.
+  def statistics
+    authorize!(:read_statistics, current_course)
+  end
+
+  def monitoring
+    if monitor.nil?
+      render file: 'public/404', layout: false, status: :not_found
+      return
+    end
+
+    authorize! :read, @monitor
+
+    @monitor_id = monitor.id
   end
 
   protected
@@ -163,7 +183,8 @@ class Course::Assessment::AssessmentsController < Course::Assessment::Controller
     base_params = [:title, :description, :base_exp, :time_bonus_exp, :start_at, :end_at, :tab_id,
                    :bonus_end_at, :published, :autograded, :show_mcq_mrq_solution, :show_private,
                    :show_evaluation, :use_public, :use_private, :use_evaluation, :has_personal_times,
-                   :affects_personal_times, :block_student_viewing_after_submitted, :has_todo]
+                   :affects_personal_times, :block_student_viewing_after_submitted, :has_todo,
+                   :allow_record_draft_answer]
     base_params += if autograded?
                      [:skippable, :allow_partial_submission, :show_mcq_answer]
                    else
@@ -174,6 +195,10 @@ class Course::Assessment::AssessmentsController < Course::Assessment::Controller
 
   def autograded_params
     params.require(:assessment).permit(:autograded)
+  end
+
+  def monitoring_params
+    params.require(:assessment).permit(monitoring: Course::Assessment::MonitoringService.params)[:monitoring]
   end
 
   # Randomized Assessment is temporarily hidden (PR#5406)
@@ -309,4 +334,24 @@ class Course::Assessment::AssessmentsController < Course::Assessment::Controller
   def authentication_service
     @authentication_service ||= Course::Assessment::AuthenticationService.new(@assessment, session)
   end
+
+  def monitoring_component_enabled?
+    @monitoring_component_enabled ||= current_component_host[:course_monitoring_component].present?
+  end
+
+  def can_manage_monitor?
+    @can_manage_monitor ||= can?(:manage, Course::Monitoring::Monitor.new) && monitoring_component_enabled?
+  end
+
+  def monitoring_service
+    @monitoring_service ||= Course::Assessment::MonitoringService.new(@assessment) if monitoring_component_enabled?
+  end
+
+  def monitor
+    @monitor ||= monitoring_service&.monitor
+  end
+
+  alias_method :load_monitor, :monitor
+  alias_method :check_can_manage_monitor, :can_manage_monitor?
+  alias_method :check_monitoring_component_enabled, :monitoring_component_enabled?
 end

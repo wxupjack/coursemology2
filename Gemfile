@@ -46,9 +46,6 @@ gem 'webpacker', '<= 5.4.4'
 # Internationalisation for JavaScript.
 gem 'i18n-js', '<= 3.10.0'
 
-# Routes from JavaScript
-gem 'js-routes'
-
 # Use jQuery as the JavaScript library
 gem 'jquery-rails'
 # Our Coursemology will be themed using Bootstrap
@@ -164,6 +161,10 @@ group :production, :test do
   gem 'puma'
 end
 
+group :production, :development do
+  gem 'redis-rails'
+end
+
 group :production do
   # Use fog-aws as CarrierWave's storage provider
   gem 'fog-aws', '3.8.0'
@@ -172,7 +173,6 @@ group :production do
   gem 'sidekiq'
   gem 'sidekiq-cron'
   gem 'sinatra', require: nil
-  gem 'redis-rails'
   gem 'rollbar', '>= 1.5.3'
 
   # better log format
@@ -187,7 +187,7 @@ gem 'acts_as_tenant'
 gem 'http_accept_language'
 
 # User authentication
-gem 'devise', '4.8.1'
+gem 'devise', '4.9.2'
 gem 'devise_masquerade'
 gem 'devise-multi_email'
 
@@ -205,16 +205,11 @@ gem 'themes_on_rails', '>= 0.3.1', git: 'https://github.com/raymondtangsc/themes
 
 # Forms made easy for Rails
 gem 'simple_form'
-gem 'simple_form-bootstrap', git: 'https://github.com/raymondtangsc/simple_form-bootstrap'
+gem 'simple_form-bootstrap', git: 'https://github.com/purfectliterature/simple_form-bootstrap'
 # Dynamic nested forms
 gem 'cocoon'
-# momentjs-rails is needed for bootstrap3-datetimepicker-rails
-gem 'momentjs-rails', git: 'https://github.com/ekowidianto/momentjs-rails.git'
-gem 'bootstrap3-datetimepicker-rails'
-gem 'bootstrap-select-rails'
 gem 'bootstrap_tokenfield_rails'
 gem 'twitter-typeahead-rails'
-gem 'summernote-rails', git: 'https://github.com/zhuhanming/summernote-rails'
 
 # Using CarrierWave for file uploads
 gem 'carrierwave'

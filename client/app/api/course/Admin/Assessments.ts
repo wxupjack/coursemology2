@@ -19,53 +19,47 @@ type MovedAssessmentsResponse = Promise<AxiosResponse<MovedAssessmentsResult>>;
 type MovedTabsResponse = Promise<AxiosResponse<MovedTabsResult>>;
 
 export default class AssessmentsAdminAPI extends BaseAdminAPI {
-  override _getUrlPrefix(): string {
-    return `${super._getUrlPrefix()}/assessments`;
+  override get urlPrefix(): string {
+    return `${super.urlPrefix}/assessments`;
   }
 
   index(): Response {
-    return this.getClient().get(this._getUrlPrefix());
+    return this.client.get(this.urlPrefix);
   }
 
   update(data: AssessmentSettingsPostData): Response {
-    return this.getClient().patch(this._getUrlPrefix(), data);
+    return this.client.patch(this.urlPrefix, data);
   }
 
   createCategory(data: AssessmentCategoryPostData): Response {
-    return this.getClient().post(`${this._getUrlPrefix()}/categories`, data);
+    return this.client.post(`${this.urlPrefix}/categories`, data);
   }
 
   createTabInCategory(
     id: AssessmentCategory['id'],
     data: AssessmentTabPostData,
   ): Response {
-    return this.getClient().post(
-      `${this._getUrlPrefix()}/categories/${id}/tabs`,
-      data,
-    );
+    return this.client.post(`${this.urlPrefix}/categories/${id}/tabs`, data);
   }
 
   deleteCategory(id: AssessmentCategory['id']): Response {
-    return this.getClient().delete(`${this._getUrlPrefix()}/categories/${id}`);
+    return this.client.delete(`${this.urlPrefix}/categories/${id}`);
   }
 
   deleteTabInCategory(
     id: AssessmentCategory['id'],
     tabId: AssessmentTab['id'],
   ): Response {
-    return this.getClient().delete(
-      `${this._getUrlPrefix()}/categories/${id}/tabs/${tabId}`,
+    return this.client.delete(
+      `${this.urlPrefix}/categories/${id}/tabs/${tabId}`,
     );
   }
 
   moveAssessments(data: MoveAssessmentsPostData): MovedAssessmentsResponse {
-    return this.getClient().post(
-      `${super._getUrlPrefix()}/move_assessments`,
-      data,
-    );
+    return this.client.post(`${super.urlPrefix}/move_assessments`, data);
   }
 
   moveTabs(data: MoveTabsPostData): MovedTabsResponse {
-    return this.getClient().post(`${super._getUrlPrefix()}/move_tabs`, data);
+    return this.client.post(`${super.urlPrefix}/move_tabs`, data);
   }
 }

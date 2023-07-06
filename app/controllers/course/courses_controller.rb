@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 class Course::CoursesController < Course::Controller
   include Course::ActivityFeedsConcern
-  skip_authorize_resource :course, only: [:show, :index]
+  skip_authorize_resource :course, only: [:show, :index, :sidebar]
 
   def index
-    @courses = Course.publicly_accessible.ordered_by_start_at
+    @courses = Course.publicly_accessible
   end
 
   def show
@@ -12,8 +12,7 @@ class Course::CoursesController < Course::Controller
       format.html { render layout: 'course' }
       format.json do
         @currently_active_announcements = current_course.announcements.
-                                          currently_active.includes(:creator).
-                                          sorted_by_sticky.sorted_by_date
+                                          currently_active.includes(:creator)
         @activity_feeds = recent_activity_feeds.limit(20).preload(activity: [{ object: { topic: { actable: :forum } } },
                                                                              :actor])
         load_activity_course_users
@@ -32,6 +31,9 @@ class Course::CoursesController < Course::Controller
   end
 
   def destroy
+  end
+
+  def sidebar
   end
 
   protected

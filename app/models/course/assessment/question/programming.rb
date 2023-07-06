@@ -15,7 +15,7 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
   MEMORY_LIMIT = nil
 
   include DuplicationStateTrackingConcern
-  attr_accessor :max_time_limit
+  attr_accessor :max_time_limit, :skip_process_package
 
   acts_as :question, class_name: Course::Assessment::Question.name
 
@@ -158,22 +158,29 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
 
   def set_defaults
     self.max_time_limit = DEFAULT_CPU_TIMEOUT
+    self.skip_process_package = false
   end
 
   # Create new package or re-evaluate the old package.
   def process_package # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     if attachment_changed?
       attachment ? process_new_package : remove_old_package
-    elsif time_limit_changed? || memory_limit_changed? || language_id_changed? || (is_codaveri_changed? && is_codaveri)
+    elsif should_evaluate_package
       # For non-autograded questions, the attachment is not present
       evaluate_package if attachment
     end
   end
 
+  def should_evaluate_package
+    time_limit_changed? || memory_limit_changed? ||
+    language_id_changed? || (is_codaveri_changed? && is_codaveri) ||
+      import_job&.status == 'errored'
+  end
+
   def evaluate_package
     execute_after_commit do
       import_job =
-        Course::Assessment::Question::ProgrammingImportJob.perform_later(self, attachment)
+        Course::Assessment::Question::ProgrammingImportJob.perform_later(self, attachment, max_time_limit)
       update_column(:import_job_id, import_job.job_id)
     end
   end
@@ -189,7 +196,7 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
     execute_after_commit do
       new_attachment.save!
       import_job =
-        Course::Assessment::Question::ProgrammingImportJob.perform_later(self, new_attachment)
+        Course::Assessment::Question::ProgrammingImportJob.perform_later(self, new_attachment, max_time_limit)
       update_column(:import_job_id, import_job.job_id)
     end
   end
@@ -214,7 +221,7 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
   end
 
   def skip_process_package?
-    duplicating?
+    duplicating? || skip_process_package
   end
 
   # time limit validation during duplication is skipped, and time limit is allowed to be nil
@@ -231,9 +238,7 @@ class Course::Assessment::Question::Programming < ApplicationRecord # rubocop:di
   def validate_codaveri_question # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     return if !is_codaveri || duplicating?
 
-    if question_assessments&.first&.assessment&.autograded?
-      errors.add(:base, 'Assessment type must not be autograded.')
-    elsif !codaveri_language_whitelist.include?(language.type.constantize)
+    if !codaveri_language_whitelist.include?(language.type.constantize)
       errors.add(:base, 'Language type must be Python 3 and above.')
     elsif !question_assessments.empty? &&
           !question_assessments.first.assessment.course.component_enabled?(Course::CodaveriComponent)

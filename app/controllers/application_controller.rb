@@ -7,10 +7,7 @@ class ApplicationController < ActionController::Base
   # Custom flash types. We follow Bootstrap's convention.
   add_flash_types :success, :info, :warning, :danger
 
-  # We allow views to add breadcrumbs
-  helper_method :add_breadcrumb
-
-  include ApplicationMultitenancyConcern
+  include ApplicationControllerMultitenancyConcern
   include ApplicationComponentsConcern
   include ApplicationInternationalizationConcern
   include ApplicationThemingConcern

@@ -1,7 +1,8 @@
 import { Component } from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { connect } from 'react-redux';
-import ReactTooltip from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
+import Warning from '@mui/icons-material/Warning';
 import {
   Card,
   CardContent,
@@ -13,6 +14,7 @@ import {
 } from '@mui/material';
 import PropTypes from 'prop-types';
 
+import Link from 'lib/components/core/Link';
 import { getCourseUserURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
 import { formatLongDateTime } from 'lib/moment';
@@ -41,16 +43,16 @@ class VisibleGradingPanel extends Component {
   static calculateTotalGrade(grades) {
     return Object.values(grades)
       .filter((grade) => grade !== null)
-      .reduce((acc, b) => acc + b.grade, 0);
+      .reduce((acc, b) => acc + (parseFloat(b.grade) || 0), 0);
   }
 
   static renderCourseUserLink(courseUser) {
     const courseId = getCourseId();
     if (courseUser && courseUser.id) {
       return (
-        <a href={getCourseUserURL(courseId, courseUser.id)}>
+        <Link to={getCourseUserURL(courseId, courseUser.id)}>
           {courseUser.name}
-        </a>
+        </Link>
       );
     }
     if (courseUser) {
@@ -137,10 +139,9 @@ class VisibleGradingPanel extends Component {
 
   renderGradeRow(question, showGrader) {
     const questionGrading = this.props.grading.questions[question.id];
-    const questionGrade =
-      questionGrading && questionGrading.grade !== null
-        ? questionGrading.grade
-        : '';
+    const parsedGrade = parseFloat(questionGrading?.grade);
+    const questionGrade = Number.isNaN(parsedGrade) ? '' : parsedGrade;
+
     const grader = questionGrading && questionGrading.grader;
 
     const courseId = getCourseId();
@@ -149,7 +150,7 @@ class VisibleGradingPanel extends Component {
     if (showGrader) {
       if (grader && grader.id) {
         graderInfo = (
-          <a href={getCourseUserURL(courseId, grader.id)}>{grader.name}</a>
+          <Link to={getCourseUserURL(courseId, grader.id)}>{grader.name}</Link>
         );
       } else if (grader) {
         // System or deleted users should not be linked to
@@ -227,20 +228,17 @@ class VisibleGradingPanel extends Component {
       submission: { workflowState },
     } = this.props;
     return (
-      <div>
+      <div className="flex flex-row items-center">
         {intl.formatMessage(translations[workflowState])}
         {workflowState === workflowStates.Graded ? (
           <span style={{ display: 'inline-block', marginLeft: 5 }}>
-            <a
-              data-for="unpublished-grades"
-              data-offset="{'left' : -8}"
-              data-tip
-            >
-              <i className="fa fa-exclamation-triangle" />
+            <a data-tooltip-id="unpublished-grades" data-tooltip-offset={8}>
+              <Warning fontSize="small" />
             </a>
-            <ReactTooltip effect="solid" id="unpublished-grades">
+
+            <Tooltip id="unpublished-grades">
               <FormattedMessage {...translations.unpublishedGrades} />
-            </ReactTooltip>
+            </Tooltip>
           </span>
         ) : null}
       </div>
@@ -349,16 +347,16 @@ VisibleGradingPanel.propTypes = {
   bonusAwarded: PropTypes.number,
 };
 
-function mapStateToProps(state) {
-  const { submittedAt, bonusEndAt, bonusPoints } = state.submission;
+function mapStateToProps({ assessments: { submission } }) {
+  const { submittedAt, bonusEndAt, bonusPoints } = submission.submission;
   const bonusAwarded =
     new Date(submittedAt) < new Date(bonusEndAt) ? bonusPoints : 0;
   return {
-    gamified: state.assessment.gamified,
-    grading: state.grading,
-    questionIds: state.assessment.questionIds,
-    questions: state.questions,
-    submission: state.submission,
+    gamified: submission.assessment.gamified,
+    grading: submission.grading,
+    questionIds: submission.assessment.questionIds,
+    questions: submission.questions,
+    submission: submission.submission,
     bonusAwarded,
   };
 }

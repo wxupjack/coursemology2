@@ -1,7 +1,8 @@
-import { mount } from 'enzyme';
+import { dispatch } from 'store';
+import { fireEvent, render, waitFor } from 'test-utils';
 
 import CourseAPI from 'api/course';
-import storeCreator from 'course/survey/store';
+import { loadSurveys } from 'course/survey/actions/surveys';
 
 import MoveUpButton from '../MoveUpButton';
 
@@ -13,23 +14,20 @@ const surveys = [
 ];
 
 describe('<MoveUpButton />', () => {
-  it('injects handlers that allow survey section to be moved before the previous section', () => {
-    const surveyId = surveys[0].id;
-    const sectionIndex = 3;
+  it('injects handlers that allow survey section to be moved before the previous section', async () => {
+    const url = `/courses/${global.courseId}/surveys/${surveys[0].id}`;
+    window.history.pushState({}, '', url);
+    dispatch(loadSurveys(surveys));
+
     const spyMove = jest.spyOn(CourseAPI.survey.surveys, 'reorderSections');
-    const store = storeCreator({ surveys: { surveys } });
 
-    window.history.pushState(
-      {},
-      '',
-      `/courses/${courseId}/surveys/${surveyId}`,
-    );
-    const moveSectionButton = mount(
-      <MoveUpButton sectionIndex={sectionIndex} />,
-      buildContextOptions(store),
-    );
-    moveSectionButton.find('button').simulate('click');
+    const page = render(<MoveUpButton sectionIndex={3} />);
+    const moveUpButton = page.getByRole('button');
 
-    expect(spyMove).toHaveBeenCalledWith({ ordering: [3, 1, 5, 4, 9] });
+    fireEvent.click(moveUpButton);
+
+    await waitFor(() =>
+      expect(spyMove).toHaveBeenCalledWith({ ordering: [3, 1, 5, 4, 9] }),
+    );
   });
 });

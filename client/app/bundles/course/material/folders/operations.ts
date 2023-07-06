@@ -1,14 +1,14 @@
+import { Operation } from 'store';
 import {
   FolderFormData,
   MaterialFormData,
   MaterialUploadFormData,
 } from 'types/course/material/folders';
-import { Operation } from 'types/store';
 
 import CourseAPI from 'api/course';
 import pollJob from 'lib/helpers/jobHelpers';
 
-import * as actions from './actions';
+import { actions } from './store';
 import { SaveFolderAction } from './types';
 
 const DOWNLOAD_FOLDER_JOB_POLL_INTERVAL_MS = 2000;
@@ -71,7 +71,6 @@ export function loadFolder(folderId: number): Operation<SaveFolderAction> {
           data.currFolderInfo,
           data.subfolders,
           data.materials,
-          data.breadcrumbs,
           data.advanceStartAt,
           data.permissions,
         ),
@@ -93,7 +92,6 @@ export function createFolder(
           data.currFolderInfo,
           data.subfolders,
           data.materials,
-          data.breadcrumbs,
           data.advanceStartAt,
           data.permissions,
         ),
@@ -114,7 +112,6 @@ export function updateFolder(
           data.currFolderInfo,
           data.subfolders,
           data.materials,
-          data.breadcrumbs,
           data.advanceStartAt,
           data.permissions,
         ),
@@ -167,7 +164,6 @@ export function uploadMaterials(
             data.currFolderInfo,
             data.subfolders,
             data.materials,
-            data.breadcrumbs,
             data.advanceStartAt,
             data.permissions,
           ),

@@ -185,7 +185,7 @@ const InstanceUserRoleRequestsTable: FC<Props> = (props) => {
               const roleRequest = roleRequests[dataIndex];
               return (
                 <Typography key={`createdAt-${roleRequest.id}`} variant="body2">
-                  {formatLongDateTime(roleRequest.confirmedAt)}
+                  {formatLongDateTime(roleRequest.createdAt)}
                 </Typography>
               );
             },
@@ -231,9 +231,7 @@ const InstanceUserRoleRequestsTable: FC<Props> = (props) => {
               return (
                 <TextField
                   id={`role-${roleRequest.id}`}
-                  onChange={(e): React.ChangeEvent =>
-                    updateValue(e.target.value)
-                  }
+                  onChange={(e): void => updateValue(e.target.value)}
                   select
                   value={value || 'normal'}
                   variant="standard"
@@ -260,7 +258,7 @@ const InstanceUserRoleRequestsTable: FC<Props> = (props) => {
               const roleRequest = roleRequests[dataIndex];
               return (
                 <Typography key={`createdAt-${roleRequest.id}`} variant="body2">
-                  {formatLongDateTime(roleRequest.confirmedAt)}
+                  {formatLongDateTime(roleRequest.createdAt)}
                 </Typography>
               );
             },
@@ -276,9 +274,11 @@ const InstanceUserRoleRequestsTable: FC<Props> = (props) => {
                   sort: false,
                   alignCenter: true,
                   customBodyRender: (_value, tableMeta): JSX.Element => {
-                    const rowData = tableMeta.rowData as RoleRequestRowData;
+                    const rowData = tableMeta.rowData;
                     const enrolRequest = rebuildObjectFromRow(columns, rowData);
-                    return renderRowActionComponent(enrolRequest);
+                    return renderRowActionComponent(
+                      enrolRequest as RoleRequestRowData,
+                    );
                   },
                 },
               },
@@ -298,7 +298,7 @@ const InstanceUserRoleRequestsTable: FC<Props> = (props) => {
               const roleRequest = roleRequests[dataIndex];
               return (
                 <Typography key={`createdAt-${roleRequest.id}`} variant="body2">
-                  {formatLongDateTime(roleRequest.confirmedAt)}
+                  {formatLongDateTime(roleRequest.createdAt)}
                 </Typography>
               );
             },

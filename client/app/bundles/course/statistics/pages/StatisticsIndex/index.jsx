@@ -6,8 +6,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import PropTypes from 'prop-types';
 
-import NotificationBar from 'lib/components/core/NotificationBar';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import Page from 'lib/components/core/layouts/Page';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import {
@@ -15,7 +14,7 @@ import {
   fetchCourseProgressionStatistics,
   fetchStaffStatistics,
   fetchStudentsStatistics,
-} from '../../actions';
+} from '../../operations';
 import { courseIndexShape } from '../../propTypes/course';
 import { staffIndexShape } from '../../propTypes/staff';
 import { studentsIndexShape } from '../../propTypes/students';
@@ -124,8 +123,7 @@ const StatisticsIndex = ({
   };
 
   return (
-    <>
-      <PageHeader title={t(translations.statistics)} />
+    <Page title={t(translations.statistics)} unpadded>
       <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
@@ -145,11 +143,12 @@ const StatisticsIndex = ({
           <StaffStatistics {...staffStatistics} />
         </TabPanel>
         <TabPanel index={2} value={value}>
-          <CourseStatistics {...courseStatistics} />
+          <Page.PaddedSection>
+            <CourseStatistics {...courseStatistics} />
+          </Page.PaddedSection>
         </TabPanel>
       </Box>
-      <NotificationBar notification={courseStatistics.notification} />
-    </>
+    </Page>
   );
 };
 
@@ -160,8 +159,13 @@ StatisticsIndex.propTypes = {
   staffStatistics: PropTypes.shape(staffIndexShape),
 };
 
-export default connect((state) => ({
-  courseStatistics: state.courseStatistics,
-  studentsStatistics: state.studentsStatistics,
-  staffStatistics: state.staffStatistics,
-}))(StatisticsIndex);
+const handle = translations.statistics;
+
+export default Object.assign(
+  connect(({ statistics }) => ({
+    courseStatistics: statistics.courseStatistics,
+    studentsStatistics: statistics.studentsStatistics,
+    staffStatistics: statistics.staffStatistics,
+  }))(StatisticsIndex),
+  { handle },
+);

@@ -5,18 +5,18 @@ import {
   injectIntl,
   WrappedComponentProps,
 } from 'react-intl';
-import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
 import { LoadingButton } from '@mui/lab';
-import { Avatar, Button, CardHeader, Link } from '@mui/material';
+import { Avatar, Button, CardHeader } from '@mui/material';
 import { grey, orange, red } from '@mui/material/colors';
 import { CommentPostMiniEntity } from 'types/course/comments';
-import { AppDispatch } from 'types/store';
 
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
 import CKEditorRichText from 'lib/components/core/fields/CKEditorRichText';
+import Link from 'lib/components/core/Link';
+import { useAppDispatch } from 'lib/hooks/store';
 import { formatLongDateTime } from 'lib/moment';
 
 import { deletePost, updatePost } from '../../operations';
@@ -62,7 +62,7 @@ const translations = defineMessages({
 
 const CommentCard: FC<Props> = (props) => {
   const { intl, post } = props;
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const [editMode, setEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -196,12 +196,14 @@ const CommentCard: FC<Props> = (props) => {
           avatar={
             <Avatar
               alt={post.creator.name}
+              className="wh-14"
               component={Link}
-              href={post.creator.userUrl}
               src={post.creator.imageUrl}
-              style={{ height: '25px', width: '25px' }}
+              to={post.creator.userUrl}
+              underline="none"
             />
           }
+          classes={{ avatar: 'mr-4' }}
           style={{ padding: 6 }}
           subheader={`${formatLongDateTime(post.createdAt)}${
             post.isDelayed ? ' (delayed comment)' : ''
@@ -209,7 +211,9 @@ const CommentCard: FC<Props> = (props) => {
           subheaderTypographyProps={{ display: 'block' }}
           title={
             post.creator.userUrl ? (
-              <a href={post.creator.userUrl}>{post.creator.name}</a>
+              <Link to={post.creator.userUrl} underline="hover">
+                {post.creator.name}
+              </Link>
             ) : (
               post.creator.name
             )

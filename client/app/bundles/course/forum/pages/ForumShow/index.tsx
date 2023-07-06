@@ -1,13 +1,12 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { AppDispatch, AppState } from 'types/store';
 
 import AddButton from 'lib/components/core/buttons/AddButton';
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import ForumManagementButtons from '../../components/buttons/ForumManagementButtons';
@@ -52,11 +51,9 @@ const ForumShow: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMarking, setIsMarking] = useState(false);
 
-  const dispatch = useDispatch<AppDispatch>();
-  const forum = useSelector((state: AppState) =>
-    getForum(state, forumIdNumber),
-  );
-  const forumTopics = useSelector((state: AppState) =>
+  const dispatch = useAppDispatch();
+  const forum = useAppSelector((state) => getForum(state, forumIdNumber));
+  const forumTopics = useAppSelector((state) =>
     getForumTopics(state, forum?.topicIds),
   );
   const unreadTopicExists =
@@ -120,13 +117,12 @@ const ForumShow: FC = () => {
   const forumPageHeaderTitle = forum ? forum.name : t(translations.header);
 
   return (
-    <>
-      <PageHeader
-        returnLink={forum?.rootForumUrl}
-        title={forumPageHeaderTitle}
-        toolbars={headerToolbars}
-      />
-
+    <Page
+      actions={headerToolbars}
+      backTo={forum?.rootForumUrl}
+      title={forumPageHeaderTitle}
+      unpadded
+    >
       {!isLoading && isOpen && (
         <ForumTopicNew
           availableTopicTypes={forum?.availableTopicTypes}
@@ -141,7 +137,7 @@ const ForumShow: FC = () => {
       ) : (
         <ForumTopicTable forum={forum} forumTopics={forumTopics} />
       )}
-    </>
+    </Page>
   );
 };
 

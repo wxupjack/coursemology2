@@ -1,8 +1,4 @@
-import {
-  getAssessmentId,
-  getCourseId,
-  getScribingId,
-} from 'lib/helpers/url-helpers';
+import { getScribingId } from 'lib/helpers/url-helpers';
 
 import BaseAPI from '../Base';
 import SubmissionsAPI from '../Submissions';
@@ -31,9 +27,7 @@ export default class ScribingQuestionAPI extends BaseAPI {
    * success response: scribing_question
    */
   fetch() {
-    return this.getClient().get(
-      `${ScribingQuestionAPI._getUrlPrefix()}/${getScribingId()}`,
-    );
+    return this.client.get(`${this.#urlPrefix}/${getScribingId()}`);
   }
 
   /**
@@ -69,11 +63,7 @@ export default class ScribingQuestionAPI extends BaseAPI {
       scribingFields.question_scribing,
     );
 
-    return this.getClient().post(
-      ScribingQuestionAPI._getUrlPrefix(),
-      formData,
-      config,
-    );
+    return this.client.post(this.#urlPrefix, formData, config);
   }
 
   /**
@@ -97,8 +87,8 @@ export default class ScribingQuestionAPI extends BaseAPI {
       scribingFields.question_scribing,
     );
 
-    return this.getClient().patch(
-      `${ScribingQuestionAPI._getUrlPrefix()}/${scribingId}`,
+    return this.client.patch(
+      `${this.#urlPrefix}/${scribingId}`,
       formData,
       config,
     );
@@ -113,12 +103,10 @@ export default class ScribingQuestionAPI extends BaseAPI {
    * error response: {}
    */
   delete(scribingId) {
-    return this.getClient().delete(
-      `${ScribingQuestionAPI._getUrlPrefix()}/${scribingId}`,
-    );
+    return this.client.delete(`${this.#urlPrefix}/${scribingId}`);
   }
 
-  static _getUrlPrefix() {
-    return `/courses/${getCourseId()}/assessments/${getAssessmentId()}/question/scribing`;
+  get #urlPrefix() {
+    return `/courses/${this.courseId}/assessments/${this.assessmentId}/question/scribing`;
   }
 }

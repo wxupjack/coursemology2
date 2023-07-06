@@ -3,11 +3,11 @@ import { connect } from 'react-redux';
 import { green, red } from '@mui/material/colors';
 import PropTypes from 'prop-types';
 
-import { selectGate } from 'course/learning-map/actions';
+import { selectGate } from 'course/learning-map/operations';
 
 import { elementTypes, satisfiabilityTypes } from '../../constants';
 import { nodeShape, selectedElementShape } from '../../propTypes';
-import translations from '../../translations.intl';
+import translations from '../../translations';
 import ConnectionPoint from '../ConnectionPoint';
 
 const styles = {
@@ -96,6 +96,7 @@ const Gate = (props) => {
       }}
     >
       {node.parents
+        .slice()
         .sort((parent1, parent2) => parent1.id.localeCompare(parent2.id))
         .map((parent) => {
           const inputId = getGateInputId(false, parent.id, node.id);

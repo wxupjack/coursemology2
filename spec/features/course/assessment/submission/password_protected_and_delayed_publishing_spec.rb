@@ -20,6 +20,7 @@ RSpec.describe 'Course: Assessment: Submissions: Exam', js: true do
 
     context 'As a Course Student' do
       let(:user) { student }
+      let(:last_submission) { assessment.submissions.last }
 
       scenario 'I need to input the password when using a different session ' do
         assessment
@@ -28,35 +29,37 @@ RSpec.describe 'Course: Assessment: Submissions: Exam', js: true do
         within find('tr', text: assessment.title) do
           click_link 'Attempt'
         end
-        # The user should be redirect to submission edit page
-        expect(page).to have_selector('div#course-assessment-submission')
 
-        submission = assessment.submissions.last
+        # The user should be redirect to submission edit page
+        wait_for_page
+        expect(current_path).to eq(edit_course_assessment_submission_path(course, assessment, last_submission))
 
         # Logout and login again and visit the same submission
         logout
         login_as(user)
+        wait_for_page
 
-        visit edit_course_assessment_submission_path(course, assessment, submission)
+        visit edit_course_assessment_submission_path(course, assessment, last_submission)
 
-        expect(page).to have_selector('div.password-panel')
-
-        fill_in 'session_password', with: 'wrong_password'
-        click_button I18n.t('course.assessment.sessions.new.continue')
+        fill_in 'password', with: 'wrong_password'
+        click_button('Submit')
         expect(current_path).to eq(new_course_assessment_session_path(course, assessment))
 
-        fill_in 'session_password', with: assessment.session_password
-        click_button I18n.t('course.assessment.sessions.new.continue')
+        fill_in 'password', with: assessment.session_password
+        click_button('Submit')
 
-        expect(page).to have_selector('div#course-assessment-submission')
+        wait_for_page
+        expect(current_path).to eq(edit_course_assessment_submission_path(course, assessment, last_submission))
       end
 
       scenario 'I can edit and save my submission' do
         submission
         visit edit_course_assessment_submission_path(course, assessment, submission)
 
-        fill_in 'session_password', with: assessment.session_password
-        click_button I18n.t('course.assessment.sessions.new.continue')
+        fill_in 'password', with: assessment.session_password
+        click_button('Submit')
+
+        click_button('OK')
 
         option = assessment.questions.first.actable.options.first
         expect(page).to have_selector('div', text: assessment.description)

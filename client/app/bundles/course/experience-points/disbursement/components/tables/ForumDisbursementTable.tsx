@@ -5,13 +5,13 @@ import {
   injectIntl,
   WrappedComponentProps,
 } from 'react-intl';
-import ReactTooltip from 'react-tooltip';
-import { Link } from '@mui/material';
+import { Tooltip } from 'react-tooltip';
 import equal from 'fast-deep-equal';
 import { TableColumns, TableOptions } from 'types/components/DataTable';
 import { ForumDisbursementUserEntity } from 'types/course/disbursement';
 
 import DataTable from 'lib/components/core/layouts/DataTable';
+import Link from 'lib/components/core/Link';
 import { DEFAULT_TABLE_ROWS_PER_PAGE } from 'lib/constants/sharedConstants';
 import { getCourseUserURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
@@ -89,13 +89,12 @@ const ForumDisbursementTable: FC<Props> = (props: Props) => {
           style: { overflowWrap: 'anywhere', padding: '5px 14px' },
         }),
         customBodyRenderLite: (dataIndex): JSX.Element => (
-          <a
-            href={getCourseUserURL(getCourseId(), forumUsers[dataIndex].id)}
-            rel="noopener noreferrer"
-            target="_blank"
+          <Link
+            opensInNewTab
+            to={getCourseUserURL(getCourseId(), forumUsers[dataIndex].id)}
           >
             {forumUsers[dataIndex].name}
-          </a>
+          </Link>
         ),
       },
     },
@@ -158,19 +157,15 @@ const ForumDisbursementTable: FC<Props> = (props: Props) => {
         customBodyRenderLite: (dataIndex): JSX.Element => (
           <>
             {dataIndex === 0 && (
-              <ReactTooltip id="view-posts">
+              <Tooltip id="view-posts">
                 <FormattedMessage {...translations.viewPosts} />
-              </ReactTooltip>
+              </Tooltip>
             )}
+
             <Link
               className={`view-posts-${forumUsers[dataIndex].id}`}
-              component="button"
-              data-for="view-posts"
-              data-tip
-              form=""
-              onClick={(): void => {
-                onPostClick(forumUsers[dataIndex]);
-              }}
+              data-tooltip-id="view-posts"
+              onClick={(): void => onPostClick(forumUsers[dataIndex])}
             >
               {forumUsers[dataIndex].postCount}
             </Link>

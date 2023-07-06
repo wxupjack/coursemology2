@@ -9,7 +9,6 @@ import commentForms from './commentForms';
 import explanations from './explanations';
 import grading from './grading';
 import history from './history';
-import notification from './notification';
 import posts from './posts';
 import questions from './questions';
 import questionsFlags from './questionsFlags';
@@ -21,7 +20,7 @@ import submissions from './submissions';
 import testCases from './testCases';
 import topics from './topics';
 
-export default combineReducers({
+const submissionReducer = combineReducers({
   annotations,
   answers,
   attachments,
@@ -29,7 +28,6 @@ export default combineReducers({
   codaveriFeedbackStatus,
   commentForms,
   explanations,
-  notification,
   posts,
   questions,
   questionsFlags,
@@ -43,3 +41,12 @@ export default combineReducers({
   testCases,
   history,
 });
+
+const rootReducer = (state, action) => {
+  if (action.type === 'PURGE_SUBMISSION_STORE') {
+    return submissionReducer(undefined, action);
+  }
+  return submissionReducer(state, action);
+};
+
+export default rootReducer;

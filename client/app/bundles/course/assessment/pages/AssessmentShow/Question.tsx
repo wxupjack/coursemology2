@@ -1,9 +1,9 @@
-import { Draggable } from 'react-beautiful-dnd';
+import { useState } from 'react';
+import { Draggable } from '@hello-pangea/dnd';
 import { ContentCopy, Create, DragIndicator } from '@mui/icons-material';
 import { Chip, IconButton, Tooltip, Typography } from '@mui/material';
-import { QuestionData } from 'types/course/assessment/assessments';
+import { QuestionData } from 'types/course/assessment/questions';
 
-import useToggle from 'lib/hooks/useToggle';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import translations from '../../translations';
@@ -25,7 +25,7 @@ interface QuestionProps {
 const Question = (props: QuestionProps): JSX.Element => {
   const { of: question, index, dragging, draggedTo, disabled } = props;
   const { t } = useTranslation();
-  const [duplicating, toggleDuplicating] = useToggle();
+  const [duplicating, setDuplicating] = useState(false);
 
   return (
     <>
@@ -43,13 +43,13 @@ const Question = (props: QuestionProps): JSX.Element => {
             } ${!dragging ? 'hover?:slot-1-neutral-100' : ''}`}
           >
             <section
-              className={`top-20 flex w-full items-start bg-slot-1 px-6 py-6 ${
-                !dragging ? 'sticky z-10' : ''
+              className={`flex w-full items-start bg-slot-1 px-6 py-6 ${
+                !dragging ? 'sticky top-0 z-10' : ''
               }`}
               {...provided.dragHandleProps}
             >
               <div
-                className={`absolute top-5 -left-5 flex items-center justify-center rounded-full transition wh-10 ${
+                className={`absolute -left-5 top-5 flex items-center justify-center rounded-full transition wh-10 ${
                   !dragged && dragging ? 'scale-0' : ''
                 } ${dragged ? 'scale-200 bg-yellow-500' : 'bg-blue-500'} ${
                   disabled ? 'animate-pulse !bg-neutral-400' : ''
@@ -116,7 +116,7 @@ const Question = (props: QuestionProps): JSX.Element => {
                   <IconButton
                     aria-label={t(translations.duplicateToAssessment)}
                     disabled={disabled || dragging}
-                    onClick={toggleDuplicating}
+                    onClick={(): void => setDuplicating(true)}
                   >
                     <ContentCopy />
                   </IconButton>
@@ -142,7 +142,7 @@ const Question = (props: QuestionProps): JSX.Element => {
               </div>
             </section>
 
-            <section className="px-6 pt-4">
+            <section className="space-y-4 px-6 pt-4">
               {question.description && (
                 <Typography
                   dangerouslySetInnerHTML={{
@@ -160,7 +160,7 @@ const Question = (props: QuestionProps): JSX.Element => {
 
       <DuplicationPrompt
         for={question}
-        onClose={toggleDuplicating}
+        onClose={(): void => setDuplicating(false)}
         open={duplicating}
       />
     </>

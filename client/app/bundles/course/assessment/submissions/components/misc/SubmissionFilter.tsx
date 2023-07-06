@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { Dispatch, FC, SetStateAction } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
 import { Autocomplete, Button, Grid, Stack, TextField } from '@mui/material';
 import {
@@ -9,21 +9,20 @@ import {
 } from 'types/course/assessment/submissions';
 
 interface Props extends WrappedComponentProps {
-  showDetailFilter: boolean;
   filter: SubmissionFilterData;
 
   tabCategories: { id: number; title: string }[];
   categoryNum: number;
 
-  setPageNum: React.Dispatch<React.SetStateAction<number>>;
-  setTableIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPageNum: Dispatch<SetStateAction<number>>;
+  setTableIsLoading: Dispatch<SetStateAction<boolean>>;
   selectedFilter: {
     assessment: SubmissionAssessmentFilterData | null;
     group: SubmissionGroupFilterData | null;
     user: SubmissionUserFilterData | null;
   };
-  setSelectedFilter: React.Dispatch<
-    React.SetStateAction<{
+  setSelectedFilter: Dispatch<
+    SetStateAction<{
       assessment: SubmissionAssessmentFilterData | null;
       group: SubmissionGroupFilterData | null;
       user: SubmissionUserFilterData | null;
@@ -50,7 +49,6 @@ const translations = defineMessages({
 const SubmissionFilter: FC<Props> = (props) => {
   const {
     intl,
-    showDetailFilter,
     filter,
     tabCategories,
     categoryNum,
@@ -59,8 +57,6 @@ const SubmissionFilter: FC<Props> = (props) => {
     handleFilterOnClick,
   } = props;
   const disableButton = Object.values(selectedFilter).every((x) => x === null);
-
-  if (!showDetailFilter) return null;
 
   return (
     <Stack className="submissions-filter" spacing={1}>
@@ -72,7 +68,7 @@ const SubmissionFilter: FC<Props> = (props) => {
             disablePortal
             getOptionLabel={(option): string => option.title}
             onChange={(
-              _event: React.SyntheticEvent,
+              _,
               value: { id: number; title: string } | null,
             ): void => {
               setSelectedFilter({
@@ -81,7 +77,7 @@ const SubmissionFilter: FC<Props> = (props) => {
               });
             }}
             options={filter.assessments}
-            renderInput={(params): React.ReactNode => {
+            renderInput={(params): JSX.Element => {
               return (
                 <TextField
                   {...params}
@@ -100,17 +96,14 @@ const SubmissionFilter: FC<Props> = (props) => {
             clearOnEscape
             disablePortal
             getOptionLabel={(option): string => option.name}
-            onChange={(
-              _event: React.SyntheticEvent,
-              value: { id: number; name: string } | null,
-            ): void => {
+            onChange={(_, value: { id: number; name: string } | null): void => {
               setSelectedFilter({
                 ...selectedFilter,
                 group: value,
               });
             }}
             options={filter.groups}
-            renderInput={(params): React.ReactNode => {
+            renderInput={(params): JSX.Element => {
               return (
                 <TextField
                   {...params}
@@ -129,17 +122,14 @@ const SubmissionFilter: FC<Props> = (props) => {
             clearOnEscape
             disablePortal
             getOptionLabel={(option): string => option.name}
-            onChange={(
-              _event: React.SyntheticEvent,
-              value: { id: number; name: string } | null,
-            ): void => {
+            onChange={(_, value: { id: number; name: string } | null): void => {
               setSelectedFilter({
                 ...selectedFilter,
                 user: value,
               });
             }}
             options={filter.users}
-            renderInput={(params): React.ReactNode => {
+            renderInput={(params): JSX.Element => {
               return (
                 <TextField
                   {...params}

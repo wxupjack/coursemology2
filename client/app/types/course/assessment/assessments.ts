@@ -1,3 +1,5 @@
+import type { QuestionData } from './questions';
+
 export interface PersonalTimeData {
   isFixed: boolean;
   effectiveTime: string | null;
@@ -7,9 +9,17 @@ export interface PersonalTimeData {
 interface AssessmentActionsData {
   status: 'locked' | 'attempting' | 'submitted' | 'open' | 'unavailable';
   actionButtonUrl: string | null;
+  monitoringUrl?: string;
+  statisticsUrl?: string;
   submissionsUrl?: string;
   editUrl?: string;
   deleteUrl?: string;
+}
+
+export interface AchievementBadgeData {
+  url: string;
+  badgeUrl: string;
+  title: string;
 }
 
 export interface AssessmentListData extends AssessmentActionsData {
@@ -33,11 +43,7 @@ export interface AssessmentListData extends AssessmentActionsData {
   isBonusEnded?: boolean;
   isEndTimePassed?: boolean;
   remainingConditionalsCount?: number;
-  topConditionals?: {
-    url: string;
-    badgeUrl: string;
-    title: string;
-  }[];
+  topConditionals?: AchievementBadgeData[];
 }
 
 export interface AssessmentsListData {
@@ -46,10 +52,14 @@ export interface AssessmentsListData {
     isGamified: boolean;
     allowRandomization: boolean;
     isAchievementsEnabled: boolean;
+    isMonitoringEnabled: boolean;
     bonusAttributes: boolean;
     endTimes: boolean;
     canCreateAssessments: boolean;
     tabId: number;
+    tabTitle: string;
+    tabUrl: string;
+    canManageMonitor: boolean;
     category: {
       id: number;
       title: string;
@@ -78,46 +88,11 @@ interface NewQuestionBuilderData {
   url: string;
 }
 
-export interface QuestionData {
-  id: number;
-  number: number;
-  defaultTitle: string;
-  title: string;
-  unautogradable: boolean;
-  type: string;
-
-  description?: string;
-  editUrl?: string;
-  deleteUrl?: string;
-  duplicationUrls?: {
-    tab: string;
-    destinations: {
-      title: string;
-      duplicationUrl: string;
-    }[];
-  }[];
-}
-
-export interface McqData extends QuestionData {
-  mcqMrqType: 'mcq' | 'mrq';
-  convertUrl: string;
-  hasAnswers: boolean;
-  options: {
-    id: number;
-    option: string;
-    correct?: boolean;
-  }[];
-
-  unsubmitAndConvertUrl?: string;
-}
-
-export interface QuestionDuplicationResult {
-  destinationUrl: string;
-}
-
 export interface AssessmentData extends AssessmentActionsData {
   id: number;
   title: string;
+  tabTitle: string;
+  tabUrl: string;
   description: string;
   autograded: boolean;
   startAt: PersonalTimeData;
@@ -152,6 +127,7 @@ export interface AssessmentData extends AssessmentActionsData {
     url?: string;
   }[];
 
+  allowRecordDraftAnswer?: boolean;
   showMcqMrqSolution?: boolean;
   gradedTestCases?: string;
   skippable?: boolean;
@@ -160,6 +136,16 @@ export interface AssessmentData extends AssessmentActionsData {
   hasUnautogradableQuestions?: boolean;
   questions?: QuestionData[];
   newQuestionUrls?: NewQuestionBuilderData[];
+}
+
+export interface UnauthenticatedAssessmentData {
+  id: number;
+  title: string;
+  tabTitle: string;
+  tabUrl: string;
+  isAuthenticated: false;
+  isStartTimeBegin: boolean;
+  startAt: string;
 }
 
 export interface AssessmentDeleteResult {
@@ -171,3 +157,11 @@ export interface QuestionOrderPostData {
 }
 
 export type AssessmentUnlockRequirements = string[];
+
+export interface AssessmentAuthenticationFormData {
+  password: string;
+}
+
+export const isAuthenticatedAssessmentData = (
+  data: AssessmentData | UnauthenticatedAssessmentData,
+): data is AssessmentData => (data as AssessmentData).permissions !== undefined;

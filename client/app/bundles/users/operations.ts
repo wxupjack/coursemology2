@@ -1,10 +1,9 @@
-import { Operation } from 'types/store';
+import { Operation } from 'store';
 
 import GlobalAPI from 'api';
 
-import * as actions from './actions';
+import { actions } from './store';
 
-// eslint-disable-next-line import/prefer-default-export
 export function fetchUser(userId: number): Operation {
   return async (dispatch) =>
     GlobalAPI.users.fetch(userId).then((response) => {

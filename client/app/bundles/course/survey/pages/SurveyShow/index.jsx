@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
 import { defineMessages } from 'react-intl';
 import { connect } from 'react-redux';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { ListSubheader } from '@mui/material';
 import PropTypes from 'prop-types';
 
@@ -10,6 +10,7 @@ import useTranslation from 'lib/hooks/useTranslation';
 
 import { changeSection, finalizeOrder, reorder } from '../../actions/questions';
 import { fetchSurvey, loadSurvey } from '../../actions/surveys';
+import withSurveyLayout from '../../containers/SurveyLayout';
 import { surveyShape } from '../../propTypes';
 import surveyTranslations from '../../translations';
 
@@ -130,9 +131,9 @@ SurveyShow.propTypes = {
   surveyId: PropTypes.string.isRequired,
 };
 
-const mapStateToProps = (state) => ({
-  isLoading: state.surveysFlags.isLoadingSurvey,
-  disabled: state.surveysFlags.disableSurveyShow,
+const mapStateToProps = ({ surveys }) => ({
+  isLoading: surveys.surveysFlags.isLoadingSurvey,
+  disabled: surveys.surveysFlags.disableSurveyShow,
 });
 
-export default connect(mapStateToProps)(SurveyShow);
+export default withSurveyLayout(connect(mapStateToProps)(SurveyShow));

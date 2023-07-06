@@ -29,9 +29,13 @@ const translations = defineMessages({
     id: 'course.assessment.create.createAsDraft',
     defaultMessage: 'Create As Draft',
   },
+  createAssessmentToPopulate: {
+    id: 'course.assessments.index.createAssessmentToPopulate',
+    defaultMessage: 'Create an assessment to start populating {category}.',
+  },
   noAssessments: {
     id: 'course.assessments.index.noAssessments',
-    defaultMessage: 'Create an assessment to start populating {category}.',
+    defaultMessage: "Whoops, there's nothing to see here, yet!",
   },
   openingSoon: {
     id: 'course.assessments.index.openingSoon',
@@ -81,6 +85,10 @@ const translations = defineMessages({
     id: 'course.assessments.index.bonusEndsAt',
     defaultMessage: 'Bonus ends at',
   },
+  actions: {
+    id: 'course.assessments.index.actions',
+    defaultMessage: 'Actions',
+  },
   attempt: {
     id: 'course.assessments.index.attempt',
     defaultMessage: 'Attempt',
@@ -100,6 +108,10 @@ const translations = defineMessages({
   editAssessment: {
     id: 'course.assessments.index.editAssessment',
     defaultMessage: 'Edit Assessment',
+  },
+  assessmentStatistics: {
+    id: 'course.assessments.index.assessmentStatistics',
+    defaultMessage: 'Assessment Statistics',
   },
   submissions: {
     id: 'course.assessments.index.submissions',
@@ -180,6 +192,10 @@ const translations = defineMessages({
     id: 'course.assessment.show.baseExp',
     defaultMessage: 'Base EXP',
   },
+  allowRecordDraftAnswer: {
+    id: 'course.assessment.show.allowRecordDraftAnswer',
+    defaultMessage: 'Allow versioning of draft programming answer',
+  },
   showMcqMrqSolution: {
     id: 'course.assessment.show.showMcqMrqSolution',
     defaultMessage: 'Show MCQ/MRQ solutions',
@@ -236,11 +252,11 @@ const translations = defineMessages({
   },
   changeToMrq: {
     id: 'course.assessment.show.changeToMrq',
-    defaultMessage: 'Change to MRQ',
+    defaultMessage: 'Convert to MRQ',
   },
   changeToMcq: {
     id: 'course.assessment.show.changeToMcq',
-    defaultMessage: 'Change to MCQ',
+    defaultMessage: 'Convert to MCQ',
   },
   sureChangingQuestionType: {
     id: 'course.assessment.show.sureChangingQuestionType',
@@ -380,14 +396,6 @@ const translations = defineMessages({
     id: 'course.assessment.show.showOptions',
     defaultMessage: 'Show options',
   },
-  changeToMrqFull: {
-    id: 'course.assessment.show.changeToMrqFull',
-    defaultMessage: 'Change to Multiple Response (MRQ)',
-  },
-  changeToMcqFull: {
-    id: 'course.assessment.show.changeToMcqFull',
-    defaultMessage: 'Change to Multiple Choice (MCQ)',
-  },
   multipleChoice: {
     id: 'course.assessment.show.multipleChoice',
     defaultMessage: 'Multiple Choice (MCQ)',
@@ -419,6 +427,38 @@ const translations = defineMessages({
   forumPostResponse: {
     id: 'course.assessment.show.forumPostResponse',
     defaultMessage: 'Forum Post Response',
+  },
+  newMultipleChoice: {
+    id: 'course.assessment.show.newMultipleChoice',
+    defaultMessage: 'New Multiple Choice Question (MCQ)',
+  },
+  newMultipleResponse: {
+    id: 'course.assessment.show.newMultipleResponse',
+    defaultMessage: 'New Multiple Response Question (MRQ)',
+  },
+  newTextResponse: {
+    id: 'course.assessment.show.newTextResponse',
+    defaultMessage: 'New Text Response Question',
+  },
+  newAudioResponse: {
+    id: 'course.assessment.show.newAudioResponse',
+    defaultMessage: 'New Audio Response Question',
+  },
+  newFileUpload: {
+    id: 'course.assessment.show.newFileUpload',
+    defaultMessage: 'New File Upload Question',
+  },
+  newProgramming: {
+    id: 'course.assessment.show.newProgramming',
+    defaultMessage: 'New Programming Question',
+  },
+  newScribing: {
+    id: 'course.assessment.show.newScribing',
+    defaultMessage: 'New Scribing Question',
+  },
+  newForumPostResponse: {
+    id: 'course.assessment.show.newForumPostResponse',
+    defaultMessage: 'New Forum Post Response Question',
   },
   newQuestion: {
     id: 'course.assessment.show.newQuestion',
@@ -486,6 +526,890 @@ const translations = defineMessages({
   notAutogradable: {
     id: 'course.assessment.show.notAutogradable',
     defaultMessage: 'Not autogradable',
+  },
+  noOptions: {
+    id: 'course.assessment.show.noOptions',
+    defaultMessage: 'This question has no options.',
+  },
+  description: {
+    id: 'course.assessment.question.multipleResponses.description',
+    defaultMessage: 'Description',
+  },
+  staffOnlyComments: {
+    id: 'course.assessment.question.multipleResponses.staffOnlyComments',
+    defaultMessage: 'Staff-only comments',
+  },
+  staffOnlyCommentsHint: {
+    id: 'course.assessment.question.multipleResponses.staffOnlyCommentsHint',
+    defaultMessage:
+      'Useful for internal notes or documentations. Students will never see this.',
+  },
+  maximumGrade: {
+    id: 'course.assessment.question.multipleResponses.maximumGrade',
+    defaultMessage: 'Maximum grade',
+  },
+  alwaysGradeAsCorrect: {
+    id: 'course.assessment.question.multipleResponses.alwaysGradeAsCorrect',
+    defaultMessage: 'Always grade as correct',
+  },
+  alwaysGradeAsCorrectHint: {
+    id: 'course.assessment.question.multipleResponses.alwaysGradeAsCorrectHint',
+    defaultMessage:
+      'If enabled, this question will always be graded as correct, regardless of the submitted responses. Makes sense if there are no "wrong" responses in this question.',
+  },
+  questionDetails: {
+    id: 'course.assessment.question.multipleResponses.questionDetails',
+    defaultMessage: 'Question details',
+  },
+  grading: {
+    id: 'course.assessment.question.multipleResponses.grading',
+    defaultMessage: 'Grading',
+  },
+  skills: {
+    id: 'course.assessment.question.multipleResponses.skills',
+    defaultMessage: 'Skills',
+  },
+  skillsHint: {
+    id: 'course.assessment.question.multipleResponses.skillsHint',
+    defaultMessage:
+      "Completing this question will boost these stats in the students' skills.",
+  },
+  noSkillsCanCreateSkills: {
+    id: 'course.assessment.question.multipleResponses.noSkillsCanCreateSkills',
+    defaultMessage:
+      'There are no skills in this course yet. You can create new skills at the <url>Skills</url> page.',
+  },
+  canConfigureSkills: {
+    id: 'course.assessment.question.multipleResponses.canConfigureSkills',
+    defaultMessage:
+      'You can configure existing and create new skills at the <url>Skills</url> page.',
+  },
+  responses: {
+    id: 'course.assessment.question.multipleResponses.responses',
+    defaultMessage: 'Responses',
+  },
+  responsesHint: {
+    id: 'course.assessment.question.multipleResponses.responsesHint',
+    defaultMessage:
+      'Explanations are displayed after a student submits their responses for this question.',
+  },
+  randomizeResponses: {
+    id: 'course.assessment.question.multipleResponses.randomizeResponses',
+    defaultMessage: 'Randomize responses',
+  },
+  randomizeResponsesHint: {
+    id: 'course.assessment.question.multipleResponses.randomizeResponsesHint',
+    defaultMessage:
+      "If enabled, responses will always be randomized across attempts. Responses that ignore randomisation will always go to the end of the responses' list.",
+  },
+  response: {
+    id: 'course.assessment.question.multipleResponses.response',
+    defaultMessage: 'Response',
+  },
+  explanation: {
+    id: 'course.assessment.question.multipleResponses.explanation',
+    defaultMessage: 'Explanation',
+  },
+  explanationDescription: {
+    id: 'course.assessment.question.multipleResponses.explanationDescription',
+    defaultMessage:
+      'The explanation to show after the student submits his answer.',
+  },
+  markAsCorrectResponse: {
+    id: 'course.assessment.question.multipleResponses.markAsCorrectResponse',
+    defaultMessage: 'Mark as a correct response',
+  },
+  deleteResponse: {
+    id: 'course.assessment.question.multipleResponses.deleteResponse',
+    defaultMessage: 'Delete response',
+  },
+  responseWillBeDeleted: {
+    id: 'course.assessment.question.multipleResponses.responseWillBeDeleted',
+    defaultMessage: 'This response will be deleted once you save your changes.',
+  },
+  newResponseCannotUndo: {
+    id: 'course.assessment.question.multipleResponses.newResponseCannotUndo',
+    defaultMessage:
+      'This is a new response. It will immediately disappear if you delete before saving it.',
+  },
+  undoDeleteResponse: {
+    id: 'course.assessment.question.multipleResponses.undoDeleteResponse',
+    defaultMessage: 'Undo delete response',
+  },
+  addResponse: {
+    id: 'course.assessment.question.multipleResponses.addResponse',
+    defaultMessage: 'Add a new response',
+  },
+  ignoresRandomization: {
+    id: 'course.assessment.question.multipleResponses.ignoresRandomization',
+    defaultMessage: 'Ignores randomization',
+  },
+  choice: {
+    id: 'course.assessment.question.multipleResponses.choice',
+    defaultMessage: 'Choice',
+  },
+  choices: {
+    id: 'course.assessment.question.multipleResponses.choices',
+    defaultMessage: 'Choices',
+  },
+  choicesHint: {
+    id: 'course.assessment.question.multipleResponses.choicesHint',
+    defaultMessage:
+      'Explanations are displayed after a student submits their choice for this question.',
+  },
+  markAsCorrectChoice: {
+    id: 'course.assessment.question.multipleResponses.markAsCorrectChoice',
+    defaultMessage: 'Mark as a correct choice',
+  },
+  deleteChoice: {
+    id: 'course.assessment.question.multipleResponses.deleteChoice',
+    defaultMessage: 'Delete choice',
+  },
+  choiceWillBeDeleted: {
+    id: 'course.assessment.question.multipleResponses.choiceWillBeDeleted',
+    defaultMessage: 'This choice will be deleted once you save your changes.',
+  },
+  newChoiceCannotUndo: {
+    id: 'course.assessment.question.multipleResponses.newChoiceCannotUndo',
+    defaultMessage:
+      'This is a new choice. It will immediately disappear if you delete before saving it.',
+  },
+  undoDeleteChoice: {
+    id: 'course.assessment.question.multipleResponses.undoDeleteChoice',
+    defaultMessage: 'Undo delete choice',
+  },
+  addChoice: {
+    id: 'course.assessment.question.multipleResponses.addChoice',
+    defaultMessage: 'Add a new choice',
+  },
+  randomizeChoices: {
+    id: 'course.assessment.question.multipleResponses.randomizeChoices',
+    defaultMessage: 'Randomize choices',
+  },
+  randomizeChoicesHint: {
+    id: 'course.assessment.question.multipleResponses.randomizeChoicesHint',
+    defaultMessage:
+      'If enabled, choices will always be randomized across attempts. Choices that ignore randomisation will always go to the end of the choices list.',
+  },
+  alwaysGradeAsCorrectChoiceHint: {
+    id: 'course.assessment.question.multipleResponses.alwaysGradeAsCorrectChoiceHint',
+    defaultMessage:
+      'If enabled, this question will always be graded as correct, regardless of the submitted choice. Makes sense if there are no "wrong" choices in this question.',
+  },
+  convertToMcqHint: {
+    id: 'course.assessment.question.multipleResponses.convertToMcqHint',
+    defaultMessage:
+      'If this question is converted to a Multiple Choice Question (MCQ), students can only submit one out of the many <s>responses</s> choices above. Note that you may define multiple correct choices.',
+  },
+  convertToMrqHint: {
+    id: 'course.assessment.question.multipleResponses.convertToMrqHint',
+    defaultMessage:
+      'If this question is converted to a Multiple Response Question (MRQ), students can submit multiple <s>choices</s> responses defined above.',
+  },
+  mustSpecifyMaximumGrade: {
+    id: 'course.assessment.question.multipleResponses.mustSpecifyMaximumGrade',
+    defaultMessage:
+      'You must specify a valid, non-negative maximum grade to award.',
+  },
+  mustSpecifyPositiveMaximumGrade: {
+    id: 'course.assessment.question.multipleResponses.mustSpecifyPositiveMaximumGrade',
+    defaultMessage: 'Maximum grade has to be non-negative.',
+  },
+  cannotBeMoreThanMaxMaximumGrade: {
+    id: 'course.assessment.question.multipleResponses.cannotBeMoreThanMaxMaximumGrade',
+    defaultMessage: 'Cannot be more than 1000.',
+  },
+  mustSpecifyResponse: {
+    id: 'course.assessment.question.multipleResponses.mustSpecifyResponse',
+    defaultMessage: 'You must specify a valid response title.',
+  },
+  mustSpecifyChoice: {
+    id: 'course.assessment.question.multipleResponses.mustSpecifyChoice',
+    defaultMessage: 'You must specify a valid choice title.',
+  },
+  mustSpecifyAtLeastOneCorrectChoice: {
+    id: 'course.assessment.question.multipleResponses.mustSpecifyAtLeastOneCorrectChoice',
+    defaultMessage: 'You must specify at least one correct choice.',
+  },
+  questionCreated: {
+    id: 'course.assessment.question.multipleResponses.questionCreated',
+    defaultMessage: 'Question was successfully created.',
+  },
+  saveChangesFirstBeforeConvertingMcqMrq: {
+    id: 'course.assessment.question.multipleResponses.saveChangesFirstBeforeConvertingMcqMrq',
+    defaultMessage:
+      'Please save your changes before attempting to convert this question.',
+  },
+  mustSpecifyMaximumPosts: {
+    id: 'course.assessment.question.forumPostResponses.mustSpecifyMaximumPosts',
+    defaultMessage:
+      'You must specify a valid, positive maximum posts to be allowed.',
+  },
+  mustSpecifyPositiveMaximumPosts: {
+    id: 'course.assessment.question.forumPostResponses.mustSpecifyPositiveMaximumPosts',
+    defaultMessage: 'Maximum posts has to be positive.',
+  },
+  forumPosts: {
+    id: 'course.assessment.question.forumPostResponses.forumPosts',
+    defaultMessage: 'Additional Settings',
+  },
+  forumPostsRequirements: {
+    id: 'course.assessment.question.forumPostResponses.forumPostsRequirements',
+    defaultMessage:
+      'Additional forum posts question settings for this question',
+  },
+  maxPosts: {
+    id: 'course.assessment.question.forumPostResponses.maxPosts',
+    defaultMessage: 'Maximum number of forum posts a student could select',
+  },
+  enableTextResponse: {
+    id: 'course.assessment.question.forumPostResponses.enableTextResponse',
+    defaultMessage:
+      'Include a text field for students to provide further inputs',
+  },
+  allowFileUpload: {
+    id: 'course.assessment.question.textResponses.allowFileUpload',
+    defaultMessage: 'Allow file upload in the answer',
+  },
+  solutions: {
+    id: 'course.assessment.question.textResponses.solutions',
+    defaultMessage: 'Solutions',
+  },
+  solutionsHint: {
+    id: 'course.assessment.question.textResponses.solutionsHint',
+    defaultMessage:
+      'Adding solutions allows the answer to be autograded. Students can only input plain text.',
+  },
+  solutionWillBeDeleted: {
+    id: 'course.assessment.question.textResponses.solutionWillBeDeleted',
+    defaultMessage: 'This solution will be deleted once you save your changes.',
+  },
+  newSolutionCannotUndo: {
+    id: 'course.assessment.question.textResponses.newSolutionCannotUndo',
+    defaultMessage:
+      'This is a new solution. It will immediately disappear if you delete before saving it.',
+  },
+  undoDeleteSolution: {
+    id: 'course.assessment.question.textResponses.undoDeleteSolution',
+    defaultMessage: 'Undo delete solution',
+  },
+  addSolution: {
+    id: 'course.assessment.question.textResponses.addSolution',
+    defaultMessage: 'Add a new solution',
+  },
+  solution: {
+    id: 'course.assessment.question.textResponses.solution',
+    defaultMessage: 'Solution',
+  },
+  zeroGrade: {
+    id: 'course.assessment.question.textResponses.zeroGrade',
+    defaultMessage: '0.0',
+  },
+  solutionType: {
+    id: 'course.assessment.question.textResponses.solutionType',
+    defaultMessage: 'Type of Solution',
+  },
+  solutionTypeExplanation: {
+    id: 'course.assessment.question.textResponses.solutionTypeExplanation',
+    defaultMessage:
+      'If Exact Match is selected, solutions with multiple lines must match student answers exactly for the answer to be graded as correct.',
+  },
+  exactMatch: {
+    id: 'course.assessment.question.textResponses.exactMatch',
+    defaultMessage: 'Exact Match',
+  },
+  keyword: {
+    id: 'course.assessment.question.textResponses.keyword',
+    defaultMessage: 'Keyword',
+  },
+  grade: {
+    id: 'course.assessment.question.textResponses.grade',
+    defaultMessage: 'Grade',
+  },
+  deleteSolution: {
+    id: 'course.assessment.question.textResponses.deleteSolution',
+    defaultMessage: 'Delete solution',
+  },
+  mustSpecifyGrade: {
+    id: 'course.assessment.question.textResponses.mustSpecifyGrade',
+    defaultMessage: 'You must specify a valid number for grade.',
+  },
+  mustSpecifySolution: {
+    id: 'course.assessment.question.textResponses.mustSpecifySolution',
+    defaultMessage: 'You must specify a valid solution title.',
+  },
+  textResponseNote: {
+    id: 'course.assessment.question.textResponses.textResponseNote',
+    defaultMessage:
+      'Note: If no solutions are provided, the autograder will always award the maximum grade.',
+  },
+  fileUploadNote: {
+    id: 'course.assessment.question.textResponses.fileUploadNote',
+    defaultMessage:
+      'Note: File upload question is not auto-gradable. The autograder will always award the maximum grade.',
+  },
+  mustSpecifySolutionType: {
+    id: 'course.assessment.question.textResponses.mustSpecifySolutionType',
+    defaultMessage:
+      'You must choose either exact match or keyword as solution type.',
+  },
+  recentActivities: {
+    id: 'course.assessment.monitoring.recentActivities',
+    defaultMessage: 'Recent activities',
+  },
+  recentActivitiesHint: {
+    id: 'course.assessment.monitoring.recentActivitiesHint',
+    defaultMessage: 'These logs will disappear if you close this tab!',
+  },
+  connected: {
+    id: 'course.assessment.monitoring.connected',
+    defaultMessage: 'Connected',
+  },
+  disconnected: {
+    id: 'course.assessment.monitoring.disconnected',
+    defaultMessage: 'Disconnected',
+  },
+  filterByGroup: {
+    id: 'course.assessment.monitoring.filterByGroup',
+    defaultMessage: 'Filter by Group',
+  },
+  pulsegrid: {
+    id: 'course.assessment.monitoring.pulsegrid',
+    defaultMessage: 'PulseGrid',
+  },
+  summaryCorrectAsAt: {
+    id: 'course.assessment.monitoring.summaryCorrectAsAt',
+    defaultMessage: 'Summary correct as at {time}',
+  },
+  lastHeartbeat: {
+    id: 'course.assessment.monitoring.lastHeartbeat',
+    defaultMessage: 'Last heartbeat',
+  },
+  generatedAt: {
+    id: 'course.assessment.monitoring.generatedAt',
+    defaultMessage: 'Generated at',
+  },
+  userAgent: {
+    id: 'course.assessment.monitoring.userAgent',
+    defaultMessage: 'User Agent',
+  },
+  type: {
+    id: 'course.assessment.monitoring.type',
+    defaultMessage: 'Type',
+  },
+  stale: {
+    id: 'course.assessment.monitoring.stale',
+    defaultMessage: 'Stale',
+  },
+  live: {
+    id: 'course.assessment.monitoring.live',
+    defaultMessage: 'Live',
+  },
+  ipAddress: {
+    id: 'course.assessment.monitoring.ipAddress',
+    defaultMessage: 'IP Address',
+  },
+  detailsOfNHeartbeats: {
+    id: 'course.assessment.monitoring.detailsOfNHeartbeats',
+    defaultMessage: 'Details of the last {n} heartbeats',
+  },
+  connectedToLiveMonitoringChannel: {
+    id: 'course.assessment.monitoring.connectedToLiveMonitoringChannel',
+    defaultMessage: 'Connected to the live monitoring channel',
+  },
+  disconnectedFromLiveMonitoringChannel: {
+    id: 'course.assessment.monitoring.disconnectedFromLiveMonitoringChannel',
+    defaultMessage: 'Disconnected from the live monitoring channel',
+  },
+  userHeartbeatNotReceivedInTime: {
+    id: 'course.assessment.monitoring.userHeartbeatNotReceivedInTime',
+    defaultMessage: "{name}'s heartbeat wasn't received in time.",
+  },
+  userHeartbeatContinuedStreaming: {
+    id: 'course.assessment.monitoring.userHeartbeatContinuedStreaming',
+    defaultMessage: "{name}'s heartbeat just continued streaming.",
+  },
+  blankField: {
+    id: 'course.assessment.monitoring.blankField',
+    defaultMessage: '(blank)',
+  },
+  cannotConnectToLiveMonitoringChannel: {
+    id: 'course.assessment.monitoring.cannotConnectToLiveMonitoringChannel',
+    defaultMessage:
+      'Oops, an error occurred when connecting to the live monitoring channel.',
+  },
+  noActiveSessions: {
+    id: 'course.assessment.monitoring.noActiveSessions',
+    defaultMessage: 'No active sessions.',
+  },
+  alivePresenceHint: {
+    id: 'course.assessment.monitoring.alivePresenceHint',
+    defaultMessage: 'Last heartbeat was received in time.',
+  },
+  alivePresenceHintSUSMatches: {
+    id: 'course.assessment.monitoring.alivePresenceHintSUSMatches',
+    defaultMessage: 'Last heartbeat was received in time and the SUS matches.',
+  },
+  latePresenceHint: {
+    id: 'course.assessment.monitoring.latePresenceHint',
+    defaultMessage:
+      "Next heartbeat hasn't been received in time, but still within the configured inter-heartbeats interval.",
+  },
+  missingPresenceHint: {
+    id: 'course.assessment.monitoring.missingPresenceHint',
+    defaultMessage: "Next heartbeat hasn't been received in time.",
+  },
+  attemptingAssessment: {
+    id: 'course.assessment.submission.attemptingAssessment',
+    defaultMessage: 'Creating a new submission...',
+  },
+  createSubmissionSuccessful: {
+    id: 'course.assessment.submission.createSubmissionSuccessful',
+    defaultMessage: 'Submission created! Redirecting now...',
+  },
+  createSubmissionFailed: {
+    id: 'course.assessment.submission.createSubmissionFailed',
+    defaultMessage: 'Submission attempt failed! {error}',
+  },
+  password: {
+    id: 'course.assessment.session.password',
+    defaultMessage: 'Password',
+  },
+  lockedSessionAssessment: {
+    id: 'course.assessment.session.lockedSessionAssessment',
+    defaultMessage:
+      'The assessment is locked, please approach any course staff for assistance.',
+  },
+  lockedAssessment: {
+    id: 'course.assessment.session.lockedAssessment',
+    defaultMessage:
+      'The assessment is locked, please input the password to continue.',
+  },
+  assessmentNotStarted: {
+    id: 'course.assessment.session.assessmentNotStarted',
+    defaultMessage:
+      'The assessment has not started yet. Please come back after {startDate}.',
+  },
+  canEnableCodaveriInComponents: {
+    id: 'course.assessment.question.programming.canEnableCodaveriInComponents',
+    defaultMessage:
+      'Contact the course manager or owner to enable this feature in Components in the Course Settings.',
+  },
+  buildLog: {
+    id: 'course.assessment.question.programming.buildLog',
+    defaultMessage: 'Package build log',
+  },
+  buildLogHint: {
+    id: 'course.assessment.question.programming.buildLogHint',
+    defaultMessage:
+      'These will disappear once the evaluation package is successfully imported.',
+  },
+  standardError: {
+    id: 'course.assessment.question.programming.standardError',
+    defaultMessage: 'Standard error',
+  },
+  standardOutput: {
+    id: 'course.assessment.question.programming.standardOutput',
+    defaultMessage: 'Standard output',
+  },
+  prependHint: {
+    id: 'course.assessment.question.programming.prependHint',
+    defaultMessage:
+      'Inserted before the submitted code. Useful for defining given helper functions, variables, or packages.',
+  },
+  prepend: {
+    id: 'course.assessment.question.programming.prepend',
+    defaultMessage: 'Prepend',
+  },
+  appendHint: {
+    id: 'course.assessment.question.programming.appendHint',
+    defaultMessage:
+      'Inserted after the submitted code. Useful for defining complex test cases or overriding functions or variables in the submitted code.',
+  },
+  append: {
+    id: 'course.assessment.question.programming.append',
+    defaultMessage: 'Append',
+  },
+  templateHint: {
+    id: 'course.assessment.question.programming.templateHint',
+    defaultMessage: 'What appears in the editor when a new attempt is made.',
+  },
+  template: {
+    id: 'course.assessment.question.programming.template',
+    defaultMessage: 'Template',
+  },
+  solutionHint: {
+    id: 'course.assessment.question.programming.solutionHint',
+    defaultMessage: 'Always hidden. Stored here for reference only.',
+  },
+  templates: {
+    id: 'course.assessment.question.programming.templates',
+    defaultMessage: 'Templates',
+  },
+  codeInserts: {
+    id: 'course.assessment.question.programming.codeInserts',
+    defaultMessage: 'Code inserts',
+  },
+  codeInsertsHint: {
+    id: 'course.assessment.question.programming.codeInsertsHint',
+    defaultMessage:
+      'These are inserted around submitted codes internally before evaluation. They are never exposed to anyone.',
+  },
+  dataFiles: {
+    id: 'course.assessment.question.programming.dataFiles',
+    defaultMessage: 'Data files',
+  },
+  testCases: {
+    id: 'course.assessment.question.programming.testCases',
+    defaultMessage: 'Test cases',
+  },
+  hideExplanation: {
+    id: 'course.assessment.question.programming.hideExplanation',
+    defaultMessage: 'Hide this explanation',
+  },
+  showTestCasesExplanation: {
+    id: 'course.assessment.question.programming.showTestCasesExplanation',
+    defaultMessage: 'How are these test cases run and compared?',
+  },
+  publicTestCases: {
+    id: 'course.assessment.question.programming.publicTestCases',
+    defaultMessage: 'Public test cases',
+  },
+  privateTestCases: {
+    id: 'course.assessment.question.programming.privateTestCases',
+    defaultMessage: 'Private test cases',
+  },
+  privateTestCasesHint: {
+    id: 'course.assessment.question.programming.privateTestCasesHint',
+    defaultMessage: 'Students cannot see these, but can know if any one fails.',
+  },
+  evaluationTestCases: {
+    id: 'course.assessment.question.programming.evaluationTestCases',
+    defaultMessage: 'Evaluation test cases',
+  },
+  evaluationTestCasesHint: {
+    id: 'course.assessment.question.programming.evaluationTestCasesHint',
+    defaultMessage:
+      'Students cannot see these and will not know if any one fails.',
+  },
+  cppTestCasesHint: {
+    id: 'course.assessment.question.programming.cppTestCasesHint',
+    defaultMessage:
+      'Expressions will be evaluated in the context of the submitted code. Their return values will then ' +
+      'be compared against the Expected expectations using the <code>EXPECT_*</code> assertions from the ' +
+      '<gtf>Google Test Framework</gtf>. Floating point numbers are formatted with <sts>std::to_string</sts>.',
+  },
+  addFiles: {
+    id: 'course.assessment.question.programming.addFiles',
+    defaultMessage: 'Add files',
+  },
+  oneDuplicateFileNotAdded: {
+    id: 'course.assessment.question.programming.oneDuplicateFileNotAdded',
+    defaultMessage:
+      '{name} was not added because other files with the same name were selected or already added. ' +
+      'Remove the existing file(s) or rename the new file to add it.',
+  },
+  someDuplicateFilesNotAdded: {
+    id: 'course.assessment.question.programming.someDuplicateFilesNotAdded',
+    defaultMessage:
+      'These files were not added because other files with the same name were selected or already added.',
+  },
+  fileName: {
+    id: 'course.assessment.question.programming.fileName',
+    defaultMessage: 'File name',
+  },
+  fileSize: {
+    id: 'course.assessment.question.programming.fileSize',
+    defaultMessage: 'Size',
+  },
+  evaluator: {
+    id: 'course.assessment.question.programming.evaluator',
+    defaultMessage: 'Evaluator',
+  },
+  evaluatorHint: {
+    id: 'course.assessment.question.programming.evaluatorHint',
+    defaultMessage:
+      'You cannot change this once there are submissions for this assessment.',
+  },
+  defaultEvaluator: {
+    id: 'course.assessment.question.programming.defaultEvaluator',
+    defaultMessage: 'Default',
+  },
+  defaultEvaluatorHint: {
+    id: 'course.assessment.question.programming.defaultEvaluatorHint',
+    defaultMessage:
+      'No fuss; just run the code according to the evaluation package below and report the test results.',
+  },
+  codaveriEvaluator: {
+    id: 'course.assessment.question.programming.codaveriEvaluator',
+    defaultMessage: 'Codaveri',
+  },
+  codaveriEvaluatorHint: {
+    id: 'course.assessment.question.programming.codaveriEvaluatorHint',
+    defaultMessage:
+      'On top of the default evaluation, this evaluator will provide automated code feedback powered by Codaveri when the submission is finalised. They will appear as draft comments for the instructors to review, edit, and publish.',
+  },
+  evaluationLimits: {
+    id: 'course.assessment.question.programming.evaluationLimits',
+    defaultMessage: 'Evaluation limits',
+  },
+  memoryLimit: {
+    id: 'course.assessment.question.programming.memoryLimit',
+    defaultMessage: 'Memory limit',
+  },
+  timeLimit: {
+    id: 'course.assessment.question.programming.timeLimit',
+    defaultMessage: 'Time limit',
+  },
+  attemptLimit: {
+    id: 'course.assessment.question.programming.attemptLimit',
+    defaultMessage: 'Attempt limit',
+  },
+  seconds: {
+    id: 'course.assessment.question.programming.seconds',
+    defaultMessage: 's',
+  },
+  megabytes: {
+    id: 'course.assessment.question.programming.megabytes',
+    defaultMessage: 'MB',
+  },
+  lowestGradingPriority: {
+    id: 'course.assessment.question.programming.lowestGradingPriority',
+    defaultMessage: 'Lowest grading priority',
+  },
+  lowestGradingPriorityHint: {
+    id: 'course.assessment.question.programming.lowestGradingPriorityHint',
+    defaultMessage:
+      "If enabled, this question's evaluation will always use the evaluator of the lowest priority. If unsure, just leave this unchecked.",
+  },
+  seeBuildLog: {
+    id: 'course.assessment.question.programming.seeBuildLog',
+    defaultMessage: 'See the build log',
+  },
+  packagePending: {
+    id: 'course.assessment.question.programming.packagePending',
+    defaultMessage: 'Package is still being imported. Come back again later?',
+  },
+  templateMode: {
+    id: 'course.assessment.question.programming.templateMode',
+    defaultMessage: 'Template mode',
+  },
+  templateModeHint: {
+    id: 'course.assessment.question.programming.templateModeHint',
+    defaultMessage: 'You cannot change this mode once there are submissions.',
+  },
+  codeSubmission: {
+    id: 'course.assessment.question.programming.codeSubmission',
+    defaultMessage: 'Code submission',
+  },
+  codeSubmissionHint: {
+    id: 'course.assessment.question.programming.codeSubmissionHint',
+    defaultMessage:
+      'Set the submission template below. Students can edit and submit their code in the editor to be compiled and tested.',
+  },
+  fileSubmission: {
+    id: 'course.assessment.question.programming.fileSubmission',
+    defaultMessage: 'File submission',
+  },
+  fileSubmissionHint: {
+    id: 'course.assessment.question.programming.fileSubmissionHint',
+    defaultMessage:
+      'Upload Java files as submission templates. Students can edit online or upload their Java files to be compiled and tested.',
+  },
+  javaTestCasesHint: {
+    id: 'course.assessment.question.programming.javaTestCasesHint',
+    defaultMessage:
+      'Expressions will be evaluated in the context of the submitted code. Their return values will be compared against ' +
+      'the Expected expectations using the <code>expectEquals(expression, expected)</code> void. Its simplified definition ' +
+      'is as follows, where <code>Object</code> has been overloaded for all Java primitives.',
+  },
+  javaTestCasesHint2: {
+    id: 'course.assessment.question.programming.javaTestCasesHint2',
+    defaultMessage:
+      '<code>printValue(Object val)</code> will be called on all Expressions and Expected expectations by default. Its ' +
+      'simplified definition is as follows, where <code>Object</code> has been overloaded for all Java primitives.',
+  },
+  javaTestCasesHint3: {
+    id: 'course.assessment.question.programming.javaTestCasesHint3',
+    defaultMessage:
+      'If you wish to override these behaviours, you may redefine these methods in <append>Append</append> above.',
+  },
+  pythonTestCasesHint: {
+    id: 'course.assessment.question.programming.pythonTestCasesHint',
+    defaultMessage:
+      'Expressions will be evaluated in the context of the submitted code. Their return values will then be compared ' +
+      'against the Expected expectations using the equality operator (<code>==</code>). Notably, <code>print()</code> ' +
+      'returns <code>None</code>, so <code>print</code>ed outputs should not be confused with actual return values.',
+  },
+  inlineCode: {
+    id: 'course.assessment.question.programming.inlineCode',
+    defaultMessage: 'Inline code',
+  },
+  language: {
+    id: 'course.assessment.question.programming.language',
+    defaultMessage: 'Language',
+  },
+  evaluateAndTestCode: {
+    id: 'course.assessment.question.programming.evaluateAndTestCode',
+    defaultMessage: 'Evaluate and test code',
+  },
+  evaluateAndTestCodeHint: {
+    id: 'course.assessment.question.programming.evaluateAndTestCodeHint',
+    defaultMessage:
+      'If enabled, Coursemology can run, evaluate, and test submission codes when submitted. You can configure the ' +
+      'evaluation package (parameters, data files, and test cases) below.',
+  },
+  cannotDisableHasSubmissions: {
+    id: 'course.assessment.question.programming.cannotDisableHasSubmissions',
+    defaultMessage:
+      'You cannot disable this option once there are submissions.',
+  },
+  packageCreationMode: {
+    id: 'course.assessment.question.programming.packageCreationMode',
+    defaultMessage: 'Package creation mode',
+  },
+  packageCreationModeHint: {
+    id: 'course.assessment.question.programming.packageCreationModeHint',
+    defaultMessage:
+      'You cannot change this mode once this question is successfully created. Choose wisely!',
+  },
+  editOnline: {
+    id: 'course.assessment.question.programming.editOnline',
+    defaultMessage: 'Create/edit online',
+  },
+  editOnlineHint: {
+    id: 'course.assessment.question.programming.editOnlineHint',
+    defaultMessage:
+      'Do everything right here in this page. Useful for quick edits (especially exams) or collaborating with other ' +
+      'instructors.',
+  },
+  uploadPackage: {
+    id: 'course.assessment.question.programming.uploadPackage',
+    defaultMessage: 'Manually create/edit offline and upload',
+  },
+  uploadPackageHint: {
+    id: 'course.assessment.question.programming.uploadPackageHint',
+    defaultMessage:
+      "Pack the package as a ZIP file, then upload it here. Useful for complex test cases or if you host your course's " +
+      'evaluation packages in some version control system (e.g., Git, Mercurial, etc.).',
+  },
+  packageInfoOnline: {
+    id: 'course.assessment.question.programming.packageInfoOnline',
+    defaultMessage: 'Generated evaluation package',
+  },
+  packageInfoOnlineHint: {
+    id: 'course.assessment.question.programming.packageInfoOnlineHint',
+    defaultMessage:
+      'This package is generated from this online editor. You may download it for future reference.',
+  },
+  packageInfoUpload: {
+    id: 'course.assessment.question.programming.packageInfoUpload',
+    defaultMessage: 'Latest uploaded package',
+  },
+  packageInfoUploadHint: {
+    id: 'course.assessment.question.programming.packageInfoUploadHint',
+    defaultMessage: 'Previews extracted from this package is shown below.',
+  },
+  lastUpdated: {
+    id: 'course.assessment.question.programming.lastUpdated',
+    defaultMessage: 'Last updated by {by} on {on}.',
+  },
+  uploadNewPackage: {
+    id: 'course.assessment.question.programming.uploadNewPackage',
+    defaultMessage: 'Upload a new package',
+  },
+  uploadNewPackageHint: {
+    id: 'course.assessment.question.programming.uploadNewPackageHint',
+    defaultMessage:
+      'All existing submissions will be evaluated against this new package once it is successfully imported.',
+  },
+  packageIsZipOnly: {
+    id: 'course.assessment.question.programming.packageIsZipOnly',
+    defaultMessage: 'Evaluation packages are in ZIPs only.',
+  },
+  questionSavedRedirecting: {
+    id: 'course.assessment.question.programming.questionSavedRedirecting',
+    defaultMessage: 'Question saved. Redirecting...',
+  },
+  evaluatingSubmissions: {
+    id: 'course.assessment.question.programming.evaluatingSubmissions',
+    defaultMessage:
+      'Hold tight, evaluating all submissions with the new package...',
+  },
+  questionSavedButPackageError: {
+    id: 'course.assessment.question.programming.questionSavedButPackageError',
+    defaultMessage:
+      "Your changes was saved, but the package wasn't successfully imported.",
+  },
+  errorWhenSavingQuestion: {
+    id: 'course.assessment.question.programming.errorWhenSavingQuestion',
+    defaultMessage: 'An error occurred when saving your changes.',
+  },
+  languageAndEvaluation: {
+    id: 'course.assessment.question.programming.languageAndEvaluation',
+    defaultMessage: 'Language and evaluation',
+  },
+  noTestCases: {
+    id: 'course.assessment.question.programming.noTestCases',
+    defaultMessage: 'No test cases.',
+  },
+  addTestCaseToBegin: {
+    id: 'course.assessment.question.programming.addTestCaseToBegin',
+    defaultMessage: 'Add a test case to get started. ↗',
+  },
+  expression: {
+    id: 'course.assessment.question.programming.expression',
+    defaultMessage: 'Expression',
+  },
+  expected: {
+    id: 'course.assessment.question.programming.expected',
+    defaultMessage: 'Expected',
+  },
+  hint: {
+    id: 'course.assessment.question.programming.hint',
+    defaultMessage: 'Hint',
+  },
+  addTestCase: {
+    id: 'course.assessment.question.programming.addTestCase',
+    defaultMessage: 'Add a test case',
+  },
+  atLeastOneTestCaseRequired: {
+    id: 'course.assessment.question.programming.atLeastOneTestCaseRequired',
+    defaultMessage: 'At least one test case is required.',
+  },
+  hasToBeValidNumber: {
+    id: 'course.assessment.question.programming.hasToBeValidNumber',
+    defaultMessage: 'Has to be a valid positive number.',
+  },
+  hasToBeAtLeastOne: {
+    id: 'course.assessment.question.programming.hasToBeAtLeastOne',
+    defaultMessage: 'Has to be a valid positive number at least 1.',
+  },
+  cannotBeMoreThanMaxLimit: {
+    id: 'course.assessment.question.programming.cannotBeMoreThanMaxLimit',
+    defaultMessage: 'Cannot be more than {max} s.',
+  },
+  savingChanges: {
+    id: 'course.assessment.question.programming.savingChanges',
+    defaultMessage: 'Saving your changes...',
+  },
+  submitConfirmation: {
+    id: 'course.assessment.question.programming.submitConfirmation',
+    defaultMessage:
+      'There are existing submissions for this autograded submission. Updating this question will regrade all ' +
+      'submitted answers to this question and only system-issued EXP for the submissions will be re-calculated. ' +
+      'Note that manually-issued EXP will not be updated. Are you sure you wish to continue?',
+  },
+  mustUploadPackage: {
+    id: 'course.assessment.question.programming.mustUploadPackage',
+    defaultMessage: 'Please specify a valid evaluation package ZIP file.',
+  },
+  autogradedAssessmentButNoEvaluationWarning: {
+    id: 'course.assessment.question.programming.autogradedAssessmentButNoEvaluationWarning',
+    defaultMessage:
+      "This assessment is autograded. If code evaluation and testing is disabled, this question's " +
+      'submissions will always receive the maximum grade above since there are nothing for the autograder to test ' +
+      'and grade.',
   },
 });
 

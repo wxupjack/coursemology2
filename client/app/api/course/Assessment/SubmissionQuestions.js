@@ -9,8 +9,8 @@ export default class SubmissionQuestionsAPI extends BaseAssessmentAPI {
    * success response: comment_with_sanitized_html
    */
   createComment(submissionQuestionId, params) {
-    return this.getClient().post(
-      `${this._getUrlPrefix()}/${submissionQuestionId}/comments`,
+    return this.client.post(
+      `${this.#urlPrefix}/${submissionQuestionId}/comments`,
       params,
     );
   }
@@ -24,13 +24,13 @@ export default class SubmissionQuestionsAPI extends BaseAssessmentAPI {
    */
   getPastAnswers(submissionQuestionId, answersToLoad = 10) {
     const params = { answers_to_load: answersToLoad };
-    return this.getClient().get(
-      `${this._getUrlPrefix()}/${submissionQuestionId}/past_answers`,
+    return this.client.get(
+      `${this.#urlPrefix}/${submissionQuestionId}/past_answers`,
       { params },
     );
   }
 
-  _getUrlPrefix() {
-    return `/courses/${this.getCourseId()}/assessments/${this.getAssessmentId()}/submission_questions`;
+  get #urlPrefix() {
+    return `/courses/${this.courseId}/assessments/${this.assessmentId}/submission_questions`;
   }
 }

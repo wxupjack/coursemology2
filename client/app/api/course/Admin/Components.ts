@@ -7,17 +7,17 @@ import type {
 import BaseAdminAPI from './Base';
 
 export default class ComponentsAdminAPI extends BaseAdminAPI {
-  override _getUrlPrefix(): string {
-    return `${super._getUrlPrefix()}/components`;
+  override get urlPrefix(): string {
+    return `${super.urlPrefix}/components`;
   }
 
   index(): Promise<AxiosResponse<CourseComponents>> {
-    return this.getClient().get(this._getUrlPrefix());
+    return this.client.get(this.urlPrefix);
   }
 
   update(
     data: CourseComponentsPostData,
   ): Promise<AxiosResponse<CourseComponents>> {
-    return this.getClient().patch(this._getUrlPrefix(), data);
+    return this.client.patch(this.urlPrefix, data);
   }
 }

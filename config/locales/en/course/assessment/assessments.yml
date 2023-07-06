@@ -10,8 +10,6 @@ en:
         sidebar_title: :'course.assessment.assessments.index.header'
         index:
           header: "Assessments"
-        assessment:
-          attempt: "Attempt"
         show:
           public_test: "Public"
           private_test: "Private"
@@ -20,12 +18,6 @@ en:
           header: "New Assessment"
         edit:
           header: "Edit Assessment"
-        authenticate:
-          header: "Input Password"
-          message_not_started: "The assessment will be unlocked on %{start_at}."
-          message_unlock: "The assessment is locked, please input the password."
-          placeholder: "Password"
-          continue: "Continue"
         assessment_question_bundle_buttons:
           question_groups: "Groups"
           question_bundles: "Bundles"

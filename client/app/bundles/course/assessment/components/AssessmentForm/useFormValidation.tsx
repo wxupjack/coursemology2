@@ -16,7 +16,7 @@ import * as yup from 'yup';
 
 import ft from 'lib/translations/form';
 
-import t from './translations.intl';
+import t from './translations';
 
 const validationSchema = yup.object({
   title: yup.string().required(ft.required),
@@ -46,6 +46,7 @@ const validationSchema = yup.object({
   has_todo: yup.bool(),
   autograded: yup.bool(),
   block_student_viewing_after_submitted: yup.bool(),
+  allow_record_draft_answer: yup.bool(),
   skippable: yup.bool(),
   allow_partial_submission: yup.bool(),
   show_mcq_answer: yup.bool(),
@@ -88,15 +89,53 @@ const validationSchema = yup.object({
   randomization: yup.bool(),
   has_personal_times: yup.bool(),
   affects_personal_times: yup.bool(),
+  monitoring: yup.object({
+    enabled: yup.bool(),
+    secret: yup.string().nullable(),
+    min_interval_ms: yup.number().when('enabled', {
+      is: true,
+      then: yup
+        .number()
+        .positive(t.hasToBePositiveIntegerMaxOneDay)
+        .max(84_000_000, t.hasToBePositiveIntegerMaxOneDay)
+        .typeError(t.hasToBePositiveIntegerMaxOneDay)
+        .required(ft.required)
+        .min(3000, t.hasToBeMoreThanValueMs),
+    }),
+    max_interval_ms: yup.number().when('enabled', {
+      is: true,
+      then: yup
+        .number()
+        .positive(t.hasToBePositiveIntegerMaxOneDay)
+        .max(84_000_000, t.hasToBePositiveIntegerMaxOneDay)
+        .typeError(t.hasToBePositiveIntegerMaxOneDay)
+        .moreThan(yup.ref('min_interval_ms'), t.hasToBeMoreThanMinInterval)
+        .required(ft.required),
+    }),
+    offset_ms: yup.number().when('enabled', {
+      is: true,
+      then: yup
+        .number()
+        .positive(t.hasToBePositiveIntegerMaxOneDay)
+        .max(84_000_000, t.hasToBePositiveIntegerMaxOneDay)
+        .typeError(ft.required)
+        .required(ft.required),
+    }),
+  }),
 });
 
-const useFormValidation = (initialValues): UseFormReturn => {
+const useFormValidation = (
+  initialValues,
+  defaultMonitoringMinIntervalMs?: number,
+): UseFormReturn => {
   const form = useForm({
     defaultValues: {
       ...initialValues,
       session_protected: Boolean(initialValues?.session_password),
     },
-    resolver: yupResolver(validationSchema),
+    resolver: yupResolver(validationSchema, {
+      context: { defaultMonitoringMinIntervalMs },
+    }),
   });
 
   return {
@@ -106,6 +145,16 @@ const useFormValidation = (initialValues): UseFormReturn => {
       const postProcessor = (rawData): SubmitHandler<FieldValues> => {
         if (!rawData.session_protected) rawData.session_password = null;
         delete rawData.session_protected;
+
+        if (!rawData.password_protected && rawData.monitoring !== undefined)
+          rawData.monitoring.enabled = false;
+
+        if (rawData.monitoring?.enabled === false) {
+          delete rawData.monitoring.min_interval_ms;
+          delete rawData.monitoring.max_interval_ms;
+          delete rawData.monitoring.offset_ms;
+        }
+
         return onValid(rawData);
       };
 

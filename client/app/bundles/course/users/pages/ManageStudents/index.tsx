@@ -1,12 +1,11 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { AppDispatch, AppState } from 'types/store';
 
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import Note from 'lib/components/core/Note';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 import manageUsersTranslations from 'lib/translations/course/users/index';
 
 import UserManagementButtons from '../../components/buttons/UserManagementButtons';
@@ -23,10 +22,6 @@ import {
 type Props = WrappedComponentProps;
 
 const translations = defineMessages({
-  manageStudentsTitle: {
-    id: 'course.users.ManageStudents.manageStudentsTitle',
-    defaultMessage: 'Students',
-  },
   noStudents: {
     id: 'course.users.ManageStudents.noStudents',
     defaultMessage: 'No students in course... yet!',
@@ -37,23 +32,12 @@ const ManageStudents: FC<Props> = (props) => {
   const { intl } = props;
   const [isLoading, setIsLoading] = useState(true);
 
-  const students = useSelector((state: AppState) =>
-    getAllStudentMiniEntities(state),
-  );
+  const students = useAppSelector(getAllStudentMiniEntities);
+  const permissions = useAppSelector(getManageCourseUserPermissions);
+  const sharedData = useAppSelector(getManageCourseUsersSharedData);
+  const timelines = useAppSelector(getAssignableTimelines);
 
-  const permissions = useSelector((state: AppState) =>
-    getManageCourseUserPermissions(state),
-  );
-
-  const sharedData = useSelector((state: AppState) =>
-    getManageCourseUsersSharedData(state),
-  );
-
-  const timelines = useSelector((state: AppState) =>
-    getAssignableTimelines(state),
-  );
-
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(fetchStudents())
@@ -72,10 +56,10 @@ const ManageStudents: FC<Props> = (props) => {
   };
 
   return (
-    <>
-      <PageHeader
-        title={intl.formatMessage(manageUsersTranslations.manageUsersHeader)}
-      />
+    <Page
+      title={intl.formatMessage(manageUsersTranslations.manageUsersHeader)}
+      unpadded
+    >
       {isLoading ? (
         <LoadingIndicator />
       ) : (
@@ -84,14 +68,15 @@ const ManageStudents: FC<Props> = (props) => {
             permissions={permissions}
             sharedData={sharedData}
           />
+
           {students.length > 0 ? (
             <ManageUsersTable
-              csvDownloadOptions={{ filename: 'Student List' }}
-              renderRowActionComponent={(user, disabled): JSX.Element => (
-                <UserManagementButtons disabled={disabled} user={user} />
+              className="mt-8"
+              csvDownloadFilename="Student List"
+              renderRowActionComponent={(user): JSX.Element => (
+                <UserManagementButtons user={user} />
               )}
               timelinesMap={timelines}
-              title={intl.formatMessage(translations.manageStudentsTitle)}
               users={students}
             />
           ) : (
@@ -99,7 +84,7 @@ const ManageStudents: FC<Props> = (props) => {
           )}
         </>
       )}
-    </>
+    </Page>
   );
 };
 

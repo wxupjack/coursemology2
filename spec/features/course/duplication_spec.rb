@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-RSpec.feature 'Course: Duplication' do
+RSpec.feature 'Course: Duplication', js: true do
   let!(:instance) { Instance.default }
 
   with_tenant(:instance) do
@@ -18,7 +18,7 @@ RSpec.feature 'Course: Duplication' do
         scenario 'I cannot view the Duplication Sidebar item' do
           visit course_path(course)
 
-          expect(page).not_to have_selector('li', text: 'layouts.duplication.title')
+          expect(find_sidebar).not_to have_text(I18n.t('layouts.duplication.title'))
         end
       end
 
@@ -28,7 +28,7 @@ RSpec.feature 'Course: Duplication' do
         scenario 'I can view the Duplication Sidebar item' do
           visit course_path(course)
 
-          expect(page).to have_selector('li', text: 'layouts.duplication.title')
+          expect(find_sidebar).to have_text(I18n.t('layouts.duplication.title'))
         end
       end
     end
@@ -39,15 +39,23 @@ RSpec.feature 'Course: Duplication' do
       scenario 'I can view the Duplication Sidebar item' do
         visit course_path(course)
 
-        expect(page).to have_selector('li', text: 'layouts.duplication.title')
+        expect(find_sidebar).to have_text(I18n.t('layouts.duplication.title'))
       end
 
-      context 'when I am a manager in another course', js: true do
+      context 'when I am a manager in another course' do
         let(:source_course) { create(:course) }
         let!(:course_user) { create(:course_manager, course: source_course, user: user) }
-        let(:assessment_title) { SecureRandom.hex }
-        let!(:assessment) { create(:assessment, title: assessment_title, tab: source_course.assessment_tabs.first) }
+        let(:assessment_title1) { SecureRandom.hex }
+        let(:assessment_title2) { SecureRandom.hex }
         let(:new_course_title) { SecureRandom.hex }
+        let!(:assessment1) { create(:assessment, title: assessment_title1, tab: source_course.assessment_tabs.first) }
+
+        let!(:assessment2) do
+          create(:assessment,
+                 title: assessment_title2,
+                 tab: source_course.assessment_tabs.first,
+                 end_at: 2.days.from_now)
+        end
 
         scenario 'I can duplicate objects from that course' do
           visit course_duplication_path(course)
@@ -61,14 +69,12 @@ RSpec.feature 'Course: Duplication' do
           find("[role='option']", text: course.title).click
 
           find('.items-selector-menu span span', text: 'Assessments').click
-          find(:xpath, '//*[@id="course-duplication"]
-                        /div[1]/div[2]/div[6]/div/div[2]/div[2]/label/span[1]', visible: false).click
+          find('label', text: assessment_title1).click
           click_on 'Duplicate Items'
           click_on 'Duplicate'
 
-          # expect(page).not_to have_css('.source-course-dropdown')
           wait_for_job
-          expect(course.assessments.where(title: assessment_title).count).to be(1)
+          expect(course.assessments.where(title: assessment_title1).count).to be(1)
         end
 
         scenario 'I can duplicate the whole course' do
@@ -87,11 +93,13 @@ RSpec.feature 'Course: Duplication' do
           wait_for_job
           duplicated_course = Course.find_by(title: new_course_title)
           expect(duplicated_course).to be_present
-          expect(duplicated_course.assessments.where(title: assessment_title).count).to eq(1)
+          expect(duplicated_course.assessments.where(title: assessment_title1).count).to eq(1)
+          expect(duplicated_course.assessments.where(title: assessment_title2).count).to eq(1)
 
           # As only course and assessment duplication source tracing is currently supported,
           # we will only test for these two
-          expect(duplicated_course.assessments.where(title: assessment_title).first.source.id).to eq(assessment.id)
+          expect(duplicated_course.assessments.where(title: assessment_title1).first.source.id).to eq(assessment1.id)
+          expect(duplicated_course.assessments.where(title: assessment_title2).first.source.id).to eq(assessment2.id)
           expect(duplicated_course.source.id).to eq(source_course.id)
         end
       end
@@ -100,11 +108,13 @@ RSpec.feature 'Course: Duplication' do
     context 'As a Course Student' do
       let(:user) { create(:course_student, course: course).user }
 
-      scenario 'I cannot view the Duplication Sidebar item and cannot duplicate a course' do
+      scenario 'I cannot view the Duplication Sidebar item' do
         visit course_path(course)
 
-        expect(page).not_to have_selector('li', text: 'layouts.duplication.title')
+        expect(find_sidebar).not_to have_text(I18n.t('layouts.duplication.title'))
+      end
 
+      scenario 'I cannot access the duplication page', js: false do
         visit course_duplication_path(course)
 
         expect(page.status_code).to eq(403)

@@ -27,8 +27,10 @@ export default class ProgrammingAPI extends BaseAssessmentAPI {
     const formData = new FormData();
     ProgrammingAPI.appendFormData(formData, submissionFields);
 
-    const url = `${this._getUrlPrefix()}/${answerId}/programming/create_programming_files`;
-    return this.getClient().post(url, formData, config);
+    const url = `${
+      this.#urlPrefix
+    }/${answerId}/programming/create_programming_files`;
+    return this.client.post(url, formData, config);
   }
 
   /**
@@ -44,15 +46,15 @@ export default class ProgrammingAPI extends BaseAssessmentAPI {
    * error response: { errors: [] } - An array of errors will be returned upon validation error.
    */
   deleteProgrammingFile(answerId, payload) {
-    return this.getClient().post(
-      `${this._getUrlPrefix()}/${answerId}/programming/destroy_programming_file`,
+    return this.client.post(
+      `${this.#urlPrefix}/${answerId}/programming/destroy_programming_file`,
       payload,
     );
   }
 
-  _getUrlPrefix() {
-    return `/courses/${this.getCourseId()}/assessments/${this.getAssessmentId()}\
-/submissions/${this.getSubmissionId()}/answers`;
+  get #urlPrefix() {
+    return `/courses/${this.courseId}/assessments/${this.assessmentId}\
+/submissions/${this.submissionId}/answers`;
   }
 
   static appendFormData(formData, data, name) {

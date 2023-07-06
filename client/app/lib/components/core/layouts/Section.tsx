@@ -15,14 +15,20 @@ interface SectionProps {
   titleColor?: string;
   contentClassName?: string;
   size?: Breakpoint;
+  id?: string;
 }
 
 const Section = (props: SectionProps): JSX.Element => (
-  <Container className="mb-6" disableGutters maxWidth={props.size ?? 'lg'}>
+  <Container
+    className="mb-6"
+    disableGutters
+    id={props.id}
+    maxWidth={props.size ?? 'lg'}
+  >
     <Grid container spacing={2}>
       <Grid
-        className={`lg:sticky lg:self-start ${
-          props.sticksToNavbar ? 'lg:top-20' : 'lg:-top-6'
+        className={`lg:self-start ${
+          props.sticksToNavbar ? 'lg:sticky lg:top-0' : ''
         }`}
         item
         lg={3}

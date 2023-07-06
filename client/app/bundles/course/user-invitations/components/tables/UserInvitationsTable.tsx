@@ -5,7 +5,6 @@ import {
   injectIntl,
   WrappedComponentProps,
 } from 'react-intl';
-import { useSelector } from 'react-redux';
 import { Typography } from '@mui/material';
 import equal from 'fast-deep-equal';
 import { TableColumns, TableOptions } from 'types/components/DataTable';
@@ -13,7 +12,6 @@ import {
   InvitationMiniEntity,
   InvitationRowData,
 } from 'types/course/userInvitations';
-import { AppState } from 'types/store';
 
 import DataTable from 'lib/components/core/layouts/DataTable';
 import Note from 'lib/components/core/Note';
@@ -23,6 +21,7 @@ import {
   TIMELINE_ALGORITHMS,
 } from 'lib/constants/sharedConstants';
 import rebuildObjectFromRow from 'lib/helpers/mui-datatables-helpers';
+import { useAppSelector } from 'lib/hooks/store';
 import tableTranslations from 'lib/translations/table';
 
 import { getManageCourseUserPermissions } from '../../selectors';
@@ -60,9 +59,7 @@ const UserInvitationsTable: FC<Props> = (props) => {
     renderRowActionComponent = null,
     intl,
   } = props;
-  const permissions = useSelector((state: AppState) =>
-    getManageCourseUserPermissions(state),
-  );
+  const permissions = useAppSelector(getManageCourseUserPermissions);
 
   if (invitations && invitations.length === 0) {
     return (
@@ -260,7 +257,7 @@ const UserInvitationsTable: FC<Props> = (props) => {
         customBodyRender: (_value, tableMeta): JSX.Element => {
           const rowData = tableMeta.rowData;
           const invitation = rebuildObjectFromRow(columns, rowData);
-          return renderRowActionComponent(invitation);
+          return renderRowActionComponent(invitation as InvitationRowData);
         },
       },
     });

@@ -51,7 +51,7 @@ RSpec.describe Course::Assessment::Submission::SubmissionsController do
     end
 
     describe '#create' do
-      context 'when an there is already an existing submission for an assessment' do
+      context 'when there is already an existing submission for an assessment' do
         subject do
           post :create, params: { course_id: course, assessment_id: assessment }
         end
@@ -62,12 +62,14 @@ RSpec.describe Course::Assessment::Submission::SubmissionsController do
         end
 
         it do
-          is_expected.
-            to redirect_to(edit_course_assessment_submission_path(course, assessment, submission))
+          redirect_url = JSON.parse(subject.body)['redirectUrl']
+          expect(redirect_url).
+            to eq(edit_course_assessment_submission_path(course, assessment, submission))
         end
       end
 
-      context 'when a submission of a randomized assesment creation fails' do
+      # Randomized Assessment is temporarily hidden (PR#5406)
+      xcontext 'when a submission of a randomized assesment creation fails' do
         subject do
           post :create, params: { course_id: course, assessment_id: randomized_assessment }
         end
@@ -76,10 +78,10 @@ RSpec.describe Course::Assessment::Submission::SubmissionsController do
           subject
         end
 
-        it { is_expected.to redirect_to(course_assessments_path(course)) }
-        it 'sets the proper flash message' do
-          expect(flash[:danger]).to eq(I18n.t('course.assessment.submission.submissions.create.'\
-                                              'failure', error: ''))
+        it do
+          is_expected.to have_http_status(:bad_request)
+          expect(JSON.parse(response.body)['error']).
+            to eq('activerecord.errors.models.course/assessment/submission.no_bundles_assigned')
         end
       end
     end

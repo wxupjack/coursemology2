@@ -1,38 +1,40 @@
-import { AxiosResponse } from 'axios';
 import {
   CourseData,
+  CourseLayoutData,
   CourseListData,
   CoursePermissions,
 } from 'types/course/courses';
 import { RoleRequestBasicListData } from 'types/system/instance/roleRequests';
 
+import { APIResponse } from 'api/types';
+
 import BaseCourseAPI from './Base';
 
 export default class CoursesAPI extends BaseCourseAPI {
-  _baseUrlPrefix: string = '/courses';
+  #baseUrlPrefix: string = '/courses';
 
   /**
    * Fetches all of the courses
    */
-  index(): Promise<
-    AxiosResponse<{
-      courses: CourseListData[];
-      instanceUserRoleRequest?: RoleRequestBasicListData;
-      permissions: CoursePermissions;
-    }>
-  > {
-    return this.getClient().get(this._baseUrlPrefix);
+  index(): APIResponse<{
+    courses: CourseListData[];
+    instanceUserRoleRequest?: RoleRequestBasicListData;
+    permissions: CoursePermissions;
+  }> {
+    return this.client.get(this.#baseUrlPrefix);
   }
 
   /**
    * Fetches one course
    */
-  fetch(courseId: number): Promise<
-    AxiosResponse<{
-      course: CourseData;
-    }>
-  > {
-    return this.getClient().get(`${this._baseUrlPrefix}/${courseId}`);
+  fetch(courseId: number): APIResponse<{
+    course: CourseData;
+  }> {
+    return this.client.get(`${this.#baseUrlPrefix}/${courseId}`);
+  }
+
+  fetchLayout(courseId: number): APIResponse<CourseLayoutData> {
+    return this.client.get(`${this.#baseUrlPrefix}/${courseId}/sidebar`);
   }
 
   /**
@@ -47,20 +49,18 @@ export default class CoursesAPI extends BaseCourseAPI {
    * error response: { errors: [] } - An array of errors will be returned upon validation error.
    */
 
-  create(params: FormData): Promise<
-    AxiosResponse<{
-      id: number;
-      title: string;
-    }>
-  > {
-    return this.getClient().post(this._baseUrlPrefix, params);
+  create(params: FormData): APIResponse<{
+    id: number;
+    title: string;
+  }> {
+    return this.client.post(this.#baseUrlPrefix, params);
   }
 
   /**
    * Removes a todo
    */
-  removeTodo(ignoreLink: string): Promise<void> {
-    return this.getClient().post(ignoreLink);
+  removeTodo(ignoreLink: string): APIResponse {
+    return this.client.post(ignoreLink);
   }
 
   /**
@@ -69,22 +69,22 @@ export default class CoursesAPI extends BaseCourseAPI {
   sendNewRegistrationCode(
     registrationLink: string,
     myData: FormData,
-  ): Promise<AxiosResponse<void>> {
-    return this.getClient().postForm(registrationLink, myData);
+  ): APIResponse {
+    return this.client.postForm(registrationLink, myData);
   }
 
   /**
    * Submits an enrol request
    */
 
-  submitEnrolRequest(link: string): Promise<AxiosResponse<{ id: number }>> {
-    return this.getClient().postForm(link);
+  submitEnrolRequest(link: string): APIResponse<{ id: number }> {
+    return this.client.postForm(link);
   }
 
   /**
    * Cancels a pending enrol request
    */
-  cancelEnrolRequest(link: string): Promise<AxiosResponse<void>> {
-    return this.getClient().delete(link);
+  cancelEnrolRequest(link: string): APIResponse {
+    return this.client.delete(link);
   }
 }

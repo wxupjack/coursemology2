@@ -11,22 +11,25 @@ import {
   Switch,
 } from '@mui/material';
 import PropTypes from 'prop-types';
+import withHeartbeatWorker from 'workers/withHeartbeatWorker';
 
+import Page from 'lib/components/core/layouts/Page';
+import Link from 'lib/components/core/Link';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import NotificationBar, {
-  notificationShape,
-} from 'lib/components/core/NotificationBar';
 import withRouter from 'lib/components/navigation/withRouter';
 import { getUrlParameter } from 'lib/helpers/url-helpers';
 
+import assessmentsTranslations from '../../../translations';
 import {
   autogradeSubmission,
   enterStudentView,
   exitStudentView,
   fetchSubmission,
   finalise,
+  generateFeedback,
   mark,
   publish,
+  purgeSubmissionStore,
   reevaluateAnswer,
   resetAnswer,
   saveDraft,
@@ -52,6 +55,7 @@ import {
 } from '../../propTypes';
 import translations from '../../translations';
 
+import BlockedSubmission from './BlockedSubmission';
 import SubmissionEditForm from './SubmissionEditForm';
 import SubmissionEditStepForm from './SubmissionEditStepForm';
 import SubmissionEmptyForm from './SubmissionEmptyForm';
@@ -60,24 +64,23 @@ class VisibleSubmissionEditIndex extends Component {
   constructor(props) {
     super(props);
 
-    const newSubmission =
-      !!getUrlParameter('new_submission') &&
-      getUrlParameter('new_submission') === 'true';
     const stepString = getUrlParameter('step');
     const step =
       Number.isNaN(stepString) || stepString === ''
         ? null
         : parseInt(stepString, 10) - 1;
 
-    this.state = { newSubmission, step };
+    this.state = { step };
   }
 
   componentDidMount() {
-    const {
-      dispatch,
-      match: { params },
-    } = this.props;
-    dispatch(fetchSubmission(params.submissionId));
+    const { dispatch, match, setSessionId } = this.props;
+    dispatch(fetchSubmission(match.params.submissionId, setSessionId));
+  }
+
+  componentWillUnmount() {
+    const { dispatch } = this.props;
+    dispatch(purgeSubmissionStore());
   }
 
   handleAutogradeSubmission() {
@@ -197,6 +200,14 @@ class VisibleSubmissionEditIndex extends Component {
     dispatch(reevaluateAnswer(params.submissionId, answerId, questionId));
   };
 
+  onGenerateFeedback = (answerId, questionId) => {
+    const {
+      dispatch,
+      match: { params },
+    } = this.props;
+    dispatch(generateFeedback(params.submissionId, answerId, questionId));
+  };
+
   allConsideredCorrect() {
     const { explanations, questions } = this.props;
     if (Object.keys(explanations).length !== Object.keys(questions).length) {
@@ -215,9 +226,9 @@ class VisibleSubmissionEditIndex extends Component {
     const renderFile = (file, index) => (
       <div key={index}>
         <InsertDriveFile style={{ verticalAlign: 'middle' }} />
-        <a href={file.url}>
-          <span>{file.name}</span>
-        </a>
+        <Link href={file.url} opensInNewTab>
+          {file.name}
+        </Link>
       </div>
     );
 
@@ -243,7 +254,7 @@ class VisibleSubmissionEditIndex extends Component {
   }
 
   renderContent() {
-    const { newSubmission, step } = this.state;
+    const { step } = this.state;
     const {
       answers,
       assessment: {
@@ -258,7 +269,9 @@ class VisibleSubmissionEditIndex extends Component {
         allowPartialSubmission,
         showMcqAnswer,
         showMcqMrqSolution,
+        isCodaveriEnabled,
       },
+      codaveriFeedbackStatus,
       submission: { graderView, canUpdate, maxStep, workflowState },
       explanations,
       grading,
@@ -299,6 +312,7 @@ class VisibleSubmissionEditIndex extends Component {
           allConsideredCorrect={this.allConsideredCorrect()}
           allowPartialSubmission={allowPartialSubmission}
           attempting={workflowState === workflowStates.Attempting}
+          codaveriFeedbackStatus={codaveriFeedbackStatus}
           explanations={explanations}
           graderView={graderView}
           handleSaveGrade={() => this.handleSaveGrade()}
@@ -306,8 +320,10 @@ class VisibleSubmissionEditIndex extends Component {
           handleUnsubmit={() => this.handleUnsubmit()}
           historyQuestions={historyQuestions}
           initialValues={answers.initial}
+          isCodaveriEnabled={isCodaveriEnabled}
           isSaving={isSaving}
           maxStep={maxStep === undefined ? questionIds.length - 1 : maxStep}
+          onGenerateFeedback={this.onGenerateFeedback}
           onReevaluateAnswer={this.onReevaluateAnswer}
           onReset={this.onReset}
           onSaveDraft={this.onSaveDraft}
@@ -331,6 +347,7 @@ class VisibleSubmissionEditIndex extends Component {
       <SubmissionEditForm
         attempting={workflowState === workflowStates.Attempting}
         canUpdate={canUpdate}
+        codaveriFeedbackStatus={codaveriFeedbackStatus}
         delayedGradePublication={delayedGradePublication}
         explanations={explanations}
         graded={workflowState === workflowStates.Graded}
@@ -346,9 +363,10 @@ class VisibleSubmissionEditIndex extends Component {
         historyQuestions={historyQuestions}
         initialValues={answers.initial}
         isAutograding={isAutograding}
+        isCodaveriEnabled={isCodaveriEnabled}
         isSaving={isSaving}
         maxStep={maxStep === undefined ? questionIds.length - 1 : maxStep}
-        newSubmission={newSubmission}
+        onGenerateFeedback={this.onGenerateFeedback}
         onReevaluateAnswer={this.onReevaluateAnswer}
         onReset={this.onReset}
         onSaveDraft={this.onSaveDraft}
@@ -405,18 +423,16 @@ class VisibleSubmissionEditIndex extends Component {
   }
 
   render() {
-    const { isLoading, notification } = this.props;
+    const { isSubmissionBlocked, isLoading } = this.props;
 
-    if (isLoading) {
-      return <LoadingIndicator />;
-    }
+    if (isLoading) return <LoadingIndicator />;
+    if (isSubmissionBlocked) return <BlockedSubmission />;
     return (
-      <>
+      <Page>
         {this.renderAssessment()}
         {this.renderProgress()}
         {this.renderContent()}
-        <NotificationBar notification={notification} />
-      </>
+      </Page>
     );
   }
 }
@@ -432,10 +448,10 @@ VisibleSubmissionEditIndex.propTypes = {
   }),
   answers: PropTypes.object,
   assessment: assessmentShape,
+  codaveriFeedbackStatus: PropTypes.object,
   exp: PropTypes.number,
   explanations: PropTypes.objectOf(explanationShape),
   grading: gradingShape.isRequired,
-  notification: notificationShape,
   posts: PropTypes.objectOf(postShape),
   questions: PropTypes.objectOf(questionShape),
   historyAnswers: PropTypes.objectOf(answerShape),
@@ -446,30 +462,36 @@ VisibleSubmissionEditIndex.propTypes = {
   isAutograding: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   isSaving: PropTypes.bool.isRequired,
+  isSubmissionBlocked: PropTypes.bool,
+  setSessionId: PropTypes.func,
 };
 
-function mapStateToProps(state) {
+function mapStateToProps({ assessments: { submission } }) {
   return {
-    assessment: state.assessment,
-    exp: state.grading.exp,
-    explanations: state.explanations,
-    answers: state.answers,
-    grading: state.grading.questions,
-    notification: state.notification,
-    posts: state.posts,
-    submission: state.submission,
-    questions: state.questions,
-    historyAnswers: state.history.answers,
-    historyQuestions: state.history.questions,
-    questionsFlags: state.questionsFlags,
-    isAutograding: state.submissionFlags.isAutograding,
-    topics: state.topics,
-    isLoading: state.submissionFlags.isLoading,
-    isSaving: state.submissionFlags.isSaving,
+    assessment: submission.assessment,
+    exp: submission.grading.exp,
+    explanations: submission.explanations,
+    answers: submission.answers,
+    codaveriFeedbackStatus: submission.codaveriFeedbackStatus,
+    grading: submission.grading.questions,
+    posts: submission.posts,
+    submission: submission.submission,
+    questions: submission.questions,
+    historyAnswers: submission.history.answers,
+    historyQuestions: submission.history.questions,
+    questionsFlags: submission.questionsFlags,
+    isAutograding: submission.submissionFlags.isAutograding,
+    topics: submission.topics,
+    isLoading: submission.submissionFlags.isLoading,
+    isSaving: submission.submissionFlags.isSaving,
+    isSubmissionBlocked: submission.submissionFlags.isSubmissionBlocked,
   };
 }
 
+const handle = assessmentsTranslations.attempt;
+
 const SubmissionEditIndex = withRouter(
-  connect(mapStateToProps)(VisibleSubmissionEditIndex),
+  withHeartbeatWorker(connect(mapStateToProps)(VisibleSubmissionEditIndex)),
 );
-export default SubmissionEditIndex;
+
+export default Object.assign(SubmissionEditIndex, { handle });

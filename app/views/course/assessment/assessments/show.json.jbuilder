@@ -12,6 +12,8 @@ can_manage = can?(:manage, assessment)
 
 json.id assessment.id
 json.title assessment.title
+json.tabTitle "#{@category.title}: #{@tab.title}"
+json.tabUrl course_assessments_path(course_id: current_course, category: @category, tab: @tab)
 json.description assessment.description unless @assessment.description.blank?
 json.autograded assessment.autograded?
 json.hasTodo assessment.has_todo if can_manage
@@ -97,6 +99,7 @@ if can_attempt && assessment.folder.materials.exists?
 end
 
 if can_observe
+  json.allowRecordDraftAnswer assessment.allow_record_draft_answer
   json.showMcqMrqSolution assessment.show_mcq_mrq_solution
   json.gradedTestCases display_graded_test_types(assessment)
 

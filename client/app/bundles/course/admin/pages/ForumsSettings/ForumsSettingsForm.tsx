@@ -16,7 +16,8 @@ import commonTranslations from '../../translations';
 
 import translations from './translations';
 
-interface ForumsSettingsFormProps extends Emits<FormEmitter> {
+interface ForumsSettingsFormProps
+  extends Emits<FormEmitter<ForumsSettingsData>> {
   data: ForumsSettingsData;
   onSubmit: (data: ForumsSettingsData) => void;
   disabled?: boolean;
@@ -59,7 +60,7 @@ const ForumsSettingsForm = (props: ForumsSettingsFormProps): JSX.Element => {
           />
 
           <Typography
-            className="!mt-2 !mb-4"
+            className="!mb-4 !mt-2"
             color="text.secondary"
             variant="body2"
           >

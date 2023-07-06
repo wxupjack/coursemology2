@@ -1,17 +1,18 @@
 import { FC, lazy, Suspense, useEffect, useState } from 'react';
-import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
+import { defineMessages } from 'react-intl';
 import {
   CheckCircleOutline,
   PendingOutlined,
   ScheduleOutlined,
 } from '@mui/icons-material';
-import { Card, CardContent, CardHeader, Link } from '@mui/material';
+import { Card, CardContent, CardHeader, Typography } from '@mui/material';
 import { CommentStatusTypes, CommentTopicEntity } from 'types/course/comments';
-import { AppDispatch, AppState } from 'types/store';
 
+import Link from 'lib/components/core/Link';
 import { getCourseUserURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
+import useTranslation from 'lib/hooks/useTranslation';
 
 import { updatePending, updateRead } from '../../operations';
 import { getAllCommentPostMiniEntities } from '../../selectors';
@@ -26,14 +27,14 @@ const CommentField = lazy(
     ),
 );
 
-interface Props extends WrappedComponentProps {
+interface TopicCardProps {
   topic: CommentTopicEntity;
 }
 
 const translations = defineMessages({
-  by: {
-    id: 'course.discussion.topics.TopicCard.by',
-    defaultMessage: 'By',
+  byCreator: {
+    id: 'course.discussion.topics.TopicCard.byCreator',
+    defaultMessage: 'Created by <link>{creatorName}</link>',
   },
   pendingStatus: {
     id: 'course.discussion.topics.TopicCard.pendingStatus',
@@ -57,12 +58,14 @@ const translations = defineMessages({
   },
 });
 
-const TopicCard: FC<Props> = (props) => {
-  const { intl, topic } = props;
-  const dispatch = useDispatch<AppDispatch>();
-  const postListData = useSelector((state: AppState) =>
-    getAllCommentPostMiniEntities(state),
-  ).filter((post) => post.topicId === topic.id);
+const TopicCard: FC<TopicCardProps> = (props) => {
+  const { topic } = props;
+  const { t } = useTranslation();
+
+  const dispatch = useAppDispatch();
+  const postListData = useAppSelector(getAllCommentPostMiniEntities).filter(
+    (post) => post.topicId === topic.id,
+  );
   const [status, setStatus] = useState(CommentStatusTypes.loading);
 
   useEffect(() => {
@@ -131,7 +134,7 @@ const TopicCard: FC<Props> = (props) => {
             }}
           >
             <PendingOutlined />
-            {intl.formatMessage(translations.loadingStatus)}
+            {t(translations.loadingStatus)}
           </div>
         );
       case CommentStatusTypes.pending:
@@ -148,7 +151,7 @@ const TopicCard: FC<Props> = (props) => {
             }}
           >
             <ScheduleOutlined />
-            {intl.formatMessage(translations.pendingStatus)}
+            {t(translations.pendingStatus)}
           </Link>
         );
       case CommentStatusTypes.notPending:
@@ -165,7 +168,7 @@ const TopicCard: FC<Props> = (props) => {
             }}
           >
             <CheckCircleOutline />
-            {intl.formatMessage(translations.notPendingStatus)}
+            {t(translations.notPendingStatus)}
           </Link>
         );
       case CommentStatusTypes.read:
@@ -184,7 +187,7 @@ const TopicCard: FC<Props> = (props) => {
             }}
           >
             <CheckCircleOutline />
-            {intl.formatMessage(translations.unreadStatus)}
+            {t(translations.unreadStatus)}
           </Link>
         );
       default:
@@ -197,28 +200,38 @@ const TopicCard: FC<Props> = (props) => {
       <CardHeader
         style={{ paddingBottom: '0px' }}
         subheader={
-          <>
-            <div>{renderStatus()}</div>
-            <div>
-              {`${intl.formatMessage(translations.by)}: `}
-              <a href={getCourseUserURL(getCourseId(), topic.creator.id)}>
-                {topic.creator.name}
-              </a>
-            </div>
-          </>
+          <div className="space-y-4">
+            <Typography variant="body2">
+              {t(translations.byCreator, {
+                creatorName: topic.creator.name,
+                link: (chunk) => (
+                  <Link
+                    to={getCourseUserURL(getCourseId(), topic.creator.id)}
+                    underline="hover"
+                  >
+                    {chunk}
+                  </Link>
+                ),
+              })}
+            </Typography>
+
+            {renderStatus()}
+          </div>
         }
         title={
-          <a
+          <Link
             className={`topic-${topic.id}`}
-            href={topic.links.titleLink}
             id={`topic-${topic.id}-${
               topic.timestamp?.toString().replaceAll(':', '-') ?? ''
             }`}
+            to={topic.links.titleLink}
+            underline="hover"
+            variant="h6"
           >
             {topic.timestamp
               ? `${topic.title}: ${topic.timestamp.toString()}`
               : topic.title}
-          </a>
+          </Link>
         }
       />
       <CardContent>
@@ -237,7 +250,7 @@ const TopicCard: FC<Props> = (props) => {
             </div>
           );
         })}
-        {/* Dont need to render the comment field when the last post (which is 
+        {/* Dont need to render the comment field when the last post (which is
           the intended post to be shown) is of codaveri feedback type */}
         {!postListData[postListData.length - 1]?.codaveriFeedback && (
           <Suspense
@@ -247,7 +260,7 @@ const TopicCard: FC<Props> = (props) => {
                   marginTop: 10,
                 }}
               >
-                {intl.formatMessage(translations.loadingComment)}
+                {t(translations.loadingComment)}
               </div>
             }
           >
@@ -259,4 +272,4 @@ const TopicCard: FC<Props> = (props) => {
   );
 };
 
-export default injectIntl(TopicCard);
+export default TopicCard;

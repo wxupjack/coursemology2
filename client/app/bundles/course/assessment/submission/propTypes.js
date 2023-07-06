@@ -43,7 +43,7 @@ export const fileShape = PropTypes.shape({
 });
 
 export const questionGradeShape = PropTypes.shape({
-  grade: PropTypes.number,
+  grade: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   grader: PropTypes.shape({
     name: PropTypes.string,
     id: PropTypes.number,
@@ -85,6 +85,7 @@ export const answerShape = PropTypes.shape({
   file: PropTypes.object,
   files: PropTypes.arrayOf(fileShape),
   option_ids: PropTypes.arrayOf(PropTypes.number),
+  isDraftAnswer: PropTypes.bool,
   createdAt: PropTypes.string,
 });
 
@@ -158,6 +159,7 @@ export const annotationShape = PropTypes.shape({
 
 export const questionFlagsShape = PropTypes.shape({
   jobError: PropTypes.bool.isRequired,
+  jobErrorMessage: PropTypes.string,
   isAutograding: PropTypes.bool.isRequired,
   isResetting: PropTypes.bool.isRequired,
 });

@@ -5,12 +5,12 @@ module ApplicationHelper
 
   include ApplicationThemingHelper
   include ApplicationAnnouncementsHelper
+  include ApplicationJobsHelper
   include ApplicationWidgetsHelper
   include ApplicationCocoonHelper
   include ApplicationNotificationsHelper
 
   include ApplicationFormattersHelper
-  include ApplicationSidebarHelper
   include RouteOverridesHelper
   include FormForWithResourceHelper
   include RenderWithinLayoutHelper

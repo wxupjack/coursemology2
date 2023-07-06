@@ -1,15 +1,14 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Avatar, Grid, Typography } from '@mui/material';
-import { AppDispatch, AppState } from 'types/store';
 
+import Page from 'lib/components/core/layouts/Page';
+import Link from 'lib/components/core/Link';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import PageHeader from 'lib/components/navigation/PageHeader';
 import { getCourseUserURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 
 import { fetchUsers } from '../../operations';
 import { getAllStudentMiniEntities } from '../../selectors';
@@ -46,10 +45,8 @@ const UsersIndex: FC<Props> = (props) => {
   const { intl } = props;
   const courseId = getCourseId();
   const [isLoading, setIsLoading] = useState(true);
-  const users = useSelector((state: AppState) =>
-    getAllStudentMiniEntities(state),
-  );
-  const dispatch = useDispatch<AppDispatch>();
+  const users = useAppSelector(getAllStudentMiniEntities);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(fetchUsers())
@@ -66,8 +63,7 @@ const UsersIndex: FC<Props> = (props) => {
   };
 
   return (
-    <>
-      <PageHeader title={intl.formatMessage(translations.studentsHeader)} />
+    <Page title={intl.formatMessage(translations.studentsHeader)}>
       {isLoading ? (
         <LoadingIndicator />
       ) : (
@@ -109,8 +105,10 @@ const UsersIndex: FC<Props> = (props) => {
             : renderEmptyState()}
         </Grid>
       )}
-    </>
+    </Page>
   );
 };
 
-export default injectIntl(UsersIndex);
+const handle = translations.studentsHeader;
+
+export default Object.assign(injectIntl(UsersIndex), { handle });

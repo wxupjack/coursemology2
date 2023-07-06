@@ -4,7 +4,7 @@ import { PersonalTimeListData } from 'types/course/personalTimes';
 import BaseCourseAPI from './Base';
 
 export default class PersonalTimesAPI extends BaseCourseAPI {
-  _baseUrlPrefix: string = `/courses/${this.getCourseId()}`;
+  #baseUrlPrefix: string = `/courses/${this.courseId}`;
 
   /**
    * Fetches personal time data from specified user
@@ -14,8 +14,8 @@ export default class PersonalTimesAPI extends BaseCourseAPI {
       personalTimes: PersonalTimeListData[];
     }>
   > {
-    return this.getClient().get(
-      `${this._baseUrlPrefix}/users/${userId}/personal_times`,
+    return this.client.get(
+      `${this.#baseUrlPrefix}/users/${userId}/personal_times`,
     );
   }
 
@@ -28,7 +28,7 @@ export default class PersonalTimesAPI extends BaseCourseAPI {
       personalTimes: PersonalTimeListData[];
     }>
   > {
-    const url = `${this._baseUrlPrefix}/users/${userId}/personal_times`;
+    const url = `${this.#baseUrlPrefix}/users/${userId}/personal_times`;
     const config = {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -36,7 +36,7 @@ export default class PersonalTimesAPI extends BaseCourseAPI {
     };
     const payload = new FormData();
     payload.append('course_user[user_id]', userId.toString());
-    return this.getClient().postForm(`${url}/recompute`, payload, config);
+    return this.client.postForm(`${url}/recompute`, payload, config);
   }
 
   /**
@@ -47,7 +47,7 @@ export default class PersonalTimesAPI extends BaseCourseAPI {
     data: FormData,
     userId: number,
   ): Promise<AxiosResponse<PersonalTimeListData>> {
-    const url = `${this._baseUrlPrefix}/users/${userId}/personal_times`;
+    const url = `${this.#baseUrlPrefix}/users/${userId}/personal_times`;
     const config = {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -57,7 +57,7 @@ export default class PersonalTimesAPI extends BaseCourseAPI {
         user_id: userId,
       },
     };
-    return this.getClient().post(url, data, config);
+    return this.client.post(url, data, config);
   }
 
   /**
@@ -65,7 +65,9 @@ export default class PersonalTimesAPI extends BaseCourseAPI {
    * @returns new personal time data
    */
   delete(personalTimeId: number, userId: number): Promise<AxiosResponse<void>> {
-    const url = `${this._baseUrlPrefix}/users/${userId}/personal_times/${personalTimeId}`;
-    return this.getClient().delete(url);
+    const url = `${
+      this.#baseUrlPrefix
+    }/users/${userId}/personal_times/${personalTimeId}`;
+    return this.client.delete(url);
   }
 }

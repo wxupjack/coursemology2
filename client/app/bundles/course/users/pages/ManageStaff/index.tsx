@@ -1,12 +1,11 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { AppDispatch, AppState } from 'types/store';
 
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import Note from 'lib/components/core/Note';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 import manageUsersTranslations from 'lib/translations/course/users/index';
 
 import UserManagementButtons from '../../components/buttons/UserManagementButtons';
@@ -23,10 +22,6 @@ import {
 type Props = WrappedComponentProps;
 
 const translations = defineMessages({
-  manageStaffTitle: {
-    id: 'course.users.ManageStaff.manageStaffTitle',
-    defaultMessage: 'Staff',
-  },
   noStaff: {
     id: 'course.users.ManageStaff.noStaff',
     defaultMessage: 'No staff in course.',
@@ -36,16 +31,10 @@ const translations = defineMessages({
 const ManageStaff: FC<Props> = (props) => {
   const { intl } = props;
   const [isLoading, setIsLoading] = useState(true);
-  const staff = useSelector((state: AppState) =>
-    getAllStaffMiniEntities(state),
-  );
-  const permissions = useSelector((state: AppState) =>
-    getManageCourseUserPermissions(state),
-  );
-  const sharedData = useSelector((state: AppState) =>
-    getManageCourseUsersSharedData(state),
-  );
-  const dispatch = useDispatch<AppDispatch>();
+  const staff = useAppSelector(getAllStaffMiniEntities);
+  const permissions = useAppSelector(getManageCourseUserPermissions);
+  const sharedData = useAppSelector(getManageCourseUsersSharedData);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(fetchStaff())
@@ -62,10 +51,10 @@ const ManageStaff: FC<Props> = (props) => {
   };
 
   return (
-    <>
-      <PageHeader
-        title={intl.formatMessage(manageUsersTranslations.manageUsersHeader)}
-      />
+    <Page
+      title={intl.formatMessage(manageUsersTranslations.manageUsersHeader)}
+      unpadded
+    >
       {isLoading ? (
         <LoadingIndicator />
       ) : (
@@ -74,15 +63,16 @@ const ManageStaff: FC<Props> = (props) => {
             permissions={permissions}
             sharedData={sharedData}
           />
+
           <UpgradeToStaff />
+
           {staff.length > 0 ? (
             <ManageUsersTable
-              csvDownloadOptions={{ filename: 'Staff List' }}
+              csvDownloadFilename="Staff List"
               manageStaff
-              renderRowActionComponent={(user, disabled): JSX.Element => (
-                <UserManagementButtons disabled={disabled} user={user} />
+              renderRowActionComponent={(user): JSX.Element => (
+                <UserManagementButtons user={user} />
               )}
-              title={intl.formatMessage(translations.manageStaffTitle)}
               users={staff}
             />
           ) : (
@@ -90,7 +80,7 @@ const ManageStaff: FC<Props> = (props) => {
           )}
         </>
       )}
-    </>
+    </Page>
   );
 };
 

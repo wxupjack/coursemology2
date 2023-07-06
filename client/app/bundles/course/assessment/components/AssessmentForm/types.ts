@@ -1,6 +1,5 @@
 import { Emits } from 'react-emitter-factory';
 import { FieldValues, UseFormSetError } from 'react-hook-form';
-import { WrappedComponentProps } from 'react-intl';
 import { connect, ConnectedProps } from 'react-redux';
 import { ConditionsData } from 'types/course/conditions';
 
@@ -26,11 +25,12 @@ export interface AssessmentFormEmitter {
 }
 
 // @ts-ignore until Assessment store is fully typed
-export const connector = connect((state) => ({ tabs: state.editPage.tabs }));
+export const connector = connect(({ assessments }) => ({
+  tabs: assessments.editPage.tabs,
+}));
 
 export interface AssessmentFormProps
-  extends WrappedComponentProps,
-    ConnectedProps<typeof connector>,
+  extends ConnectedProps<typeof connector>,
     Emits<AssessmentFormEmitter> {
   tabs: Tab[];
   onSubmit: (data: FieldValues, setError: UseFormSetError<FieldValues>) => void;
@@ -41,6 +41,9 @@ export interface AssessmentFormProps
   randomizationAllowed?: boolean;
   folderAttributes?: FolderAttributes;
   conditionAttributes?: ConditionsData;
+  pulsegridUrl?: string;
+  canManageMonitor?: boolean;
+  monitoringEnabled?: boolean;
 
   /**
    * If `true`, this component is displayed on Edit Assessment page
@@ -56,6 +59,4 @@ export interface AssessmentFormProps
    * If `true`, Autograded and Manual grading modes can be changed
    */
   modeSwitching?: boolean;
-
-  containsCodaveri?: boolean;
 }

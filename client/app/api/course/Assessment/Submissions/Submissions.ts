@@ -8,8 +8,8 @@ import {
 import BaseCourseAPI from 'api/course/Base';
 
 export default class SubmissionsAPI extends BaseCourseAPI {
-  _getUrlPrefix(): string {
-    return `/courses/${this.getCourseId()}/assessments/submissions`;
+  get #urlPrefix(): string {
+    return `/courses/${this.courseId}/assessments/submissions`;
   }
 
   /**
@@ -22,7 +22,7 @@ export default class SubmissionsAPI extends BaseCourseAPI {
       permissions: SubmissionPermissions;
     }>
   > {
-    return this.getClient().get(this._getUrlPrefix());
+    return this.client.get(this.#urlPrefix);
   }
 
   pending(isMyStudents: boolean): Promise<
@@ -32,7 +32,7 @@ export default class SubmissionsAPI extends BaseCourseAPI {
       permissions: SubmissionPermissions;
     }>
   > {
-    return this.getClient().get(`${this._getUrlPrefix()}/pending`, {
+    return this.client.get(`${this.#urlPrefix}/pending`, {
       params: { my_students: isMyStudents },
     });
   }
@@ -44,7 +44,7 @@ export default class SubmissionsAPI extends BaseCourseAPI {
       permissions: SubmissionPermissions;
     }>
   > {
-    return this.getClient().get(this._getUrlPrefix(), {
+    return this.client.get(this.#urlPrefix, {
       params: { category: categoryId },
     });
   }
@@ -65,7 +65,7 @@ export default class SubmissionsAPI extends BaseCourseAPI {
       permissions: SubmissionPermissions;
     }>
   > {
-    return this.getClient().get(this._getUrlPrefix(), {
+    return this.client.get(this.#urlPrefix, {
       params: {
         'filter[category_id]': categoryId,
         'filter[assessment_id]': assessmentId,
@@ -89,8 +89,8 @@ export default class SubmissionsAPI extends BaseCourseAPI {
       permissions: SubmissionPermissions;
     }>
   > {
-    return this.getClient().get(
-      `${this._getUrlPrefix()}/pending?my_students=${myStudents}`,
+    return this.client.get(
+      `${this.#urlPrefix}/pending?my_students=${myStudents}`,
       {
         params: {
           'filter[page_num]': pageNum,

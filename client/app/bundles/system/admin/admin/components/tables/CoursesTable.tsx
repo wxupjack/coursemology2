@@ -1,40 +1,25 @@
-import { FC, ReactElement, useState } from 'react';
-import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
-import { CircularProgress, Typography } from '@mui/material';
-import { debounceSearchRender } from 'mui-datatables';
-import {
-  TableColumns,
-  TableOptions,
-  TableState,
-} from 'types/components/DataTable';
-import { AppDispatch, Operation } from 'types/store';
+import { ReactElement } from 'react';
+import { defineMessages } from 'react-intl';
 import { CourseMiniEntity } from 'types/system/courses';
-import { InstanceAdminStats } from 'types/system/instance/users';
-import { AdminStats, UserBasicMiniEntity } from 'types/users';
+import { UserBasicMiniEntity } from 'types/users';
 
-import DataTable from 'lib/components/core/layouts/DataTable';
-import {
-  DEFAULT_TABLE_ROWS_PER_PAGE,
-  FIELD_DEBOUNCE_DELAY_MS,
-} from 'lib/constants/sharedConstants';
-import rebuildObjectFromRow from 'lib/helpers/mui-datatables-helpers';
+import Link from 'lib/components/core/Link';
+import Note from 'lib/components/core/Note';
+import Table, { ColumnTemplate } from 'lib/components/table';
+import { DEFAULT_TABLE_ROWS_PER_PAGE } from 'lib/constants/sharedConstants';
+import useTranslation from 'lib/hooks/useTranslation';
 import tableTranslations from 'lib/translations/table';
 
-interface Props extends WrappedComponentProps {
-  filter: { active: boolean };
+interface CoursesTableProps {
   courses: CourseMiniEntity[];
-  courseCounts: AdminStats | InstanceAdminStats;
-  title: string;
   renderRowActionComponent: (course: CourseMiniEntity) => ReactElement;
-  indexOperation: (params?) => Operation;
+  className?: string;
 }
 
 const translations = defineMessages({
   searchText: {
     id: 'system.admin.admin.CoursesTable.searchText',
-    defaultMessage: 'Search course title, description or owners.',
+    defaultMessage: 'Search courses by title or owner',
   },
   fetchFilteredCoursesFailure: {
     id: 'system.admin.admin.CoursesTable.fetchFilteredCoursesFailure',
@@ -42,24 +27,12 @@ const translations = defineMessages({
   },
 });
 
-const CoursesTable: FC<Props> = (props) => {
-  const {
-    filter,
-    courses,
-    courseCounts,
-    title,
-    renderRowActionComponent,
-    intl,
-    indexOperation,
-  } = props;
-  const dispatch = useDispatch<AppDispatch>();
-  const [isLoading, setIsLoading] = useState(false);
+const CoursesTable = (props: CoursesTableProps): JSX.Element => {
+  const { courses, renderRowActionComponent } = props;
+  const { t } = useTranslation();
 
-  const [tableState, setTableState] = useState<TableState>({
-    count: courseCounts.coursesCount,
-    page: 1,
-    searchText: '',
-  });
+  if (!courses?.length)
+    return <Note message={t(translations.fetchFilteredCoursesFailure)} />;
 
   const renderOwnerLink = (owner: UserBasicMiniEntity): JSX.Element => {
     if (owner.id === -1 && owner.name === 'Deleted') {
@@ -71,246 +44,115 @@ const CoursesTable: FC<Props> = (props) => {
     }
     return (
       <li key={owner.id} className="list-none">
-        <a href={`/users/${owner.id}`}>{owner.name}</a>
+        <Link to={`/users/${owner.id}`} underline="hover">
+          {owner.name}
+        </Link>
       </li>
     );
   };
 
-  const changePage = (page: number): void => {
-    setIsLoading(true);
-    dispatch(
-      indexOperation({
-        'filter[page_num]': page,
-        'filter[length]': DEFAULT_TABLE_ROWS_PER_PAGE,
-        active: filter.active,
-      }),
-    )
-      .then(() =>
-        setTableState({
-          ...tableState,
-          page,
-        }),
-      )
-      .catch(() =>
-        toast.error(
-          intl.formatMessage(translations.fetchFilteredCoursesFailure),
-        ),
-      )
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
-
-  const search = (page: number, searchText?: string): void => {
-    setIsLoading(true);
-    dispatch(
-      indexOperation({
-        'filter[page_num]': page,
-        'filter[length]': DEFAULT_TABLE_ROWS_PER_PAGE,
-        active: filter.active,
-        search: searchText ? searchText.trim() : searchText,
-      }),
-    )
-      .catch(() =>
-        toast.error(
-          intl.formatMessage(translations.fetchFilteredCoursesFailure),
-        ),
-      )
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
-
-  const options: TableOptions = {
-    count: tableState.count,
-    customSearchRender: debounceSearchRender(FIELD_DEBOUNCE_DELAY_MS),
-    download: false,
-    filter: false,
-    jumpToPage: true,
-    onTableChange: (action, newTableState) => {
-      switch (action) {
-        case 'search':
-          search(newTableState.page! + 1, newTableState.searchText);
-          break;
-        case 'changePage':
-          changePage(newTableState.page! + 1);
-          break;
-        default:
-          break;
-      }
-    },
-    pagination: true,
-    print: false,
-    rowsPerPage: DEFAULT_TABLE_ROWS_PER_PAGE,
-    rowsPerPageOptions: [DEFAULT_TABLE_ROWS_PER_PAGE],
-    search: true,
-    searchPlaceholder: intl.formatMessage(translations.searchText),
-    selectableRows: 'none',
-    serverSide: true,
-    setTableProps: (): Record<string, unknown> => {
-      return { size: 'small' };
-    },
-    setRowProps: (_row, dataIndex, _rowIndex): Record<string, unknown> => {
-      return {
-        key: `course_${courses[dataIndex].id}`,
-        courseid: `course_${courses[dataIndex].id}`,
-        className: `course course_${courses[dataIndex].id}`,
-      };
-    },
-    viewColumns: false,
-  };
-
-  const columns: TableColumns[] = [
+  const columns: ColumnTemplate<CourseMiniEntity>[] = [
     {
-      name: 'id',
-      label: intl.formatMessage(tableTranslations.id),
-      options: {
-        display: false,
-        filter: false,
-        sort: false,
+      of: 'title',
+      title: t(tableTranslations.name),
+      sortable: true,
+      searchable: true,
+      cell: (course) => (
+        <Link
+          href={`//${course.instance.host}/courses/${course.id}`}
+          underline="hover"
+        >
+          {course.title}
+        </Link>
+      ),
+    },
+    {
+      of: 'createdAt',
+      title: t(tableTranslations.createdAt),
+      sortable: true,
+      cell: (course) => course.createdAt,
+      sortProps: {
+        sort: (a, b): number =>
+          Date.parse(a.createdAt) - Date.parse(b.createdAt),
       },
     },
     {
-      name: 'title',
-      label: intl.formatMessage(tableTranslations.name),
-      options: {
-        alignCenter: false,
-        sort: false,
-        customBodyRenderLite: (dataIndex): JSX.Element => {
-          const course = courses[dataIndex];
-          return (
-            <Typography
-              key={`title-${course.id}`}
-              className="course_title"
-              variant="body2"
-            >
-              <a href={`//${course.instance.host}/courses/${course.id}`}>
-                {course.title}
-              </a>
-            </Typography>
-          );
-        },
+      of: 'activeUserCount',
+      title: t(tableTranslations.activeUsers),
+      sortable: true,
+      cell: (course) => (
+        <Link
+          href={`//${course.instance.host}/courses/${course.id}/students?active=true`}
+          underline="hover"
+        >
+          {course.activeUserCount}
+        </Link>
+      ),
+    },
+    {
+      of: 'userCount',
+      title: t(tableTranslations.totalUsers),
+      sortable: true,
+      cell: (course) => (
+        <Link
+          href={`//${course.instance.host}/courses/${course.id}/students`}
+          underline="hover"
+        >
+          {course.userCount}
+        </Link>
+      ),
+    },
+    {
+      of: 'instance',
+      title: t(tableTranslations.instance),
+      sortable: true,
+      cell: (course) => (
+        <Link href={`//${course.instance.host}`} underline="hover">
+          {course.instance.name}
+        </Link>
+      ),
+      searchProps: { getValue: (course) => course.instance.name },
+    },
+    {
+      of: 'owners',
+      title: t(tableTranslations.owners),
+      sortable: true,
+      searchable: true,
+      cell: (course) => (
+        <ul className="mb-0 pl-0">{course.owners.map(renderOwnerLink)}</ul>
+      ),
+      searchProps: {
+        getValue: (course) =>
+          course.owners.map((owner) => owner.name).join(';'),
       },
     },
     {
-      name: 'createdAt',
-      label: intl.formatMessage(tableTranslations.createdAt),
-      options: {
-        alignCenter: false,
-        search: false,
-        sort: false,
-        customBodyRenderLite: (dataIndex): JSX.Element => {
-          const course = courses[dataIndex];
-          return (
-            <Typography
-              key={`createdAt-${course.id}`}
-              className="course_created_at"
-              variant="body2"
-            >
-              {course.createdAt}
-            </Typography>
-          );
-        },
-      },
-    },
-    {
-      name: 'activeTotalUsers',
-      label: intl.formatMessage(tableTranslations.activeTotalUsers),
-      options: {
-        alignCenter: false,
-        search: false,
-        sort: false,
-        customBodyRenderLite: (dataIndex): JSX.Element => {
-          const course = courses[dataIndex];
-          return (
-            <Typography
-              key={`activeTotalUsers-${course.id}`}
-              className="course_active_total_users"
-              variant="body2"
-            >
-              <a
-                href={`//${course.instance.host}/courses/${course.id}/students`}
-              >
-                {course.activeUserCount} / {course.userCount}
-              </a>
-            </Typography>
-          );
-        },
-      },
-    },
-    {
-      name: 'instance',
-      label: intl.formatMessage(tableTranslations.instance),
-      options: {
-        alignCenter: false,
-        search: true,
-        sort: false,
-        customBodyRenderLite: (dataIndex): JSX.Element => {
-          const course = courses[dataIndex];
-          return (
-            <a href={`//${course.instance.host}`}>
-              <Typography
-                key={`instance-${course.id}`}
-                className="course_instance"
-                variant="body2"
-              >
-                {course.instance.name}
-              </Typography>
-            </a>
-          );
-        },
-      },
-    },
-    {
-      name: 'owners',
-      label: intl.formatMessage(tableTranslations.owners),
-      options: {
-        alignCenter: false,
-        search: true,
-        sort: false,
-        customBodyRenderLite: (dataIndex): JSX.Element => {
-          const course = courses[dataIndex];
-          return (
-            <ul className="mb-0 pl-0">
-              {course.owners.map((owner) => renderOwnerLink(owner))}
-            </ul>
-          );
-        },
-      },
-    },
-    {
-      name: 'actions',
-      label: intl.formatMessage(tableTranslations.actions),
-      options: {
-        empty: true,
-        sort: false,
-        alignCenter: true,
-        customBodyRender: (_value, tableMeta): JSX.Element => {
-          const rowData = tableMeta.rowData as CourseMiniEntity;
-          const course = rebuildObjectFromRow(columns, rowData);
-          return renderRowActionComponent(course);
-        },
-      },
+      id: 'actions',
+      title: t(tableTranslations.actions),
+      cell: (course) => renderRowActionComponent?.(course),
+      unless: !renderRowActionComponent,
     },
   ];
 
   return (
-    <DataTable
+    <Table
+      className={props.className}
       columns={columns}
       data={courses}
-      isLoading={isLoading}
-      options={options}
-      title={
-        <Typography variant="h6">
-          {title}
-          {isLoading && (
-            <CircularProgress className="relative top-1 ml-4" size={24} />
-          )}
-        </Typography>
-      }
-      withMargin
+      getRowClassName={(course): string => `course_${course.id}`}
+      getRowEqualityData={(course): CourseMiniEntity => course}
+      getRowId={(course): string => course.id.toString()}
+      indexing={{ indices: true }}
+      pagination={{
+        rowsPerPage: [DEFAULT_TABLE_ROWS_PER_PAGE],
+        showAllRows: true,
+      }}
+      search={{ searchPlaceholder: t(translations.searchText) }}
+      toolbar={{
+        show: true,
+      }}
     />
   );
 };
 
-export default injectIntl(CoursesTable);
+export default CoursesTable;

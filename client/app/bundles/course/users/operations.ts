@@ -1,9 +1,11 @@
+import { Operation } from 'store';
 import {
   CourseUserBasicListData,
   CourseUserBasicMiniEntity,
   CourseUserEntity,
   CourseUserMiniEntity,
-  StaffRole,
+  LearningRateRecordsEntity,
+  StaffRoles,
   UpdateCourseUserPatchData,
 } from 'types/course/courseUsers';
 import {
@@ -15,11 +17,10 @@ import {
   PersonalTimePostData,
 } from 'types/course/personalTimes';
 import { TimelineData } from 'types/course/referenceTimelines';
-import { Operation } from 'types/store';
 
 import CourseAPI from 'api/course';
 
-import * as actions from './actions';
+import { actions } from './store';
 import {
   DeleteExperiencePointsRecordAction,
   DeletePersonalTimeAction,
@@ -160,7 +161,7 @@ export function updateUser(
 
 export function upgradeToStaff(
   users: CourseUserBasicMiniEntity[],
-  role: StaffRole,
+  role: StaffRoles,
 ): Operation {
   return async (dispatch) =>
     CourseAPI.users.upgradeToStaff(users, role).then((response) => {
@@ -273,3 +274,15 @@ export function deleteExperiencePointsRecord(
       .delete(recordId)
       .then(() => dispatch(actions.deleteExperiencePointsRecord(recordId)));
 }
+
+export const fetchCourseUserLearningRateData =
+  async (): Promise<LearningRateRecordsEntity> => {
+    const response = await CourseAPI.statistics.user.fetchLearningRateRecords();
+    return {
+      learningRateRecords: response.data.learningRateRecords.map((record) => ({
+        id: record.id,
+        learningRatePercentage: Math.round(10000 / record.learningRate) / 100,
+        createdAt: new Date(record.createdAt),
+      })),
+    };
+  };

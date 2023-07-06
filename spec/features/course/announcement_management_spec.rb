@@ -20,13 +20,13 @@ RSpec.feature 'Course: Announcements' do
       scenario 'I can create new announcements', js: true do
         visit course_announcements_path(course)
         find('#new-announcement-button').click
-        expect(page).to have_selector('h2', text: 'New Announcement')
+        expect(page).to have_text('New Announcement')
 
         announcement = build_stubbed(:course_announcement, course: course)
         fill_in 'title', with: announcement.title
         find('#form-dialog-submit-button').click
 
-        expect(page).to have_selector('h3', text: announcement.title)
+        expect(page).to have_text(announcement.title)
 
         expect_toastify('New announcement posted!')
 
@@ -50,7 +50,7 @@ RSpec.feature 'Course: Announcements' do
 
         expect(current_path).to eq course_announcements_path(course)
         within find("#announcement-#{announcement.id}") do
-          expect(page).to have_selector('h3', text: new_title)
+          expect(page).to have_text(new_title)
         end
       end
 
@@ -83,10 +83,10 @@ RSpec.feature 'Course: Announcements' do
     context 'As an Course Student' do
       let(:user) { create(:course_student, course: course).user }
 
-      scenario 'I can view the Announcement Sidebar item' do
+      scenario 'I can view the Announcement Sidebar item', js: true do
         visit course_path(course)
 
-        expect(page).to have_selector('li', text: 'course.announcements.sidebar_title')
+        expect(find_sidebar).to have_text(I18n.t('course.announcements.sidebar_title'))
       end
 
       scenario 'I can see the started announcements', js: true do

@@ -1,15 +1,8 @@
 import { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
-import Group from '@mui/icons-material/Group';
-import Person from '@mui/icons-material/Person';
-import PersonOutline from '@mui/icons-material/PersonOutline';
 import {
   Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardHeader,
   CircularProgress,
   FormControlLabel,
   Switch,
@@ -21,12 +14,12 @@ import palette from 'theme/palette';
 
 import BarChart from 'lib/components/core/BarChart';
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import NotificationBar, {
-  notificationShape,
-} from 'lib/components/core/NotificationBar';
 import withRouter from 'lib/components/navigation/withRouter';
 
+import assessmentsTranslations from '../../../translations';
+import { purgeSubmissionStore } from '../../actions';
 import {
   deleteAllSubmissions,
   downloadStatistics,
@@ -90,6 +83,11 @@ class VisibleSubmissionsIndex extends Component {
 
       this.setState({ tab: 'students-tab' });
     }
+  }
+
+  componentWillUnmount() {
+    const { dispatch } = this.props;
+    dispatch(purgeSubmissionStore());
   }
 
   renderForceSubmitConfirmation(shownSubmissions, handleForceSubmitParams) {
@@ -158,7 +156,7 @@ class VisibleSubmissionsIndex extends Component {
 
   renderHeader(shownSubmissions) {
     const {
-      assessment: { title, canPublishGrades, canForceSubmit },
+      assessment: { canPublishGrades, canForceSubmit },
       isPublishing,
       isForceSubmitting,
       isDeleting,
@@ -175,34 +173,32 @@ class VisibleSubmissionsIndex extends Component {
     const showRemindButton = tab !== 'staff-tab';
 
     return (
-      <Card style={{ marginBottom: 20 }}>
-        <CardHeader subheader="Submissions" title={<h3>{title}</h3>} />
-        <CardContent style={{ paddingTop: 0, paddingBottom: 0 }}>
-          {this.renderBarChart(shownSubmissions)}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={includePhantoms}
-                className="toggle-phantom"
-                color="primary"
-                onChange={() =>
-                  this.setState({ includePhantoms: !includePhantoms })
-                }
-              />
-            }
-            label={
-              <b>
-                <FormattedMessage
-                  {...submissionsTranslations.includePhantoms}
-                />
-              </b>
-            }
-            labelPlacement="end"
-          />
-        </CardContent>
-        <CardActions>
+      <>
+        {this.renderBarChart(shownSubmissions)}
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={includePhantoms}
+              className="toggle-phantom"
+              color="primary"
+              onChange={() =>
+                this.setState({ includePhantoms: !includePhantoms })
+              }
+            />
+          }
+          label={
+            <b>
+              <FormattedMessage {...submissionsTranslations.includePhantoms} />
+            </b>
+          }
+          labelPlacement="end"
+        />
+
+        <section className="-m-2 flex-wrap">
           {canPublishGrades && (
             <Button
+              className="m-2"
               color="primary"
               disabled={
                 disableButtons ||
@@ -215,8 +211,10 @@ class VisibleSubmissionsIndex extends Component {
               <FormattedMessage {...submissionsTranslations.publishGrades} />
             </Button>
           )}
+
           {canForceSubmit && (
             <Button
+              className="m-2"
               color="primary"
               disabled={
                 disableButtons ||
@@ -231,8 +229,10 @@ class VisibleSubmissionsIndex extends Component {
               <FormattedMessage {...submissionsTranslations.forceSubmit} />
             </Button>
           )}
+
           {showRemindButton && (
             <Button
+              className="m-2"
               color="primary"
               disabled={
                 disableButtons ||
@@ -247,8 +247,8 @@ class VisibleSubmissionsIndex extends Component {
               <FormattedMessage {...submissionsTranslations.remind} />
             </Button>
           )}
-        </CardActions>
-      </Card>
+        </section>
+      </>
     );
   }
 
@@ -368,20 +368,13 @@ class VisibleSubmissionsIndex extends Component {
   renderTabs(myStudentsExist) {
     return (
       <Tabs
-        onChange={(event, value) => {
-          this.setState({ tab: value });
-        }}
-        style={{
-          backgroundColor: palette.background.default,
-          color: palette.submissionIcon.person,
-        }}
-        TabIndicatorProps={{ color: 'primary', style: { height: 5 } }}
+        className="border-only-y-neutral-200"
+        onChange={(_, value) => this.setState({ tab: value })}
         value={this.state.tab}
         variant="fullWidth"
       >
         {myStudentsExist && (
           <Tab
-            icon={<Group style={{ color: palette.submissionIcon.person }} />}
             id="my-students-tab"
             label={<FormattedMessage {...submissionsTranslations.myStudents} />}
             style={{ color: palette.submissionIcon.person }}
@@ -389,16 +382,12 @@ class VisibleSubmissionsIndex extends Component {
           />
         )}
         <Tab
-          icon={<Person style={{ color: palette.submissionIcon.person }} />}
           id="students-tab"
           label={<FormattedMessage {...submissionsTranslations.students} />}
           value="students-tab"
         />
 
         <Tab
-          icon={
-            <PersonOutline style={{ color: palette.submissionIcon.person }} />
-          }
           id="staff-tab"
           label={<FormattedMessage {...submissionsTranslations.staff} />}
           value="staff-tab"
@@ -408,7 +397,7 @@ class VisibleSubmissionsIndex extends Component {
   }
 
   render() {
-    const { isLoading, notification, submissions } = this.props;
+    const { assessment, isLoading, submissions } = this.props;
     const {
       includePhantoms,
       tab,
@@ -469,9 +458,21 @@ class VisibleSubmissionsIndex extends Component {
     }
 
     return (
-      <>
-        {this.renderHeader(shownSubmissions)}
+      <Page
+        title={
+          <FormattedMessage
+            {...translations.submissionsHeader}
+            values={{ assessment: assessment.title }}
+          />
+        }
+        unpadded
+      >
+        <Page.PaddedSection>
+          {this.renderHeader(shownSubmissions)}
+        </Page.PaddedSection>
+
         {this.renderTabs(myStudentsExist)}
+
         {myStudentsExist &&
           this.renderTable(
             myStudentSubmissions,
@@ -479,29 +480,33 @@ class VisibleSubmissionsIndex extends Component {
             'your students',
             tab === 'my-students-tab',
           )}
+
         {this.renderTable(
           staffSubmissions,
           handleStaffParams,
           'staff',
           tab === 'staff-tab',
         )}
+
         {this.renderTable(
           studentSubmissions,
           handleStudentsParams,
           'students',
           tab === 'students-tab',
         )}
+
         {publishConfirmation &&
           this.renderPublishConfirmation(shownSubmissions, handleActionParams)}
+
         {forceSubmitConfirmation &&
           this.renderForceSubmitConfirmation(
             shownSubmissions,
             handleActionParams,
           )}
+
         {remindConfirmation &&
           this.renderReminderConfirmation(shownSubmissions, handleActionParams)}
-        <NotificationBar notification={notification} />
-      </>
+      </Page>
     );
   }
 }
@@ -524,7 +529,6 @@ VisibleSubmissionsIndex.propTypes = {
       workflowState: PropTypes.string,
     }),
   ),
-  notification: notificationShape,
   isLoading: PropTypes.bool.isRequired,
   isDownloadingFiles: PropTypes.bool.isRequired,
   isDownloadingCsv: PropTypes.bool.isRequired,
@@ -536,22 +540,23 @@ VisibleSubmissionsIndex.propTypes = {
   isReminding: PropTypes.bool.isRequired,
 };
 
-function mapStateToProps(state) {
+function mapStateToProps({ assessments: { submission } }) {
   return {
-    assessment: state.assessment,
-    notification: state.notification,
-    submissions: state.submissions,
-    isLoading: state.submissionFlags.isLoading,
-    isDownloadingFiles: state.submissionFlags.isDownloadingFiles,
-    isDownloadingCsv: state.submissionFlags.isDownloadingCsv,
-    isStatisticsDownloading: state.submissionFlags.isStatisticsDownloading,
-    isPublishing: state.submissionFlags.isPublishing,
-    isForceSubmitting: state.submissionFlags.isForceSubmitting,
-    isUnsubmitting: state.submissionFlags.isUnsubmitting,
-    isDeleting: state.submissionFlags.isDeleting,
-    isReminding: state.submissionFlags.isReminding,
+    assessment: submission.assessment,
+    submissions: submission.submissions,
+    isLoading: submission.submissionFlags.isLoading,
+    isDownloadingFiles: submission.submissionFlags.isDownloadingFiles,
+    isDownloadingCsv: submission.submissionFlags.isDownloadingCsv,
+    isStatisticsDownloading: submission.submissionFlags.isStatisticsDownloading,
+    isPublishing: submission.submissionFlags.isPublishing,
+    isForceSubmitting: submission.submissionFlags.isForceSubmitting,
+    isUnsubmitting: submission.submissionFlags.isUnsubmitting,
+    isDeleting: submission.submissionFlags.isDeleting,
+    isReminding: submission.submissionFlags.isReminding,
   };
 }
 
+const handle = assessmentsTranslations.submissions;
+
 const SubmissionsIndex = connect(mapStateToProps)(VisibleSubmissionsIndex);
-export default withRouter(SubmissionsIndex);
+export default Object.assign(withRouter(SubmissionsIndex), { handle });

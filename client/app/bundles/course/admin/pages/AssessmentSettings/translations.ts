@@ -44,15 +44,11 @@ export default defineMessages({
   },
   maxProgrammingTimeLimit: {
     id: 'course.admin.AssessmentSettings.maxProgrammingTimeLimit',
-    defaultMessage: 'Maximum programming time limit',
+    defaultMessage: 'Maximum evaluation time limit',
   },
   standardOutputsAndStandardErrors: {
     id: 'course.admin.AssessmentSettings.standardOutputsAndStandardErrors',
     defaultMessage: 'Standard outputs and Standard errors',
-  },
-  randomisation: {
-    id: 'course.admin.AssessmentSettings.randomisation',
-    defaultMessage: 'Randomisation options',
   },
   enableRandomisedAssessments: {
     id: 'course.admin.AssessmentSettings.enableRandomisedAssessments',
@@ -60,7 +56,7 @@ export default defineMessages({
   },
   enableMcqChoicesRandomisations: {
     id: 'course.admin.AssessmentSettings.enableMcqChoicesRandomisations',
-    defaultMessage: 'Enable MCQ choices randomisations',
+    defaultMessage: 'Randomise MCQ choices',
   },
   deleteCategoryPromptAction: {
     id: 'course.admin.AssessmentSettings.deleteCategoryPromptAction',
@@ -159,5 +155,19 @@ export default defineMessages({
   errorOccurredWhenDeletingTab: {
     id: 'course.admin.AssessmentSettings.errorOccurredWhenDeletingTab',
     defaultMessage: 'An error occurred while deleting the tab.',
+  },
+  seconds: {
+    id: 'course.admin.AssessmentSettings.seconds',
+    defaultMessage: 's',
+  },
+  programmingQuestionSettings: {
+    id: 'course.admin.AssessmentSettings.programmingQuestionSettings',
+    defaultMessage: 'Programming Question settings',
+  },
+  maxProgrammingTimeLimitHint: {
+    id: 'course.admin.AssessmentSettings.maxProgrammingTimeLimitHint',
+    defaultMessage:
+      'This will be the upper bound for the time limits of all programming questions in this course. ' +
+      'If there are programming questions with time limits greater than this, this time limit will take precedence.',
   },
 });

@@ -15,9 +15,9 @@ import { VideoSubmissionData } from 'types/course/video/submissions';
 
 import CourseAPI from 'api/course';
 import DescriptionCard from 'lib/components/core/DescriptionCard';
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import Note from 'lib/components/core/Note';
-import PageHeader from 'lib/components/navigation/PageHeader';
 import { getVideoSubmissionsURL } from 'lib/helpers/url-builders';
 import { getCourseId, getVideoId } from 'lib/helpers/url-helpers';
 import { formatLongDateTime } from 'lib/moment';
@@ -69,6 +69,10 @@ const translations = defineMessages({
     id: 'course.video.submission.VideoSubmissionShow.noSession',
     defaultMessage: 'No watch statistics available for this submission.',
   },
+  watch: {
+    id: 'course.video.submission.VideoSubmissionShow.watch',
+    defaultMessage: 'Watch',
+  },
 });
 
 const VideoSubmissionShow: FC<Props> = (props) => {
@@ -94,17 +98,7 @@ const VideoSubmissionShow: FC<Props> = (props) => {
     }
   }, [submissionId]);
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader
-          returnLink={getVideoSubmissionsURL(getCourseId(), getVideoId())}
-          title={intl.formatMessage(translations.video)}
-        />
-        <LoadingIndicator />
-      </>
-    );
-  }
+  if (isLoading) return <LoadingIndicator />;
 
   const renderBody = videoSubmission ? (
     <>
@@ -132,16 +126,17 @@ const VideoSubmissionShow: FC<Props> = (props) => {
     </>
   ) : null;
   return (
-    <>
-      <PageHeader
-        returnLink={getVideoSubmissionsURL(getCourseId(), getVideoId())}
-        title={intl.formatMessage(translations.videoTitle, {
-          title: videoSubmission?.videoTitle,
-        })}
-      />
+    <Page
+      backTo={getVideoSubmissionsURL(getCourseId(), getVideoId())}
+      title={intl.formatMessage(translations.videoTitle, {
+        title: videoSubmission?.videoTitle,
+      })}
+    >
       {isLoading ? <LoadingIndicator /> : renderBody}
-    </>
+    </Page>
   );
 };
 
-export default injectIntl(VideoSubmissionShow);
+const handle = translations.watch;
+
+export default Object.assign(injectIntl(VideoSubmissionShow), { handle });

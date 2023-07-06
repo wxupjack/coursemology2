@@ -13,8 +13,8 @@ class Course::Assessment::Submission::AutoFeedbackJob < ApplicationJob
     instance = Course.unscoped { submission.assessment.course.instance }
     ActsAsTenant.with_tenant(instance) do
       submission.current_answers.each do |current_answer|
-        if current_answer.specific.respond_to?(:retrieve_codaveri_code_feedback)
-          current_answer.specific.retrieve_codaveri_code_feedback
+        if current_answer.specific.self_respond_to?(:generate_feedback)
+          current_answer.specific.generate_feedback
         end
       end
     end

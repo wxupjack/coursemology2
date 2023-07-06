@@ -13,15 +13,8 @@ auto_grading = attempt&.auto_grading&.specific
 if is_current_answer && !latest_answer.current_answer?
   json.latestAnswer do
     json.partial! latest_answer, answer: latest_answer
-    json.annotations latest_answer.specific.files do |file|
-      json.fileId file.id
-      json.topics(file.annotations.reject { |a| a.discussion_topic.post_ids.empty? }) do |annotation|
-        topic = annotation.discussion_topic
-        json.id topic.id
-        json.postIds topic.post_ids
-        json.line annotation.line
-      end
-    end
+    json.partial! 'course/assessment/answer/programming/annotations', programming_files: latest_answer.specific.files,
+                                                                      can_grade: can?(:grade, submission)
   end
 end
 
@@ -35,10 +28,12 @@ json.fields do
   end
 end
 
-if attempt.submitted? && (job = attempt&.auto_grading&.job)
+job = attempt&.auto_grading&.job
+
+if job
   json.autograding do
     json.path job_path(job) if job.submitted?
-    json.status job.status
+    json.partial! "jobs/#{job.status}", job: job
   end
 end
 
@@ -109,6 +104,7 @@ json.explanation do
   end
 end
 
+json.isDraftAnswer answer.draft_answer?
 json.attemptsLeft answer.attempting_times_left if question.attempt_limit
 
 if answer.codaveri_feedback_job_id && question.is_codaveri
@@ -116,8 +112,7 @@ if answer.codaveri_feedback_job_id && question.is_codaveri
   json.codaveriFeedback do
     json.jobId answer.codaveri_feedback_job_id
     json.jobStatus codaveri_job.status
-    if codaveri_job.error && codaveri_job.error['class'] == 'CodaveriError'
-      json.errorMessage codaveri_job.error['message']
-    end
+    json.jobUrl job_path(codaveri_job) if codaveri_job.status == 'submitted'
+    json.errorMessage codaveri_job.error['message'] if codaveri_job.error
   end
 end

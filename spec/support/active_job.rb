@@ -62,8 +62,9 @@ module TrackableJob::SpecHelpers
     end
   end
 
+  # Wait for page/react lifecycle to finish loading/end
   def wait_for_page
-    sleep 0.5
+    sleep 0.7
   end
 
   def wait_for_field_debouncing

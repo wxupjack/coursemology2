@@ -1,14 +1,14 @@
+import { Operation } from 'store';
 import {
   InvitationFileEntity,
   InvitationPostData,
   InvitationResult,
   InvitationsPostData,
 } from 'types/course/userInvitations';
-import { Operation } from 'types/store';
 
 import CourseAPI from 'api/course';
 
-import * as actions from './actions';
+import { actions } from './store';
 
 /**
  * Prepares and maps answer value in the react-hook-form into server side format.

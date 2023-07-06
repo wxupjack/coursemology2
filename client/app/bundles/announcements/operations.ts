@@ -1,14 +1,13 @@
-/* eslint-disable import/prefer-default-export */
-import { Operation } from 'types/store';
+import { Operation } from 'store';
 
 import GlobalAPI from 'api';
 
-import * as actions from './actions';
+import { saveAnnouncementsList } from './store';
 
 export function indexAnnouncements(): Operation {
   return async (dispatch) =>
     GlobalAPI.announcements.index().then((response) => {
       const data = response.data;
-      dispatch(actions.saveAnnouncementsList(data.announcements));
+      dispatch(saveAnnouncementsList(data.announcements));
     });
 }

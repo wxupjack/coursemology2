@@ -1,12 +1,20 @@
 import { FC, memo } from 'react';
 import { defineMessages } from 'react-intl';
-import { Link } from 'react-router-dom';
+import {
+  Campaign,
+  CheckCircle,
+  Help,
+  Lock,
+  StickyNote2,
+  VisibilityOff,
+} from '@mui/icons-material';
 import { Icon } from '@mui/material';
 import equal from 'fast-deep-equal';
 import { TableColumns, TableOptions } from 'types/components/DataTable';
 import { ForumEntity, ForumTopicEntity } from 'types/course/forums';
 
 import DataTable from 'lib/components/core/layouts/DataTable';
+import Link from 'lib/components/core/Link';
 import Note from 'lib/components/core/Note';
 import useTranslation from 'lib/hooks/useTranslation';
 import { formatLongDateTime } from 'lib/moment';
@@ -86,32 +94,41 @@ const translations = defineMessages({
 const TopicTypeIcon: FC<{ topic: ForumTopicEntity }> = (props) => {
   const { topic } = props;
   const { t } = useTranslation();
-  let className = '';
-  let tooltip = '';
+  let icon = <Icon />;
   switch (topic.topicType) {
     case 'question':
       if (topic.isResolved) {
-        className =
-          'fa fa-check-circle text-3xl overflow-visible  text-green-700 top-0';
-        tooltip = t(translations.resolved);
+        icon = (
+          <CheckCircle
+            className="text-green-700"
+            fontSize="small"
+            titleAccess={t(translations.resolved)}
+          />
+        );
       } else {
-        className =
-          'fa fa-question-circle overflow-visible  text-3xl text-yellow-700';
-        tooltip = t(translations.unresolved);
+        icon = (
+          <Help
+            className="text-yellow-700"
+            fontSize="small"
+            titleAccess={t(translations.unresolved)}
+          />
+        );
       }
       break;
     case 'sticky':
-      className = 'fa fa-thumb-tack overflow-visible  text-3xl';
-      tooltip = t(translations.sticky);
+      icon = (
+        <StickyNote2 fontSize="small" titleAccess={t(translations.sticky)} />
+      );
       break;
     case 'announcement':
-      className = 'fa fa-bullhorn overflow-visible  text-3xl';
-      tooltip = t(translations.announcement);
+      icon = (
+        <Campaign fontSize="small" titleAccess={t(translations.announcement)} />
+      );
       break;
     default:
       return null;
   }
-  return <Icon className={className} title={tooltip} />;
+  return icon;
 };
 
 const ForumTopicTable: FC<Props> = (props) => {
@@ -179,15 +196,15 @@ const ForumTopicTable: FC<Props> = (props) => {
                 </label>
                 <div className="flex items-center space-x-2 max-xl:mt-2 xl:ml-2">
                   {topic.isHidden && (
-                    <Icon
-                      className="fa fa-eye-slash overflow-visible text-3xl"
-                      title={t(translations.hidden)}
+                    <VisibilityOff
+                      fontSize="small"
+                      titleAccess={t(translations.hidden)}
                     />
                   )}
                   {topic.isLocked && (
-                    <Icon
-                      className="fa fa-lock overflow-visible text-3xl"
-                      title={t(translations.locked)}
+                    <Lock
+                      fontSize="small"
+                      titleAccess={t(translations.locked)}
                     />
                   )}
                   <TopicTypeIcon topic={topic} />
@@ -195,17 +212,9 @@ const ForumTopicTable: FC<Props> = (props) => {
               </div>
               <div>
                 {t(translations.startedBy)}{' '}
-                {postCreatorObject.userUrl ? (
-                  <a
-                    href={postCreatorObject.userUrl}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    {postCreatorObject.name}
-                  </a>
-                ) : (
-                  postCreatorObject.name
-                )}
+                <Link opensInNewTab to={postCreatorObject.userUrl}>
+                  {postCreatorObject.name}
+                </Link>
                 {postCreatorObject.visibilityIcon}
               </div>
             </>
@@ -248,17 +257,10 @@ const ForumTopicTable: FC<Props> = (props) => {
           });
           return (
             <>
-              {postCreatorObject.userUrl ? (
-                <a
-                  href={postCreatorObject.userUrl}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {postCreatorObject.name}
-                </a>
-              ) : (
-                postCreatorObject.name
-              )}
+              <Link opensInNewTab to={postCreatorObject.userUrl}>
+                {postCreatorObject.name}
+              </Link>
+
               {postCreatorObject.visibilityIcon}
               <div className="whitespace-nowrap">
                 {formatLongDateTime(latestPostCreator.createdAt)}

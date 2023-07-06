@@ -12,7 +12,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Paper,
   Step,
   StepButton,
   Stepper,
@@ -23,8 +22,10 @@ import PropTypes from 'prop-types';
 
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
 import ErrorText from 'lib/components/core/ErrorText';
+import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import usePrompt from 'lib/hooks/router/usePrompt';
 
+import EvaluatorErrorPanel from '../../components/EvaluatorErrorPanel';
 import SubmissionAnswer from '../../components/SubmissionAnswer';
 import { formNames, questionTypes } from '../../constants';
 import GradingPanel from '../../containers/GradingPanel';
@@ -73,6 +74,7 @@ const SubmissionEditForm = (props) => {
   const {
     attempting,
     canUpdate,
+    codaveriFeedbackStatus,
     explanations,
     delayedGradePublication,
     graded,
@@ -81,10 +83,12 @@ const SubmissionEditForm = (props) => {
     handleAutogradeSubmission,
     handleMark,
     handlePublish,
+    isCodaveriEnabled,
     onReset,
     onSaveDraft,
     onSubmit,
     onSubmitAnswer,
+    onGenerateFeedback,
     onReevaluateAnswer,
     handleSaveGrade,
     handleToggleViewHistoryMode,
@@ -95,7 +99,6 @@ const SubmissionEditForm = (props) => {
     intl,
     isAutograding,
     isSaving,
-    newSubmission,
     passwordProtected,
     published,
     questionIds,
@@ -111,9 +114,7 @@ const SubmissionEditForm = (props) => {
 
   let initialStep = Math.min(maxInitialStep, Math.max(0, step || 0));
 
-  const [examNotice, setExamNotice] = useState(
-    newSubmission && passwordProtected,
-  );
+  const [examNotice, setExamNotice] = useState(passwordProtected);
   const [submitConfirmation, setSubmitConfirmation] = useState(false);
   const [unsubmitConfirmation, setUnsubmitConfirmation] = useState(false);
   const [resetConfirmation, setResetConfirmation] = useState(false);
@@ -172,7 +173,7 @@ const SubmissionEditForm = (props) => {
   };
 
   const renderExamDialog = () => (
-    <Dialog maxWidth="lg" open={examNotice}>
+    <Dialog maxWidth="lg" open={attempting && examNotice}>
       <DialogTitle>
         {intl.formatMessage(translations.examDialogTitle)}
       </DialogTitle>
@@ -264,14 +265,28 @@ const SubmissionEditForm = (props) => {
     );
   };
 
+  const renderAutogradingErrorPanel = (id) => {
+    const { jobError, jobErrorMessage } = questionsFlags[id] || {};
+    const { isCodaveri, type } = questions[id];
+
+    if (type === questionTypes.Programming && jobError) {
+      return (
+        <EvaluatorErrorPanel className="mb-8">
+          {isCodaveri
+            ? intl.formatMessage(translations.codaveriAutogradeFailure)
+            : jobErrorMessage}
+        </EvaluatorErrorPanel>
+      );
+    }
+
+    return null;
+  };
+
   const renderProgrammingQuestionActions = (id) => {
     const question = questions[id];
     const { answerId, attemptsLeft, attemptLimit, autogradable } = question;
-    const {
-      jobError,
-      isAutograding: isAutogradingQuestion,
-      isResetting,
-    } = questionsFlags[id] || {};
+    const { isAutograding: isAutogradingQuestion, isResetting } =
+      questionsFlags[id] || {};
 
     if (question.type !== questionTypes.Programming) {
       return null;
@@ -279,16 +294,36 @@ const SubmissionEditForm = (props) => {
 
     if (!attempting && graderView) {
       return (
-        <Button
-          color="secondary"
-          disabled={isAutograding || isSaving}
-          id="re-evaluate-code"
-          onClick={() => onReevaluateAnswer(answerId, question.id)}
-          style={styles.formButton}
-          variant="contained"
-        >
-          {intl.formatMessage(translations.reevaluate)}
-        </Button>
+        <>
+          {isCodaveriEnabled && question.isCodaveri && (
+            <Button
+              color="secondary"
+              disabled={
+                codaveriFeedbackStatus?.answers[answerId]?.jobStatus ===
+                  'submitted' || isSaving
+              }
+              id="retrieve-code-feedback"
+              onClick={() => onGenerateFeedback(answerId, question.id)}
+              style={styles.formButton}
+              variant="contained"
+            >
+              {intl.formatMessage(translations.generateCodaveriFeedback)}
+            </Button>
+          )}
+          <Button
+            color="secondary"
+            disabled={isAutogradingQuestion || isSaving}
+            endIcon={
+              isAutogradingQuestion && <LoadingIndicator bare size={20} />
+            }
+            id="re-evaluate-code"
+            onClick={() => onReevaluateAnswer(answerId, question.id)}
+            style={styles.formButton}
+            variant="contained"
+          >
+            {intl.formatMessage(translations.reevaluate)}
+          </Button>
+        </>
       );
     }
 
@@ -302,19 +337,6 @@ const SubmissionEditForm = (props) => {
 
     return (
       <>
-        {jobError && (
-          <Paper
-            style={{
-              padding: 10,
-              backgroundColor: red[100],
-              marginBottom: 20,
-            }}
-          >
-            {question.isCodaveri
-              ? intl.formatMessage(translations.codaveriAutogradeFailure)
-              : intl.formatMessage(translations.autogradeFailure)}
-          </Paper>
-        )}
         <Button
           disabled={isAutogradingQuestion || isResetting || isSaving}
           onClick={() => {
@@ -334,6 +356,9 @@ const SubmissionEditForm = (props) => {
               isResetting ||
               isSaving ||
               (!graderView && attemptsLeft === 0)
+            }
+            endIcon={
+              isAutogradingQuestion && <LoadingIndicator bare size={20} />
             }
             id="run-code"
             onClick={() =>
@@ -408,6 +433,7 @@ const SubmissionEditForm = (props) => {
             {question.type === questionTypes.Programming && !viewHistory
               ? renderExplanationPanel(id)
               : null}
+            {viewHistory ? null : renderAutogradingErrorPanel(id)}
             {viewHistory ? null : renderProgrammingQuestionActions(id)}
             {viewHistory ? null : renderQuestionGrading(id)}
             <Suspense
@@ -568,6 +594,7 @@ const SubmissionEditForm = (props) => {
         {question.type === questionTypes.Programming && !viewHistory
           ? renderExplanationPanel(questionId)
           : null}
+        {viewHistory ? null : renderAutogradingErrorPanel(questionId)}
         {viewHistory ? null : renderProgrammingQuestionActions(questionId)}
         {viewHistory ? null : renderQuestionGrading(questionId)}
         <Suspense
@@ -688,19 +715,19 @@ SubmissionEditForm.propTypes = {
   graderView: PropTypes.bool.isRequired,
   canUpdate: PropTypes.bool.isRequired,
   delayedGradePublication: PropTypes.bool.isRequired,
-  newSubmission: PropTypes.bool.isRequired,
   passwordProtected: PropTypes.bool.isRequired,
   tabbedView: PropTypes.bool.isRequired,
   maxStep: PropTypes.number.isRequired,
   step: PropTypes.number,
-
   showMcqMrqSolution: PropTypes.bool.isRequired,
+  isCodaveriEnabled: PropTypes.bool.isRequired,
 
   attempting: PropTypes.bool.isRequired,
   submitted: PropTypes.bool.isRequired,
   graded: PropTypes.bool.isRequired,
   published: PropTypes.bool.isRequired,
 
+  codaveriFeedbackStatus: PropTypes.object,
   explanations: PropTypes.objectOf(explanationShape),
   grading: PropTypes.objectOf(questionGradeShape),
   questionIds: PropTypes.arrayOf(PropTypes.number),
@@ -717,6 +744,7 @@ SubmissionEditForm.propTypes = {
   onSubmit: PropTypes.func,
   onSubmitAnswer: PropTypes.func,
   onReevaluateAnswer: PropTypes.func,
+  onGenerateFeedback: PropTypes.func,
   handleUnsubmit: PropTypes.func,
   handleSaveGrade: PropTypes.func,
   handleMark: PropTypes.func,

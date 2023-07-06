@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { Icon, Tooltip } from '@mui/material';
+import { ExpandMore } from '@mui/icons-material';
+import { IconButton, Tooltip } from '@mui/material';
 import { blue } from '@mui/material/colors';
 import PropTypes from 'prop-types';
 
@@ -14,25 +15,25 @@ const propTypes = {
   onClickChevron: PropTypes.func,
   colorBarBorder: PropTypes.string,
   colorBarBackground: PropTypes.string,
-  iconClassname: PropTypes.string,
-  iconComponent: PropTypes.func,
+  iconComponent: PropTypes.object,
 };
 
 const style = {
   tool: {
     position: 'relative',
-    display: 'inline-block',
-    paddingRight: '24px',
+    display: 'flex',
+    alignItems: 'center',
     outline: 'none',
   },
   innerTool: {
+    textAlign: 'center',
     display: 'inline-block',
     outline: 'none',
   },
   chevron: {
     color: 'rgba(0, 0, 0, 0.4)',
-    fontSize: '12px',
-    padding: '10px 0px 10px 0px',
+    fontSize: '16px',
+    padding: '0px',
   },
   disabled: {
     cursor: 'not-allowed',
@@ -69,13 +70,13 @@ export default class ToolDropdown extends Component {
 
     const colorBarStyle = disabled
       ? {
-          width: '23px',
-          height: '8px',
+          width: '30px',
+          height: '5px',
           background: '#c0c0c0',
         }
       : {
-          width: '23px',
-          height: '8px',
+          width: '30px',
+          height: '5px',
           backgroundColor,
           border: borderColor ? `${borderColor} 2px solid` : undefined,
         };
@@ -84,17 +85,16 @@ export default class ToolDropdown extends Component {
   }
 
   renderIcon() {
-    const { disabled, iconClassname, currentTool, toolType, iconComponent } =
-      this.props;
+    const {
+      disabled,
+      currentTool,
+      toolType,
+      iconComponent: IconComponent,
+    } = this.props;
     const iconStyle = disabled
       ? style.disabled
       : { color: currentTool === toolType ? blue[500] : 'rgba(0, 0, 0, 0.4)' };
-
-    return iconComponent ? (
-      iconComponent()
-    ) : (
-      <Icon className={iconClassname} style={iconStyle} />
-    );
+    return <IconComponent style={iconStyle} />;
   }
 
   render() {
@@ -119,15 +119,16 @@ export default class ToolDropdown extends Component {
             {this.renderColorBar()}
           </div>
           <div style={style.innerTool}>
-            <Icon
-              className="fa fa-chevron-down"
+            <IconButton
               onClick={!disabled ? onClickChevron : undefined}
               style={
                 disabled
                   ? { ...style.chevron, ...style.disabled }
                   : style.chevron
               }
-            />
+            >
+              <ExpandMore fontSize="medium" />
+            </IconButton>
           </div>
         </div>
       </Tooltip>

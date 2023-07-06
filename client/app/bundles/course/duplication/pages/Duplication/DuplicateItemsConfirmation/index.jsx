@@ -1,16 +1,15 @@
 import { Component } from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
-import ReactTooltip from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
 import { Card, CardContent, ListSubheader } from '@mui/material';
 import PropTypes from 'prop-types';
 
-import {
-  duplicateItems,
-  hideDuplicateItemsConfirmation,
-} from 'course/duplication/actions';
+import { duplicateItems } from 'course/duplication/operations';
 import { courseShape } from 'course/duplication/propTypes';
+import { actions } from 'course/duplication/store';
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
+import Link from 'lib/components/core/Link';
 
 import AchievementsListing from './AchievementsListing';
 import AssessmentsListing from './AssessmentsListing';
@@ -64,9 +63,9 @@ class DuplicateItemsConfirmation extends Component {
         <MaterialsListing />
         <VideosListing />
 
-        <ReactTooltip id="itemUnpublished">
+        <Tooltip id="itemUnpublished">
           <FormattedMessage {...translations.itemUnpublished} />
-        </ReactTooltip>
+        </Tooltip>
       </>
     );
   }
@@ -85,11 +84,9 @@ class DuplicateItemsConfirmation extends Component {
         </ListSubheader>
         <Card>
           <CardContent>
-            <h4>
-              <a href={url} rel="noopener noreferrer" target="_blank">
-                {destinationCourse.title}
-              </a>
-            </h4>
+            <Link opensInNewTab to={url} variant="h6">
+              {destinationCourse.title}
+            </Link>
           </CardContent>
         </Card>
       </>
@@ -123,7 +120,7 @@ class DuplicateItemsConfirmation extends Component {
         disableCancelButton={isDuplicating}
         disableConfirmButton={isDuplicating}
         message={this.renderListing()}
-        onCancel={() => dispatch(hideDuplicateItemsConfirmation())}
+        onCancel={() => dispatch(actions.hideDuplicateItemsConfirmation())}
         onConfirm={() =>
           dispatch(
             duplicateItems(

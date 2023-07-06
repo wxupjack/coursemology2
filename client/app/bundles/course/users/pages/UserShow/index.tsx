@@ -1,31 +1,25 @@
 import { FC, useEffect, useState } from 'react';
 import { injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import Box from '@mui/material/Box';
-import { AppDispatch, AppState } from 'types/store';
 
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 
 import UserProfileAchievements from '../../components/misc/UserProfileAchievements';
 import UserProfileCard from '../../components/misc/UserProfileCard';
 import UserProfileSkills from '../../components/misc/UserProfileSkills';
 import { loadUser } from '../../operations';
 import { getUserEntity } from '../../selectors';
+import UserStatistics from '../UserStatistics';
 
 type Props = WrappedComponentProps;
 
-const styles = {
-  userShowPage: {
-    '& > * + *': { marginTop: '24px !important' },
-  },
-};
-
 const UserShow: FC<Props> = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const { userId } = useParams();
-  const user = useSelector((state: AppState) => getUserEntity(state, +userId!));
+  const user = useAppSelector((state) => getUserEntity(state, +userId!));
 
   useEffect(() => {
     if (userId) {
@@ -42,15 +36,16 @@ const UserShow: FC<Props> = () => {
   }
 
   return (
-    <Box sx={styles.userShowPage}>
+    <Page className="space-y-5">
       <UserProfileCard user={user} />
       {user.achievements && (
         <UserProfileAchievements achievements={user.achievements} />
       )}
+      {user.canReadStatistics && <UserStatistics userRole={user.role} />}
       {user.skillBranches && (
         <UserProfileSkills skillBranches={user.skillBranches} />
       )}
-    </Box>
+    </Page>
   );
 };
 

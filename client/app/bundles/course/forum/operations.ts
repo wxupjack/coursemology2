@@ -1,11 +1,12 @@
+import { Operation } from 'store';
 import {
   ForumFormData,
   ForumTopicFormData,
   ForumTopicPostFormData,
 } from 'types/course/forums';
-import { Operation } from 'types/store';
 
 import CourseAPI from 'api/course';
+import { JustRedirect } from 'api/types';
 
 import {
   changeForumTopicHidden,
@@ -27,7 +28,7 @@ import {
   updateForumTopicPostIds,
   updateForumTopicPostListData,
   updatePostAsAnswer,
-} from './reducers';
+} from './store';
 
 // Forum
 
@@ -149,7 +150,7 @@ export function fetchForumTopic(
 export function createForumTopic(
   forumId: string,
   topicFormData: ForumTopicFormData,
-): Operation<{ redirectUrl: string }> {
+): Operation<JustRedirect> {
   const ForumTopicPostData = {
     topic: {
       title: topicFormData.title,

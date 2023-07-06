@@ -1,6 +1,5 @@
 import { FC, ReactElement, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import {
   CircularProgress,
@@ -14,10 +13,10 @@ import {
   TableOptions,
   TableState,
 } from 'types/components/DataTable';
-import { AppDispatch } from 'types/store';
-import { AdminStats, UserMiniEntity, UserRole } from 'types/users';
+import { AdminStats, UserMiniEntity, UserRoles } from 'types/users';
 
 import DataTable from 'lib/components/core/layouts/DataTable';
+import Link from 'lib/components/core/Link';
 import InlineEditTextField from 'lib/components/form/fields/DataTableInlineEditable/TextField';
 import {
   DEFAULT_TABLE_ROWS_PER_PAGE,
@@ -25,6 +24,7 @@ import {
   USER_ROLES,
 } from 'lib/constants/sharedConstants';
 import rebuildObjectFromRow from 'lib/helpers/mui-datatables-helpers';
+import { useAppDispatch } from 'lib/hooks/store';
 import tableTranslations from 'lib/translations/table';
 
 import { indexUsers, updateUser } from '../../operations';
@@ -68,7 +68,7 @@ const UsersTable: FC<Props> = (props) => {
   const { title, renderRowActionComponent, intl, filter, users, userCounts } =
     props;
   const [isLoading, setIsLoading] = useState(false);
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   const [tableState, setTableState] = useState<TableState>({
     count: userCounts.usersCount,
@@ -111,7 +111,7 @@ const UsersTable: FC<Props> = (props) => {
     ) as UserMiniEntity;
     const newUser = {
       ...user,
-      role: newRole as UserRole,
+      role: newRole as UserRoles,
     };
     return dispatch(updateUser(user.id, newUser))
       .then(() => {
@@ -295,7 +295,12 @@ const UsersTable: FC<Props> = (props) => {
             <ul className="mb-0 pl-0">
               {user.instances.map((instance) => (
                 <li key={instance.name} className="list-none">
-                  <a href={`//${instance.host}/admin/users`}>{instance.name}</a>
+                  <Link
+                    href={`//${instance.host}/admin/users`}
+                    underline="hover"
+                  >
+                    {instance.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -345,9 +350,9 @@ const UsersTable: FC<Props> = (props) => {
         sort: false,
         alignCenter: true,
         customBodyRender: (_value, tableMeta): JSX.Element => {
-          const rowData = tableMeta.rowData as UserMiniEntity;
+          const rowData = tableMeta.rowData;
           const user = rebuildObjectFromRow(columns, rowData);
-          return renderRowActionComponent(user);
+          return renderRowActionComponent(user as UserMiniEntity);
         },
       },
     },

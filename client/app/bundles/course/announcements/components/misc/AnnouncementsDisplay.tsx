@@ -1,21 +1,22 @@
-import { FC, memo, useEffect, useState } from 'react';
+import { FC, memo } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
 import { Grid, Stack } from '@mui/material';
 import equal from 'fast-deep-equal';
+import { Operation } from 'store';
 import {
+  AnnouncementEntity,
   AnnouncementFormData,
-  AnnouncementMiniEntity,
   AnnouncementPermissions,
 } from 'types/course/announcements';
-import { Operation } from 'types/store';
 
 import SearchField from 'lib/components/core/fields/SearchField';
 import Pagination from 'lib/components/core/layouts/Pagination';
+import useItems from 'lib/hooks/items/useItems';
 
 import AnnouncementCard from './AnnouncementCard';
 
 interface Props extends WrappedComponentProps {
-  announcements: AnnouncementMiniEntity[];
+  announcements: AnnouncementEntity[];
   announcementPermissions: AnnouncementPermissions;
   updateOperation?: (
     announcementId: number,
@@ -32,6 +33,21 @@ const translations = defineMessages({
   },
 });
 
+const itemsPerPage = 12;
+
+const searchKeys: (keyof AnnouncementEntity)[] = ['title', 'content'];
+
+export const sortFunc = (
+  announcements: AnnouncementEntity[],
+): AnnouncementEntity[] => {
+  const sortedAnnouncements = [...announcements];
+  sortedAnnouncements
+    .sort((a, b) => Date.parse(b.startTime) - Date.parse(a.startTime))
+    .sort((a, b) => Number(b.isSticky) - Number(a.isSticky))
+    .sort((a, b) => Number(b.isCurrentlyActive) - Number(a.isCurrentlyActive));
+  return sortedAnnouncements;
+};
+
 const AnnouncementsDisplay: FC<Props> = (props) => {
   const {
     intl,
@@ -42,73 +58,37 @@ const AnnouncementsDisplay: FC<Props> = (props) => {
     canSticky = true,
   } = props;
 
-  // For pagination
-  const ITEMS_PER_PAGE = 12;
-  const [slicedAnnouncements, setslicedAnnouncements] = useState(
-    announcements.slice(0, ITEMS_PER_PAGE),
-  );
-  const [page, setPage] = useState(1);
-
-  // For search bar
-  const [shavedAnnouncements, setShavedAnnouncements] = useState(announcements);
-
-  useEffect(() => {
-    setShavedAnnouncements(announcements);
-  }, [announcements]);
-
-  const handleSearchBarChange = (rawKeyword: string): void => {
-    const keyword = rawKeyword.trim();
-
-    if (keyword === '') {
-      setShavedAnnouncements(announcements);
-    } else {
-      setShavedAnnouncements(
-        announcements.filter(
-          (announcement: AnnouncementMiniEntity) =>
-            announcement.title.toLowerCase().includes(keyword.toLowerCase()) ||
-            announcement.content.toLowerCase().includes(keyword.toLowerCase()),
-        ),
-      );
-    }
-  };
+  const {
+    processedItems: processedAnnouncements,
+    handleSearch,
+    currentPage,
+    totalPages,
+    handlePageChange,
+  } = useItems(announcements, searchKeys, sortFunc, itemsPerPage);
 
   return (
     <>
-      <Grid columns={{ xs: 1, lg: 3 }} container style={{ padding: 0 }}>
-        <Grid
-          item
-          style={{
-            display: 'flex',
-            justifyContent: 'left',
-          }}
-          xs={1}
-        >
-          <div style={{ paddingTop: 7, paddingBottom: 5 }}>
-            <SearchField
-              className="w-[350px]"
-              onChangeKeyword={handleSearchBarChange}
-              placeholder={intl.formatMessage(
-                translations.searchBarPlaceholder,
-              )}
-            />
-          </div>
+      <Grid className="flex items-center" columns={{ xs: 1, lg: 3 }} container>
+        <Grid className="lg:justify-left flex " item xs={1}>
+          <SearchField
+            className="my-4 w-full"
+            onChangeKeyword={handleSearch}
+            placeholder={intl.formatMessage(translations.searchBarPlaceholder)}
+          />
         </Grid>
         <Grid item xs={1}>
           <Pagination
-            items={shavedAnnouncements}
-            itemsPerPage={ITEMS_PER_PAGE}
-            padding={12}
-            page={page}
-            setPage={setPage}
-            setSlicedItems={setslicedAnnouncements}
+            currentPage={currentPage}
+            handlePageChange={handlePageChange}
+            totalPages={totalPages}
           />
         </Grid>
         <Grid item xs={1} />
       </Grid>
 
       <div id="course-announcements">
-        <Stack spacing={1} sx={{ paddingBottom: 1 }}>
-          {slicedAnnouncements.map((announcement) => (
+        <Stack spacing={1}>
+          {processedAnnouncements.map((announcement) => (
             <AnnouncementCard
               key={announcement.id}
               announcement={announcement}
@@ -121,14 +101,11 @@ const AnnouncementsDisplay: FC<Props> = (props) => {
         </Stack>
       </div>
 
-      {slicedAnnouncements.length > 6 && (
+      {processedAnnouncements.length > 6 && (
         <Pagination
-          items={shavedAnnouncements}
-          itemsPerPage={ITEMS_PER_PAGE}
-          padding={12}
-          page={page}
-          setPage={setPage}
-          setSlicedItems={setslicedAnnouncements}
+          currentPage={currentPage}
+          handlePageChange={handlePageChange}
+          totalPages={totalPages}
         />
       )}
     </>

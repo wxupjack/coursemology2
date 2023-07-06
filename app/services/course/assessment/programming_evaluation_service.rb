@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 # Sets up a programming evaluation, queues it for execution by evaluators, then returns the results.
 class Course::Assessment::ProgrammingEvaluationService
+  TEST_CASES_MULTIPLIERS = 3 # Public, Private & Evaluation
   # The default timeout for the job to finish.
-  DEFAULT_TIMEOUT = 5.minutes
+  DEFAULT_TIMEOUT = 300.seconds
   MEMORY_LIMIT = Course::Assessment::Question::Programming::MEMORY_LIMIT
 
   # The ratio to multiply the memory limits from our evaluation to the container by.
@@ -19,24 +20,27 @@ class Course::Assessment::ProgrammingEvaluationService
       test_reports.values.all?(&:nil?) && exit_code != 0
     end
 
-    # Checks if the evaluation exceeded its time limit.
-    #
-    # This uses a Bash behaviour where the exit code of a process is 128 + signal number, if the
-    # process was terminated because of the signal.
-    #
-    # The time limit is enforced using SIGKILL.
-    #
-    # @return [Boolean]
-    def time_limit_exceeded?
-      exit_code == 128 + Signal.list['KILL']
+    def error_class
+      case exit_code
+      when 0
+        nil
+      when 128 + Signal.list['KILL']
+        # This uses a Bash behaviour where the exit code of a process is 128 + signal number, if the
+        # process was terminated because of the signal.
+        #
+        # The time or docker memory limit is enforced using SIGKILL.
+        TimeOrMemoryLimitExceededError
+      else
+        Error
+      end
     end
 
     # Obtains the exception suitable for this result.
     def exception
-      return nil unless error?
+      exception_class = error_class
+      return unless exception_class
 
-      exception_class = time_limit_exceeded? ? TimeLimitExceededError : Error
-      exception_class.new(exception_class.name, stdout, stderr)
+      exception_class.new(nil, stdout, stderr)
     end
   end
 
@@ -44,7 +48,8 @@ class Course::Assessment::ProgrammingEvaluationService
   class Error < StandardError
     attr_reader :stdout, :stderr
 
-    def initialize(message = self.class.name, stdout = nil, stderr = nil)
+    def initialize(message, stdout = nil, stderr = nil)
+      message ||= I18n.t('course.assessment.answer.programming_auto_grading.grade.evaluation_failed_syntax')
       super(message)
       @stdout = stdout
       @stderr = stderr
@@ -62,8 +67,27 @@ class Course::Assessment::ProgrammingEvaluationService
     end
   end
 
-  # Represents a Time Limit Exceeded error while evaluating the package.
+  # Represents a Time or Docker Memory Limit Exceeded error while evaluating the package.
+  class TimeOrMemoryLimitExceededError < Error
+    def initialize(message, stdout = nil, stderr = nil)
+      message ||= I18n.t('course.assessment.answer.programming_auto_grading.grade.evaluation_failed_time_or_memory')
+      super(message, stdout, stderr)
+    end
+  end
+
   class TimeLimitExceededError < Error
+    def initialize(message, stdout = nil, stderr = nil)
+      message ||= I18n.t('course.assessment.answer.programming_auto_grading.grade.time_limit_error')
+      super(message, stdout, stderr)
+    end
+  end
+
+  # Represents a Time Limit Exceeded error while evaluating the package.
+  class MemoryLimitExceededError < Error
+    def initialize(message, stdout = nil, stderr = nil)
+      message ||= I18n.t('course.assessment.answer.programming_auto_grading.grade.memory_limit_error')
+      super(message, stdout, stderr)
+    end
   end
 
   class << self
@@ -105,7 +129,7 @@ class Course::Assessment::ProgrammingEvaluationService
     @memory_limit = memory_limit || MEMORY_LIMIT
     @time_limit = time_limit ? [time_limit, max_time_limit].min : max_time_limit
     @package = package
-    @timeout = timeout || DEFAULT_TIMEOUT
+    @timeout = timeout || [DEFAULT_TIMEOUT.to_i, @time_limit.to_i * TEST_CASES_MULTIPLIERS].max
   end
 
   def create_container(image)

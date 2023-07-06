@@ -5,7 +5,6 @@ import {
   injectIntl,
   WrappedComponentProps,
 } from 'react-intl';
-import { useSelector } from 'react-redux';
 import { Checkbox, MenuItem, TextField, Typography } from '@mui/material';
 import equal from 'fast-deep-equal';
 import { TableColumns, TableOptions } from 'types/components/DataTable';
@@ -13,7 +12,6 @@ import {
   EnrolRequestMiniEntity,
   EnrolRequestRowData,
 } from 'types/course/enrolRequests';
-import { AppState } from 'types/store';
 
 import DataTable from 'lib/components/core/layouts/DataTable';
 import Note from 'lib/components/core/Note';
@@ -24,6 +22,7 @@ import {
   TIMELINE_ALGORITHMS,
 } from 'lib/constants/sharedConstants';
 import rebuildObjectFromRow from 'lib/helpers/mui-datatables-helpers';
+import { useAppSelector } from 'lib/hooks/store';
 import tableTranslations from 'lib/translations/table';
 
 import {
@@ -78,12 +77,8 @@ const EnrolRequestsTable: FC<Props> = (props) => {
     renderRowActionComponent = null,
     intl,
   } = props;
-  const permissions = useSelector((state: AppState) =>
-    getManageCourseUserPermissions(state),
-  );
-  const sharedData = useSelector((state: AppState) =>
-    getManageCourseUsersSharedData(state),
-  );
+  const permissions = useAppSelector(getManageCourseUserPermissions);
+  const sharedData = useAppSelector(getManageCourseUsersSharedData);
   const defaultTimelineAlgorithm = sharedData.defaultTimelineAlgorithm;
   let columns: TableColumns[] = [];
 
@@ -213,7 +208,7 @@ const EnrolRequestsTable: FC<Props> = (props) => {
           return (
             <TextField
               id={`role-${enrolRequest.id}`}
-              onChange={(e): React.ChangeEvent => updateValue(e.target.value)}
+              onChange={(e): void => updateValue(e.target.value)}
               select
               value={value || 'student'}
               variant="standard"
@@ -242,7 +237,7 @@ const EnrolRequestsTable: FC<Props> = (props) => {
               key={`checkbox_${enrolRequest.id}`}
               checked={value || false}
               id={`checkbox_${enrolRequest.id}`}
-              onChange={(e): React.ChangeEvent => updateValue(e.target.checked)}
+              onChange={(e): void => updateValue(e.target.checked)}
               style={styles.checkbox}
             />
           );
@@ -265,9 +260,7 @@ const EnrolRequestsTable: FC<Props> = (props) => {
                 return (
                   <TextField
                     id={`timeline-algorithm-${enrolRequest.id}`}
-                    onChange={(e): React.ChangeEvent =>
-                      updateValue(e.target.value)
-                    }
+                    onChange={(e): void => updateValue(e.target.value)}
                     select
                     value={value || defaultTimelineAlgorithm}
                     variant="standard"
@@ -297,9 +290,9 @@ const EnrolRequestsTable: FC<Props> = (props) => {
               sort: false,
               alignCenter: true,
               customBodyRender: (_value, tableMeta): JSX.Element => {
-                const rowData = tableMeta.rowData as EnrolRequestRowData;
-                const enrolRequest = rebuildObjectFromRow(columns, rowData);
-                return renderRowActionComponent(enrolRequest);
+                const rowData = tableMeta.rowData;
+                const request = rebuildObjectFromRow(columns, rowData);
+                return renderRowActionComponent(request as EnrolRequestRowData);
               },
             },
           },

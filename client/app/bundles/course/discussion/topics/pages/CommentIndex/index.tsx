@@ -5,7 +5,6 @@ import {
   IntlShape,
   WrappedComponentProps,
 } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Box, Tab, Tabs } from '@mui/material';
 import { tabsStyle } from 'theme/mui-style';
@@ -15,13 +14,12 @@ import {
   CommentTabInfo,
   CommentTabTypes,
 } from 'types/course/comments';
-import { AppDispatch, AppState } from 'types/store';
 
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import CustomBadge from 'lib/components/extensions/CustomBadge';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 
-import { changeTabValue } from '../../actions';
 import TopicList from '../../components/lists/TopicList';
 import { fetchTabData } from '../../operations';
 import {
@@ -30,6 +28,7 @@ import {
   getTabInfo,
   getTabValue,
 } from '../../selectors';
+import { actions } from '../../store';
 
 type Props = WrappedComponentProps;
 
@@ -133,12 +132,12 @@ const tabTranslation = (
 
 const CommentTabs: FC<CommentTabProps> = (props) => {
   const { tabValue, intl } = props;
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const [tabTypesToRender, setTabTypesToRender] = useState(
     [] as CommentTabData[],
   );
-  const permissions = useSelector((state: AppState) => getPermissions(state));
-  const tabs = useSelector((state: AppState) => getTabInfo(state));
+  const permissions = useAppSelector(getPermissions);
+  const tabs = useAppSelector(getTabInfo);
 
   useEffect(() => {
     setTabTypesToRender(getTabTypesToRender(permissions, tabs));
@@ -149,7 +148,7 @@ const CommentTabs: FC<CommentTabProps> = (props) => {
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs
           onChange={(_, value): void => {
-            dispatch(changeTabValue(value));
+            dispatch(actions.changeTabValue(value));
           }}
           scrollButtons="auto"
           sx={tabsStyle}
@@ -184,10 +183,10 @@ const CommentTabs: FC<CommentTabProps> = (props) => {
 
 const CommentIndex: FC<Props> = (props) => {
   const { intl } = props;
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
-  const settings = useSelector((state: AppState) => getSettings(state));
-  const tabValue = useSelector((state: AppState) => getTabValue(state));
+  const settings = useAppSelector(getSettings);
+  const tabValue = useAppSelector(getTabValue);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -200,24 +199,29 @@ const CommentIndex: FC<Props> = (props) => {
   }, [dispatch]);
 
   return (
-    <>
-      <PageHeader
-        title={
-          settings.title
-            ? settings.title
-            : intl.formatMessage(translations.comments)
-        }
-      />
+    <Page
+      title={
+        settings.title
+          ? settings.title
+          : intl.formatMessage(translations.comments)
+      }
+      unpadded
+    >
       {isLoading ? (
         <LoadingIndicator />
       ) : (
         <>
           <CommentTabs intl={intl} tabValue={tabValue} />
-          <TopicList key={tabValue} settings={settings} tabValue={tabValue} />
+
+          <Page.PaddedSection>
+            <TopicList key={tabValue} settings={settings} tabValue={tabValue} />
+          </Page.PaddedSection>
         </>
       )}
-    </>
+    </Page>
   );
 };
 
-export default injectIntl(CommentIndex);
+const handle = translations.comments;
+
+export default Object.assign(injectIntl(CommentIndex), { handle });

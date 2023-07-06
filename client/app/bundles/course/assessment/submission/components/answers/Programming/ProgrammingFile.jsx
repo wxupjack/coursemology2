@@ -5,6 +5,7 @@ import { Paper } from '@mui/material';
 import { yellow } from '@mui/material/colors';
 import PropTypes from 'prop-types';
 
+import Link from 'lib/components/core/Link';
 import withRouter from 'lib/components/navigation/withRouter';
 import { getProgrammingFileURL } from 'lib/helpers/url-builders';
 
@@ -60,13 +61,13 @@ class ProgrammingFile extends Component {
     if (file.highlighted_content === null) {
       return (
         <Paper style={{ backgroundColor: yellow[100], padding: 10 }}>
-          <Warning style={styles.warningIcon} />
+          <Warning data-testid="warning-icon" style={styles.warningIcon} />
           <span>
             <FormattedMessage {...translations.sizeTooBig} />
             &nbsp;
-            <a href={downloadLink}>
+            <Link href={downloadLink}>
               <FormattedMessage {...translations.downloadFile} />
-            </a>
+            </Link>
           </span>
         </Paper>
       );

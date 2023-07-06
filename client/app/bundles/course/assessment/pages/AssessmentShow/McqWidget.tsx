@@ -1,48 +1,57 @@
+import { useState } from 'react';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import { Button, Collapse, Radio } from '@mui/material';
-import { McqData, QuestionData } from 'types/course/assessment/assessments';
+import { Button, Collapse, Radio, Typography } from '@mui/material';
+import { McqMrqListData } from 'types/course/assessment/question/multiple-responses';
+import { QuestionData } from 'types/course/assessment/questions';
 
 import Checkbox from 'lib/components/core/buttons/Checkbox';
-import useToggle from 'lib/hooks/useToggle';
 import useTranslation from 'lib/hooks/useTranslation';
 
+import ConvertMcqMrqButton from '../../components/ConvertMcqMrqButton';
 import translations from '../../translations';
-
-import ConvertMcqMrqPrompt from './prompts/ConvertMcqMrqPrompt';
 
 interface McqWidgetProps {
   for: QuestionData;
   onChange: (question: QuestionData) => void;
 }
 
-const isMcq = (question: QuestionData): question is McqData =>
-  (question as McqData)?.options !== undefined;
+const isMcq = (question: QuestionData): question is McqMrqListData =>
+  (question as McqMrqListData)?.options !== undefined;
 
 const McqWidget = (props: McqWidgetProps): JSX.Element | null => {
   const { for: question } = props;
   const { t } = useTranslation();
-  const [expanded, toggleExpanded] = useToggle();
-  const [converting, toggleConverting] = useToggle();
+  const [expanded, setExpanded] = useState(false);
 
   if (!isMcq(question)) return null;
 
   return (
     <section className="space-y-4">
-      <div className="flex justify-between space-x-4">
-        <Button
-          endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
-          onClick={toggleExpanded}
-          size="small"
-          variant="outlined"
-        >
-          {expanded ? t(translations.hideOptions) : t(translations.showOptions)}
-        </Button>
+      <div className="flex items-center justify-between space-x-4">
+        {question.options.length ? (
+          <Button
+            endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
+            onClick={(): void => setExpanded((wasExpanded) => !wasExpanded)}
+            size="small"
+            variant="outlined"
+          >
+            {expanded
+              ? t(translations.hideOptions)
+              : t(translations.showOptions)}
+          </Button>
+        ) : (
+          <Typography className="italic text-neutral-500" variant="body2">
+            {t(translations.noOptions)}
+          </Typography>
+        )}
 
-        <Button onClick={toggleConverting} size="small" variant="outlined">
-          {question.mcqMrqType === 'mcq'
-            ? t(translations.changeToMrqFull)
-            : t(translations.changeToMcqFull)}
-        </Button>
+        <ConvertMcqMrqButton
+          for={{
+            ...question,
+            title: question.title ? question.title : question.defaultTitle,
+          }}
+          onConvertComplete={props.onChange}
+        />
       </div>
 
       <Collapse in={expanded}>
@@ -59,13 +68,6 @@ const McqWidget = (props: McqWidgetProps): JSX.Element | null => {
           />
         ))}
       </Collapse>
-
-      <ConvertMcqMrqPrompt
-        for={question}
-        onClose={toggleConverting}
-        onConvertComplete={props.onChange}
-        open={converting}
-      />
     </section>
   );
 };

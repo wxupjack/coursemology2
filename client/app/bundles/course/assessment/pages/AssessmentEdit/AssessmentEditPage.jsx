@@ -5,14 +5,11 @@ import { Navigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 import PropTypes from 'prop-types';
 
-import NotificationBar, {
-  notificationShape,
-} from 'lib/components/core/NotificationBar';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import Page from 'lib/components/core/layouts/Page';
 import { achievementTypesConditionAttributes } from 'lib/types';
 
-import * as actions from '../../actions';
 import AssessmentForm from '../../components/AssessmentForm';
+import { updateAssessment } from '../../operations';
 import translations from '../../translations';
 
 class AssessmentEditPage extends Component {
@@ -40,7 +37,7 @@ class AssessmentEditPage extends Component {
     const { dispatch, intl } = this.props;
 
     return dispatch(
-      actions.updateAssessment(
+      updateAssessment(
         data.id,
         { assessment: atrributes },
         intl.formatMessage(translations.updateSuccess),
@@ -55,22 +52,23 @@ class AssessmentEditPage extends Component {
     const {
       intl,
       conditionAttributes,
-      containsCodaveri,
       disabled,
       folderAttributes,
       gamified,
       initialValues,
       modeSwitching,
-      notification,
+      canManageMonitor,
+      pulsegridUrl,
       randomizationAllowed,
       showPersonalizedTimelineFeatures,
+      monitoringEnabled,
     } = this.props;
 
     // TODO: Add a source router props that can be used to determine where
     // did the user come from, and initialise a Back button that goes there.
     return (
-      <main className="space-y-5">
-        <PageHeader title={intl.formatMessage(translations.editAssessment)}>
+      <Page
+        actions={
           <Button
             className="bg-white"
             disabled={disabled}
@@ -80,26 +78,28 @@ class AssessmentEditPage extends Component {
           >
             <FormattedMessage {...translations.updateAssessment} />
           </Button>
-        </PageHeader>
-
+        }
+        className="space-y-5"
+        title={intl.formatMessage(translations.editAssessment)}
+      >
         <AssessmentForm
+          canManageMonitor={canManageMonitor}
           conditionAttributes={conditionAttributes}
-          containsCodaveri={containsCodaveri}
           disabled={disabled}
           editing
           folderAttributes={folderAttributes}
           gamified={gamified}
           initialValues={initialValues}
           modeSwitching={modeSwitching}
+          monitoringEnabled={monitoringEnabled}
           onSubmit={this.onFormSubmit}
+          pulsegridUrl={pulsegridUrl}
           randomizationAllowed={randomizationAllowed}
           showPersonalizedTimelineFeatures={showPersonalizedTimelineFeatures}
         />
 
-        <NotificationBar notification={notification} />
-
         {this.state.redirectUrl && <Navigate to={this.state.redirectUrl} />}
-      </main>
+      </Page>
     );
   }
 }
@@ -115,8 +115,6 @@ AssessmentEditPage.propTypes = {
   randomizationAllowed: PropTypes.bool,
   // If allowed to switch between autograded and manually graded mode.
   modeSwitching: PropTypes.bool,
-  // If an assessment contains question of programming codaveri type
-  containsCodaveri: PropTypes.bool,
   // An array of materials of current assessment.
   folderAttributes: PropTypes.shape({}),
   conditionAttributes: achievementTypesConditionAttributes,
@@ -124,9 +122,11 @@ AssessmentEditPage.propTypes = {
   initialValues: PropTypes.shape({}),
   // Whether to disable the inner form.
   disabled: PropTypes.bool,
-  notification: notificationShape,
+  pulsegridUrl: PropTypes.string,
+  canManageMonitor: PropTypes.bool,
+  monitoringEnabled: PropTypes.bool,
 };
 
-export default connect((state) => state.editPage)(
+export default connect(({ assessments }) => assessments.editPage)(
   injectIntl(AssessmentEditPage),
 );

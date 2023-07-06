@@ -1,7 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactNode, useState } from 'react';
 import useEmitterFactory, { Emits } from 'react-emitter-factory';
-import { Control, FormState, useForm, UseFormWatch } from 'react-hook-form';
+import {
+  Control,
+  DeepPartial,
+  FieldPath,
+  FieldPathValue,
+  FieldValues,
+  FormProvider,
+  FormState,
+  Resolver,
+  useForm,
+  UseFormWatch,
+} from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Slide, Typography } from '@mui/material';
@@ -13,49 +24,65 @@ import useTranslation from 'lib/hooks/useTranslation';
 import translations from 'lib/translations/form';
 import messagesTranslations from 'lib/translations/messages';
 
-type Data = Record<string, any>;
+type Data = FieldValues;
 
-export interface FormEmitter {
+export interface FormEmitter<D extends Data = any> {
   reset?: () => void;
-  resetTo?: (data: Data) => void;
+  resetTo?: (data: D, keepDirty?: boolean) => void;
 
   /**
    * Resets the `Form` by merging its `initialValues` with the given `data`.
    * @param data The (partial) form data to merge.
    */
-  resetByMerging?: (data: Data) => void;
+  resetByMerging?: (data: Partial<D>) => void;
 
-  setValue?: (fieldName: string, value) => void;
-  setError?: (fieldName: string, errors: Record<string, string>) => void;
+  setValue?: <P extends FieldPath<D>>(
+    fieldName: P,
+    value: FieldPathValue<D, P>,
+  ) => void;
+
+  setError?: <P extends FieldPath<D>>(
+    fieldName: P,
+    errors: Record<P, string>,
+  ) => void;
 
   /**
    * Sets errors for fields in `errors` with `setReactHookFormError`. If `errors` is
    * `undefined`, pops a toast up with a generic update error message.
    * @param errors The same `errors` parameter of `setReactHookFormError`
    */
-  receiveErrors?: (errors?) => void;
+  receiveErrors?: (errors?: Record<FieldPath<D>, string>) => void;
 
   /**
    * Sets the values in `data` as part of the `initialValues` without modifying the
    * `Form`'s current state. The keys of `data` must be valid field names.
    * @param data The (partial) form data to merge.
    */
-  mutate?: (data: Data) => void;
+  mutate?: (data: Partial<D>) => void;
 }
 
-interface FormProps extends Emits<FormEmitter> {
-  initialValues?: Data;
-  onSubmit?: (data) => void;
+type Transformer<D> = (data: D) => D | Partial<D>;
+
+interface FormProps<
+  D extends Data = any,
+  M extends boolean = false,
+  V extends AnyObjectSchema = never,
+> extends Emits<FormEmitter<D>> {
+  initialValues: D;
+  onSubmit?: (data: M extends true ? Partial<D> : D) => void;
   headsUp?: boolean;
   dirty?: boolean;
-  validates?: AnyObjectSchema;
-  children?: (
-    control: Control,
-    watch: UseFormWatch<any>,
-    formState: FormState<any>,
-  ) => ReactNode;
+  validates?: V;
+  children?:
+    | ReactNode
+    | ((
+        control: Control<D>,
+        watch: UseFormWatch<D>,
+        formState: FormState<D>,
+      ) => ReactNode);
   disabled?: boolean;
   className?: string;
+  contextual?: boolean;
 
   /**
    * Dispatched when the form is reset. Return `true` to prevent the default form
@@ -68,24 +95,70 @@ interface FormProps extends Emits<FormEmitter> {
    * i.e., with `===`, against the latest `initialValues`. There is no deep equality
    * performed.
    */
-  submitsDirtyFieldsOnly?: boolean;
+  submitsDirtyFieldsOnly?: M;
+
+  /**
+   * Transforms the raw data before validating and eventually submitting it. This
+   * prop is only available if `validates` is provided a validation schema.
+   */
+  transformsBy?: V extends AnyObjectSchema ? Transformer<D> : never;
+
+  /**
+   * A context object to supply for the validation schema in `validates`.
+   */
+  validatesWith?: V extends AnyObjectSchema ? Record<string, unknown> : never;
 }
 
-const Form = (props: FormProps): JSX.Element => {
+/**
+ * Technically, `transformer(data)` can return `Partial<D>`, but `Resolver<D>`'s type
+ * is very complex, so we suppress the type error here by asserting it as `D`.
+ */
+const transformedResolver =
+  <D extends Data>(
+    transformer: Transformer<D>,
+    resolver: Resolver<D>,
+  ): Resolver<D> =>
+  (data, ...resolverArgs) =>
+    resolver(transformer(data) as D, ...resolverArgs);
+
+const transformableResolver = <D extends Data>(
+  resolver: Resolver<D>,
+  transformer?: Transformer<D>,
+): Resolver<D> =>
+  transformer ? transformedResolver(transformer, resolver) : resolver;
+
+const Form = <
+  D extends Data = any,
+  M extends boolean = false,
+  V extends AnyObjectSchema = never,
+>(
+  props: FormProps<D, M, V>,
+): JSX.Element => {
+  const {
+    transformsBy: transformer,
+    validates: schema,
+    validatesWith: validationContext,
+  } = props;
+
   const { t } = useTranslation();
+
   const [initialValues, setInitialValues] = useState(props.initialValues);
+
+  const methods = useForm({
+    defaultValues: props.initialValues as DeepPartial<D>,
+    resolver: schema && transformableResolver(yupResolver(schema), transformer),
+    context: schema && validationContext,
+  });
+
   const { control, formState, reset, watch, handleSubmit, setValue, setError } =
-    useForm({
-      defaultValues: props.initialValues,
-      resolver: props.validates && yupResolver(props.validates),
-    });
+    methods;
 
   const resetForm = (): void => {
     if (!props.onReset?.()) reset();
   };
 
-  const resetTo = (data: Data): void => {
-    reset(data);
+  const resetTo = (data: D, keepDirty?: boolean): void => {
+    reset(data, { keepDirty });
     setInitialValues(data);
   };
 
@@ -116,18 +189,20 @@ const Form = (props: FormProps): JSX.Element => {
       setInitialValues(newInitialValues);
 
       Object.entries(data).forEach(([fieldName, value]) => {
-        setValue(fieldName, value);
+        setValue(fieldName as FieldPath<D>, value);
       });
     },
   });
 
-  const processAndSubmit = (data: Data): void => {
+  const processAndSubmit = (data: D): void => {
     if (!props.onSubmit) return;
 
-    let submittedData = data;
+    let submittedData: Partial<D> | D = data;
 
     if (initialValues && props.submitsDirtyFieldsOnly) {
-      submittedData = Object.keys(data).reduce((newData, fieldName) => {
+      const keys = Object.keys(data) as FieldPath<D>[];
+
+      submittedData = keys.reduce<Partial<D>>((newData, fieldName) => {
         const value = data[fieldName];
         if (value !== initialValues[fieldName]) newData[fieldName] = value;
 
@@ -135,15 +210,17 @@ const Form = (props: FormProps): JSX.Element => {
       }, {});
     }
 
-    props.onSubmit(submittedData);
+    props.onSubmit(submittedData as M extends true ? Partial<D> : D);
   };
 
-  return (
+  const form = (
     <form
       className={`${props.headsUp ? 'pb-32' : ''} ${props.className ?? ''}`}
       onSubmit={handleSubmit(processAndSubmit)}
     >
-      {props.children?.(control, watch, formState)}
+      {typeof props.children === 'function'
+        ? props.children(control, watch, formState)
+        : props.children}
 
       {props.headsUp && (
         <Slide
@@ -178,6 +255,10 @@ const Form = (props: FormProps): JSX.Element => {
       )}
     </form>
   );
+
+  if (props.contextual) return <FormProvider {...methods}>{form}</FormProvider>;
+
+  return form;
 };
 
 export default Form;

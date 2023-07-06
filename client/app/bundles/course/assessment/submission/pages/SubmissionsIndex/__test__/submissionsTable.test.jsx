@@ -1,6 +1,7 @@
+import { BrowserRouter } from 'react-router-dom';
 import { mount } from 'enzyme';
 
-import ProviderWrapper from 'lib/components/wrappers/ProviderWrapper';
+import Providers from 'lib/components/wrappers/Providers';
 
 import SubmissionsTable from '../SubmissionsTable';
 
@@ -49,9 +50,11 @@ const defaultProps = {
 const setupTest = (propsOverrides) => {
   const props = { ...defaultProps, ...propsOverrides };
   const submissionsTable = mount(
-    <ProviderWrapper>
-      <SubmissionsTable {...props} />
-    </ProviderWrapper>,
+    <Providers>
+      <BrowserRouter>
+        <SubmissionsTable {...props} />
+      </BrowserRouter>
+    </Providers>,
   );
 
   return {

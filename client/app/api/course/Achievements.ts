@@ -9,8 +9,8 @@ import {
 import BaseCourseAPI from './Base';
 
 export default class AchievementsAPI extends BaseCourseAPI {
-  _getUrlPrefix(): string {
-    return `/courses/${this.getCourseId()}/achievements`;
+  get #urlPrefix(): string {
+    return `/courses/${this.courseId}/achievements`;
   }
 
   /**
@@ -22,7 +22,7 @@ export default class AchievementsAPI extends BaseCourseAPI {
       permissions: AchievementPermissions;
     }>
   > {
-    return this.getClient().get(this._getUrlPrefix());
+    return this.client.get(this.#urlPrefix);
   }
 
   /**
@@ -33,7 +33,7 @@ export default class AchievementsAPI extends BaseCourseAPI {
       achievement: AchievementData;
     }>
   > {
-    return this.getClient().get(`${this._getUrlPrefix()}/${achievementId}`);
+    return this.client.get(`${this.#urlPrefix}/${achievementId}`);
   }
 
   /**
@@ -47,8 +47,8 @@ export default class AchievementsAPI extends BaseCourseAPI {
       achievementCourseUsers: AchievementCourseUserData[];
     }>
   > {
-    return this.getClient().get(
-      `${this._getUrlPrefix()}/${achievementId}/achievement_course_users`,
+    return this.client.get(
+      `${this.#urlPrefix}/${achievementId}/achievement_course_users`,
     );
   }
 
@@ -68,7 +68,7 @@ export default class AchievementsAPI extends BaseCourseAPI {
       id: number;
     }>
   > {
-    return this.getClient().post(this._getUrlPrefix(), params);
+    return this.client.post(this.#urlPrefix, params);
   }
 
   /**
@@ -84,10 +84,7 @@ export default class AchievementsAPI extends BaseCourseAPI {
     achievementId: number,
     params: FormData | object,
   ): Promise<AxiosResponse> {
-    return this.getClient().patch(
-      `${this._getUrlPrefix()}/${achievementId}`,
-      params,
-    );
+    return this.client.patch(`${this.#urlPrefix}/${achievementId}`, params);
   }
 
   /**
@@ -99,6 +96,6 @@ export default class AchievementsAPI extends BaseCourseAPI {
    * error response: {}
    */
   delete(achievementId: number): Promise<AxiosResponse> {
-    return this.getClient().delete(`${this._getUrlPrefix()}/${achievementId}`);
+    return this.client.delete(`${this.#urlPrefix}/${achievementId}`);
   }
 }

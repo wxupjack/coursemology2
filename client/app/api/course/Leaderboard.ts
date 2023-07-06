@@ -4,14 +4,14 @@ import { LeaderboardData } from 'types/course/leaderboard';
 import BaseCourseAPI from './Base';
 
 export default class LeaderboardsAPI extends BaseCourseAPI {
-  _getUrlPrefix(): string {
-    return `/courses/${this.getCourseId()}/leaderboard`;
+  get #urlPrefix(): string {
+    return `/courses/${this.courseId}/leaderboard`;
   }
 
   /**
    * Fetches a list of leaderboard data in a course.
    */
   index(): Promise<AxiosResponse<LeaderboardData>> {
-    return this.getClient().get(this._getUrlPrefix());
+    return this.client.get(this.#urlPrefix);
   }
 }

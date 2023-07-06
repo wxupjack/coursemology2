@@ -54,6 +54,7 @@ const styles = {
   },
   toolbar: {
     marginBottom: '1em',
+    marginRight: '1em',
   },
   custom_line: {
     display: 'inline-block',
@@ -897,7 +898,7 @@ export default class ScribingCanvas extends Component {
       this.canvas.on('text:editing:exited', this.onTextChanged);
 
       this.scaleCanvas();
-      this.props.setCanvasLoaded(this.props.answerId, true, this.canvas);
+      this.props.setCanvasLoaded(this.props.answerId, true);
     };
   }
 
@@ -922,7 +923,9 @@ export default class ScribingCanvas extends Component {
           scribbleGroup.selectable = false;
 
           const showLayer = (isShown) => {
-            scribbleGroup._objects.forEach((obj) => obj.setVisible(isShown));
+            scribbleGroup._objects.forEach((obj) => {
+              obj.setVisible?.(isShown);
+            });
             this.canvas.renderAll();
           };
           // Populate layers list
@@ -1058,7 +1061,11 @@ export default class ScribingCanvas extends Component {
     return (
       <div id={`canvas-container-${answerId}`} style={styles.canvas_div}>
         {!isCanvasLoaded ? <LoadingIndicator /> : null}
-        <canvas id={`canvas-${answerId}`} style={styles.canvas} />
+        <canvas
+          data-testid={`canvas-${answerId}`}
+          id={`canvas-${answerId}`}
+          style={styles.canvas}
+        />
       </div>
     );
   }

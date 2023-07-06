@@ -1,14 +1,14 @@
 import { AxiosResponse } from 'axios';
+import { Operation } from 'store';
 import {
   SkillBranchListData,
   SkillFormData,
   SkillListData,
 } from 'types/course/assessment/skills/skills';
-import { Operation } from 'types/store';
 
 import CourseAPI from 'api/course';
 
-import * as actions from './actions';
+import { actions } from './store';
 
 /**
  * Prepares and maps object attributes to a FormData object for an post/patch request.

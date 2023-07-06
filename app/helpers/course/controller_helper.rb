@@ -64,28 +64,12 @@ module Course::ControllerHelper
     end
   end
 
-  # Display the course_user_badge given the course_user
-  #
-  # @param [CourseUser] course_user The CourseUser for which the badge is to be displayed
-  # @return [String] HTML string to render the course_user_badge
-  def display_course_user_badge(course_user)
-    render partial: 'layouts/course_user_badge',
-           locals: { course_user: course_user }
-  end
-
   def url_to_course_logo(course)
     asset_url(course_logo_local_url(course))
   end
 
-  # Helper method to display the course logo. If logo is present, returns the medium version
-  # of the logo (see ImageUploader for more versions). Otherwise, returns the default course
-  # logo.
-  #
-  # @return [String] HTML string to render the course logo
-  def display_course_logo(course)
-    content_tag(:span, class: ['image']) do
-      image_tag(course_logo_local_url(course))
-    end
+  def url_to_material(course, folder, material)
+    course_material_folder_material_path(course, folder, material)
   end
 
   private

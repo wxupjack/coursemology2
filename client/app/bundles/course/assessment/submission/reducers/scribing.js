@@ -34,7 +34,7 @@ function initializeLineStyles() {
   return lineStyles;
 }
 
-export default function (state = {}, action) {
+export default produce((state, action) => {
   // eslint-disable-next-line sonarjs/max-switch-cases
   switch (action.type) {
     case actions.FINALIZE_SUCCESS:
@@ -84,12 +84,11 @@ export default function (state = {}, action) {
       };
     }
     case actions.SET_CANVAS_LOADED: {
-      const { answerId, loaded, canvas } = action.payload;
+      const { answerId, loaded } = action.payload;
       return {
         ...state,
         [answerId]: {
           ...state[answerId],
-          canvas,
           isCanvasLoaded: loaded,
         },
       };
@@ -534,4 +533,4 @@ export default function (state = {}, action) {
       return state;
     }
   }
-}
+}, {});

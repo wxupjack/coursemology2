@@ -1,15 +1,15 @@
-import { FC, ReactElement, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Grid, Tooltip, Typography } from '@mui/material';
-import { AppDispatch, AppState } from 'types/store';
 
 import AvatarWithLabel from 'lib/components/core/AvatarWithLabel';
+import Page from 'lib/components/core/layouts/Page';
+import Link from 'lib/components/core/Link';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import PageHeader from 'lib/components/navigation/PageHeader';
 import { getCourseUserURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 
 import AchievementManagementButtons from '../../components/buttons/AchievementManagementButtons';
 import { loadAchievement } from '../../operations';
@@ -35,12 +35,12 @@ const AchievementShow: FC<Props> = (props) => {
   const { intl } = props;
   const courseId = getCourseId();
   const [isLoading, setIsLoading] = useState(true);
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const { achievementId } = useParams();
-  const achievementMiniEntity = useSelector((state: AppState) =>
+  const achievementMiniEntity = useAppSelector((state) =>
     getAchievementMiniEntity(state, +achievementId!),
   );
-  const achievement = useSelector((state: AppState) =>
+  const achievement = useAppSelector((state) =>
     getAchievementEntity(state, +achievementId!),
   );
 
@@ -59,27 +59,22 @@ const AchievementShow: FC<Props> = (props) => {
     return null;
   }
 
-  const headerToolbars: ReactElement[] = [];
-
-  if (achievementMiniEntity.permissions?.canManage) {
-    headerToolbars.push(
-      <AchievementManagementButtons
-        key={achievementMiniEntity.id}
-        achievement={achievementMiniEntity}
-        navigateToIndex
-      />,
-    );
-  }
-
   return (
-    <>
-      <PageHeader
-        returnLink={`/courses/${courseId}/achievements/`}
-        title={intl.formatMessage(translations.header, {
-          title: achievementMiniEntity.title,
-        })}
-        toolbars={headerToolbars}
-      />
+    <Page
+      actions={
+        achievementMiniEntity.permissions?.canManage && (
+          <AchievementManagementButtons
+            key={achievementMiniEntity.id}
+            achievement={achievementMiniEntity}
+            navigateToIndex
+          />
+        )
+      }
+      backTo={`/courses/${courseId}/achievements/`}
+      title={intl.formatMessage(translations.header, {
+        title: achievementMiniEntity.title,
+      })}
+    >
       {isLoading ? (
         <LoadingIndicator />
       ) : (
@@ -114,13 +109,13 @@ const AchievementShow: FC<Props> = (props) => {
               if (courseUser.obtainedAt !== null)
                 return (
                   <Grid key={courseUser.id} item lg={1} sm={3} xs={4}>
-                    <a href={getCourseUserURL(courseId, courseUser.id)}>
+                    <Link to={getCourseUserURL(courseId, courseUser.id)}>
                       <AvatarWithLabel
                         imageUrl={courseUser.imageUrl!}
                         label={courseUser.name}
                         size="sm"
                       />
-                    </a>
+                    </Link>
                   </Grid>
                 );
               return null;
@@ -128,7 +123,7 @@ const AchievementShow: FC<Props> = (props) => {
           </Grid>
         )
       )}
-    </>
+    </Page>
   );
 };
 

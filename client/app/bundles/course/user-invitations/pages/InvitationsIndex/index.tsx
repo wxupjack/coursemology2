@@ -1,12 +1,11 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Box, Typography } from '@mui/material';
-import { AppDispatch, AppState } from 'types/store';
 
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 
 import UserManagementTabs from '../../../users/components/navigation/UserManagementTabs';
 import PendingInvitationsButtons from '../../components/buttons/PendingInvitationsButtons';
@@ -40,22 +39,17 @@ const translations = defineMessages({
   },
   invitationsInfo: {
     id: 'course.userInvitations.InvitationsIndex.invitationsInfo',
-    defaultMessage: `The page lists all invitations which have been sent out to date.\nUsers can key in their invitation code into the course registration page to manually register into this course.`,
+    defaultMessage:
+      'The page lists all invitations which have been sent out to date.\nUsers can key in their invitation code into the course registration page to manually register into this course.',
   },
 });
 
 const InviteUsers: FC<Props> = (props) => {
   const { intl } = props;
   const [isLoading, setIsLoading] = useState(true);
-  const invitations = useSelector((state: AppState) =>
-    getAllInvitationsMiniEntities(state),
-  );
-  const permissions = useSelector((state: AppState) =>
-    getManageCourseUserPermissions(state),
-  );
-  const sharedData = useSelector((state: AppState) =>
-    getManageCourseUsersSharedData(state),
-  );
+  const invitations = useAppSelector(getAllInvitationsMiniEntities);
+  const permissions = useAppSelector(getManageCourseUserPermissions);
+  const sharedData = useAppSelector(getManageCourseUsersSharedData);
 
   const pendingInvitations = invitations.filter(
     (invitation) => !invitation.confirmed,
@@ -64,7 +58,7 @@ const InviteUsers: FC<Props> = (props) => {
     (invitation) => invitation.confirmed,
   );
 
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(fetchInvitations())
@@ -75,8 +69,7 @@ const InviteUsers: FC<Props> = (props) => {
   }, [dispatch]);
 
   return (
-    <Box>
-      <PageHeader title={intl.formatMessage(translations.manageUsersHeader)} />
+    <Page title={intl.formatMessage(translations.manageUsersHeader)} unpadded>
       {isLoading ? (
         <LoadingIndicator />
       ) : (
@@ -85,15 +78,19 @@ const InviteUsers: FC<Props> = (props) => {
             permissions={permissions}
             sharedData={sharedData}
           />
-          <Box className="invitations-bar-chart" sx={{ margin: '12px 0px' }}>
-            <InvitationsBarChart
-              accepted={acceptedInvitations.length}
-              pending={pendingInvitations.length}
-            />
-          </Box>
-          <Typography style={{ whiteSpace: 'pre-line' }} variant="body2">
-            {intl.formatMessage(translations.invitationsInfo)}
-          </Typography>
+
+          <Page.PaddedSection>
+            <Box className="invitations-bar-chart" sx={{ margin: '12px 0px' }}>
+              <InvitationsBarChart
+                accepted={acceptedInvitations.length}
+                pending={pendingInvitations.length}
+              />
+            </Box>
+
+            <Typography style={{ whiteSpace: 'pre-line' }} variant="body2">
+              {intl.formatMessage(translations.invitationsInfo)}
+            </Typography>
+          </Page.PaddedSection>
 
           {pendingInvitations.length > 0 && (
             <UserInvitationsTable
@@ -115,7 +112,7 @@ const InviteUsers: FC<Props> = (props) => {
           )}
         </>
       )}
-    </Box>
+    </Page>
   );
 };
 

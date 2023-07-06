@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { toast } from 'react-toastify';
+import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 import { Paper } from '@mui/material';
 import produce from 'immer';
-import {
-  AssessmentData,
-  QuestionData,
-} from 'types/course/assessment/assessments';
+import { AssessmentData } from 'types/course/assessment/assessments';
+import { QuestionData } from 'types/course/assessment/questions';
 
 import useTranslation from 'lib/hooks/useTranslation';
 
-import { reorderQuestions } from '../../actions';
+import { reorderQuestions } from '../../operations';
 import translations from '../../translations';
 
 import Question from './Question';

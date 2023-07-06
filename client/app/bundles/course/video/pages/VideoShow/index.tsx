@@ -1,16 +1,15 @@
 import { FC, ReactElement, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Card, CardContent, CardHeader } from '@mui/material';
-import { AppDispatch, AppState } from 'types/store';
 
 import DescriptionCard from 'lib/components/core/DescriptionCard';
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import PageHeader from 'lib/components/navigation/PageHeader';
 import { getVideosURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 
 import VideoManagementButtons from '../../components/buttons/VideoManagementButtons';
 import WatchVideoButton from '../../components/buttons/WatchVideoButton';
@@ -45,8 +44,8 @@ const VideoShow: FC<Props> = (props) => {
   const { intl } = props;
   const { videoId } = useParams();
   const [isLoading, setIsLoading] = useState(true);
-  const dispatch = useDispatch<AppDispatch>();
-  const video = useSelector((state: AppState) => getVideo(state, +videoId!));
+  const dispatch = useAppDispatch();
+  const video = useAppSelector((state) => getVideo(state, +videoId!));
 
   useEffect(() => {
     if (videoId) {
@@ -58,14 +57,7 @@ const VideoShow: FC<Props> = (props) => {
     }
   }, [dispatch, videoId]);
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader title={intl.formatMessage(translations.video)} />
-        <LoadingIndicator />
-      </>
-    );
-  }
+  if (isLoading) return <LoadingIndicator />;
 
   const headerToolbars: ReactElement[] = [];
 
@@ -102,16 +94,16 @@ const VideoShow: FC<Props> = (props) => {
     : getVideosURL(getCourseId());
 
   return (
-    <main className="space-y-5">
-      <PageHeader
-        returnLink={returnLink}
-        title={intl.formatMessage(translations.videoTitle, {
-          title: video?.title,
-        })}
-        toolbars={headerToolbars}
-      />
+    <Page
+      actions={headerToolbars}
+      backTo={returnLink}
+      className="space-y-5"
+      title={intl.formatMessage(translations.videoTitle, {
+        title: video?.title,
+      })}
+    >
       {isLoading ? <LoadingIndicator /> : renderBody}
-    </main>
+    </Page>
   );
 };
 

@@ -1,4 +1,5 @@
 import CourseAPI from 'api/course';
+import { setNotification } from 'lib/actions';
 import pollJob from 'lib/helpers/jobHelpers';
 
 import actionTypes from '../constants';
@@ -6,14 +7,6 @@ import translations from '../translations';
 
 const JOB_POLL_DELAY_MS = 500;
 const JOB_STAGGER_DELAY_MS = 400;
-
-export function setNotification(message, errors) {
-  return {
-    type: actionTypes.SET_NOTIFICATION,
-    message,
-    errors,
-  };
-}
 
 /**
  * Prepares and maps answer value in the react-hook-form into server side format.
@@ -45,12 +38,12 @@ const formatAnswers = (answers = {}) => {
 };
 
 function buildErrorMessage(error) {
-  if (!error?.response?.data) {
-    return '';
-  }
-
-  if (typeof error.response.data.error === 'string') {
+  const errMessage = error?.response?.data;
+  if (typeof errMessage?.error === 'string') {
     return error.response.data.error;
+  }
+  if (!errMessage?.errors) {
+    return '';
   }
 
   return Object.values(error.response.data.errors)
@@ -77,7 +70,7 @@ function getEvaluationResult(submissionId, answerId, questionId) {
   };
 }
 
-export function fetchSubmission(id) {
+export function fetchSubmission(id, onGetMonitoringSessionId) {
   return (dispatch) => {
     dispatch({ type: actionTypes.FETCH_SUBMISSION_REQUEST });
 
@@ -85,6 +78,14 @@ export function fetchSubmission(id) {
       .edit(id)
       .then((response) => response.data)
       .then((data) => {
+        if (data.isSubmissionBlocked) {
+          dispatch({ type: actionTypes.SUBMISSION_BLOCKED });
+          return;
+        }
+        if (data.newSessionUrl) {
+          window.location = data.newSessionUrl;
+          return;
+        }
         data.answers
           .filter((a) => a.autograding && a.autograding.path)
           .forEach((answer, index) => {
@@ -108,7 +109,8 @@ export function fetchSubmission(id) {
               );
             }, JOB_STAGGER_DELAY_MS * index);
           });
-
+        if (data.monitoringSessionId !== undefined)
+          onGetMonitoringSessionId?.(data.monitoringSessionId);
         dispatch({
           type: actionTypes.FETCH_SUBMISSION_SUCCESS,
           payload: data,
@@ -145,7 +147,7 @@ export function autogradeSubmission(id) {
 
 export function saveDraft(submissionId, rawAnswers) {
   const answers = formatAnswers(rawAnswers);
-  const payload = { submission: { answers } };
+  const payload = { submission: { answers, is_save_draft: true } };
   return (dispatch) => {
     dispatch({ type: actionTypes.SAVE_DRAFT_REQUEST });
 
@@ -249,6 +251,51 @@ export function reevaluateAnswer(submissionId, answerId, questionId) {
       })
       .catch(() => {
         dispatch({ type: actionTypes.REEVALUATE_FAILURE, questionId });
+        dispatch(setNotification(translations.requestFailure));
+      });
+  };
+}
+
+const pollFeedbackJob =
+  (jobUrl, submissionId, questionId, answerId) => (dispatch) => {
+    pollJob(
+      jobUrl,
+      () => {
+        dispatch({ type: actionTypes.FEEDBACK_SUCCESS, questionId });
+        fetchSubmission(submissionId)(dispatch);
+      },
+      () => {
+        dispatch({
+          type: actionTypes.FEEDBACK_FAILURE,
+          questionId,
+          answerId,
+        });
+        dispatch(setNotification(translations.generateFeedbackFailure));
+      },
+      JOB_POLL_DELAY_MS,
+    );
+  };
+
+export function generateFeedback(submissionId, answerId, questionId) {
+  return (dispatch) => {
+    dispatch({ type: actionTypes.FEEDBACK_REQUEST, questionId, answerId });
+
+    return CourseAPI.assessment.submissions
+      .generateFeedback(submissionId, { answer_id: answerId })
+      .then((response) => {
+        pollFeedbackJob(
+          response.data.jobUrl,
+          submissionId,
+          questionId,
+          answerId,
+        )(dispatch);
+      })
+      .catch(() => {
+        dispatch({
+          type: actionTypes.FEEDBACK_FAILURE,
+          questionId,
+          answerId,
+        });
         dispatch(setNotification(translations.requestFailure));
       });
   };
@@ -612,5 +659,11 @@ export function toggleViewHistoryMode(
         payload: { viewHistory, questionId },
       });
     }
+  };
+}
+
+export function purgeSubmissionStore() {
+  return (dispatch) => {
+    dispatch({ type: actionTypes.PURGE_SUBMISSION_STORE });
   };
 }

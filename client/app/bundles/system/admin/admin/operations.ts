@@ -1,11 +1,11 @@
+import { Operation } from 'store';
 import { AnnouncementFormData } from 'types/course/announcements';
-import { Operation } from 'types/store';
 import { InstanceFormData, InstanceMiniEntity } from 'types/system/instances';
 import { UserMiniEntity } from 'types/users';
 
 import SystemAPI from 'api/system';
 
-import * as actions from './actions';
+import { actions } from './store';
 
 /**
  * Prepares and maps announcement object attributes to a FormData object for an post/patch request.
@@ -65,7 +65,7 @@ const formatUserAttributes = (data: UserMiniEntity): FormData => {
  *   }
  */
 const formatInstanceAttributes = (
-  data: InstanceFormData | InstanceMiniEntity,
+  data: InstanceFormData | InstanceMiniEntity | Partial<InstanceMiniEntity>,
 ): FormData => {
   const payload = new FormData();
 
@@ -185,7 +185,7 @@ export function createInstance(formData: InstanceFormData): Operation {
 
 export function updateInstance(
   instanceId: number,
-  instanceEntity: InstanceMiniEntity,
+  instanceEntity: InstanceMiniEntity | Partial<InstanceMiniEntity>,
 ): Operation {
   const attributes = formatInstanceAttributes(instanceEntity);
   return async (dispatch) =>

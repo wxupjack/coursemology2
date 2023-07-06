@@ -1,20 +1,17 @@
 import { memo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { useNavigate } from 'react-router-dom';
+import { Warning } from '@mui/icons-material';
 import Delete from '@mui/icons-material/Delete';
 import History from '@mui/icons-material/History';
 import RemoveCircle from '@mui/icons-material/RemoveCircle';
-import {
-  Chip,
-  Icon,
-  IconButton,
-  Link,
-  TableCell,
-  TableRow,
-} from '@mui/material';
+import { Chip, IconButton, TableCell, TableRow } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
+import Link from 'lib/components/core/Link';
+import GhostIcon from 'lib/components/icons/GhostIcon';
 import {
   getCourseUserURL,
   getEditSubmissionURL,
@@ -33,15 +30,6 @@ import translations from '../../translations';
 import submissionsTranslations from './translations';
 
 const styles = {
-  nameWrapper: {
-    display: 'inline',
-    flexWrap: 'nowrap',
-    alignItems: 'center',
-  },
-  phantomIcon: {
-    fontSize: '14px',
-    marginRight: '2px',
-  },
   chip: {
     width: 100,
   },
@@ -66,14 +54,7 @@ const formatGrade = (grade) => (grade !== null ? grade.toFixed(1) : null);
 
 const renderPhantomUserIcon = (submission) => {
   if (submission.courseUser.phantom) {
-    return (
-      <Icon
-        className="fa fa-user-secret fa-xs"
-        data-for="phantom-user"
-        data-tip
-        style={styles.phantomIcon}
-      />
-    );
+    return <GhostIcon data-tooltip-id="phantom-user" fontSize="small" />;
   }
   return null;
 };
@@ -82,8 +63,8 @@ const renderUnpublishedWarning = (submission) => {
   if (submission.workflowState !== workflowStates.Graded) return null;
   return (
     <span style={{ display: 'inline-block', paddingLeft: 5 }}>
-      <div data-for="unpublished-grades" data-offset="{'left' : -8}" data-tip>
-        <i className="fa fa-exclamation-triangle" />
+      <div data-tooltip-id="unpublished-grades" data-tooltip-offset={8}>
+        <Warning fontSize="inherit" />
       </div>
     </span>
   );
@@ -96,6 +77,8 @@ const SubmissionsTableRow = (props) => {
     unsubmitConfirmation: false,
     deleteConfirmation: false,
   });
+
+  const navigate = useNavigate();
 
   const getGradeString = () => {
     if (submission.workflowState === workflowStates.Unstarted) return null;
@@ -137,7 +120,7 @@ const SubmissionsTableRow = (props) => {
       return null;
 
     return (
-      <span className="delete-button" data-for="delete-button" data-tip>
+      <span className="delete-button" data-tooltip-id="delete-button">
         <IconButton
           disabled={disabled}
           id={`delete-button-${submission.courseUser.id}`}
@@ -189,18 +172,24 @@ const SubmissionsTableRow = (props) => {
       return null;
 
     return (
-      <span className="submission-access-logs" data-for="access-logs" data-tip>
-        <a href={getSubmissionLogsURL(courseId, assessmentId, submission.id)}>
-          <IconButton size="large" style={styles.button}>
-            <History
-              htmlColor={
-                palette.submissionIcon.history[
-                  submission.logCount > 1 ? 'none' : 'default'
-                ]
-              }
-            />
-          </IconButton>
-        </a>
+      <span className="submission-access-logs" data-tooltip-id="access-logs">
+        <IconButton
+          onClick={() =>
+            navigate(
+              getSubmissionLogsURL(courseId, assessmentId, submission.id),
+            )
+          }
+          size="large"
+          style={styles.button}
+        >
+          <History
+            htmlColor={
+              palette.submissionIcon.history[
+                submission.logCount > 1 ? 'none' : 'default'
+              ]
+            }
+          />
+        </IconButton>
       </span>
     );
   };
@@ -253,7 +242,7 @@ const SubmissionsTableRow = (props) => {
     if (!assessment.canUnsubmitSubmission) return null;
 
     return (
-      <span className="unsubmit-button" data-for="unsubmit-button" data-tip>
+      <span className="unsubmit-button" data-tooltip-id="unsubmit-button">
         <IconButton
           disabled={disabled}
           id={`unsubmit-button-${submission.courseUser.id}`}
@@ -306,13 +295,12 @@ const SubmissionsTableRow = (props) => {
     return (
       <TableRow key={submission.courseUser.id} className="submission-row">
         <TableCell style={styles.tableCell}>
-          {renderPhantomUserIcon(submission)}
-          <a
-            href={getCourseUserURL(courseId, submission.courseUser.id)}
-            style={styles.nameWrapper}
-          >
-            {submission.courseUser.name}
-          </a>
+          <span className="flex items-center">
+            {renderPhantomUserIcon(submission)}
+            <Link to={getCourseUserURL(courseId, submission.courseUser.id)}>
+              {submission.courseUser.name}
+            </Link>
+          </span>
         </TableCell>
         <TableCell style={tableCenterCellStyle}>
           {renderSubmissionWorkflowState()}
@@ -335,16 +323,14 @@ const SubmissionsTableRow = (props) => {
           {submission.graders && submission.graders.length > 0
             ? submission.graders.map((grader) => (
                 <div key={`grader_${grader.id}`}>
-                  {!grader.id || grader.id === 0 ? (
-                    <div style={styles.nameWrapper}>{grader.name}</div>
-                  ) : (
-                    <a
-                      href={getCourseUserURL(courseId, grader.id)}
-                      style={styles.nameWrapper}
-                    >
-                      {grader.name}
-                    </a>
-                  )}
+                  <Link
+                    to={
+                      Boolean(grader.id && grader.id !== 0) &&
+                      getCourseUserURL(courseId, grader.id)
+                    }
+                  >
+                    {grader.name}
+                  </Link>
                   <br />
                 </div>
               ))

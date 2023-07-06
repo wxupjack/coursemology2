@@ -1,4 +1,5 @@
 import { AxiosResponse } from 'axios';
+import { Operation } from 'store';
 import {
   DisbursementCourseGroupListData,
   DisbursementCourseUserListData,
@@ -12,11 +13,10 @@ import {
   ForumDisbursementUserEntity,
 } from 'types/course/disbursement';
 import { ForumSearchParams } from 'types/course/forums';
-import { Operation } from 'types/store';
 
 import CourseAPI from 'api/course';
 
-import * as actions from './actions';
+import { actions } from './store';
 
 /**
  * Prepares and maps object attributes to a FormData object for an post/patch request.

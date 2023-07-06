@@ -1,7 +1,8 @@
 import { ComponentRef, useMemo, useRef, useState } from 'react';
-import { Chip, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { TimelineData } from 'types/course/referenceTimelines';
 
+import BetaChip from 'lib/components/core/BetaChip';
 import SearchField from 'lib/components/core/fields/SearchField';
 import { useAppSelector } from 'lib/hooks/store';
 import useTranslation from 'lib/hooks/useTranslation';
@@ -10,7 +11,7 @@ import DayCalendar from '../../components/DayCalendar';
 import SubmitIndicator from '../../components/SubmitIndicator';
 import TimelinesOverview from '../../components/TimelinesOverview';
 import TimelinesStack from '../../components/TimelinesStack';
-import { selectItems, selectTimelines } from '../../store';
+import { selectItems, selectTimelines } from '../../selectors';
 import translations from '../../translations';
 
 import ItemsSidebar from './ItemsSidebar';
@@ -45,7 +46,7 @@ const DayView = (): JSX.Element => {
   }, [filterKeyword, items]);
 
   return (
-    <main className="relative flex h-full overflow-hidden">
+    <main className="relative flex h-[calc(100vh_-_4rem)] overflow-hidden">
       <DayCalendar
         ref={calendarRef}
         className="ml-[32rem] border-0 border-l border-solid border-neutral-200"
@@ -56,19 +57,14 @@ const DayView = (): JSX.Element => {
 
       <SubmitIndicator className="absolute right-36 top-0 h-12" />
 
-      <div className="pointer-events-none absolute top-0 left-0 flex h-full w-full flex-col">
-        <section className="pointer-events-auto flex h-36 w-[32rem] shrink-0 flex-col justify-between pb-3 pr-3">
+      <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full flex-col">
+        <section className="pointer-events-auto flex h-36 w-[32rem] shrink-0 flex-col justify-between px-5 pb-5">
           <div className="flex items-center space-x-4">
             <Typography variant="h6">
               {t(translations.timelineDesigner)}
             </Typography>
 
-            <Chip
-              color="success"
-              label={t(translations.beta)}
-              size="small"
-              variant="outlined"
-            />
+            <BetaChip />
           </div>
 
           <SearchField
@@ -100,7 +96,7 @@ const DayView = (): JSX.Element => {
         </section>
       </div>
 
-      <summary className="absolute left-0 bottom-0 z-40 w-full border-0 border-t border-solid border-neutral-200 bg-white">
+      <summary className="absolute bottom-0 left-0 z-40 w-full border-0 border-t border-solid border-neutral-200 bg-white">
         <TimelinesOverview
           for={timelines}
           hiding={hiddenTimelineIds}

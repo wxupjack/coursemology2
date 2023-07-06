@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import ReactTooltip from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
 import {
   Card,
   CardContent,
@@ -24,10 +23,12 @@ import { fetchResponses } from 'course/survey/actions/responses';
 import { responseShape, surveyShape } from 'course/survey/propTypes';
 import surveyTranslations from 'course/survey/translations';
 import BarChart from 'lib/components/core/BarChart';
+import Link from 'lib/components/core/Link';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import moment, { formatLongDateTime } from 'lib/moment';
 
 import { workflowStates } from '../../constants';
+import withSurveyLayout from '../../containers/SurveyLayout';
 import UnsubmitButton from '../../containers/UnsubmitButton';
 
 import RemindButton from './RemindButton';
@@ -181,9 +182,9 @@ const ResponseIndex = (props) => {
         {tableResponses.map((response) => (
           <TableRow key={response.course_user.id}>
             <TableCell colSpan={2}>
-              <a href={response.course_user.path}>
+              <Link to={response.course_user.path}>
                 {response.course_user.name}
-              </a>
+              </Link>
             </TableCell>
             <TableCell>{renderResponseStatus(response)}</TableCell>
             <TableCell>{renderSubmittedAt(response)}</TableCell>
@@ -291,9 +292,10 @@ const ResponseIndex = (props) => {
         {renderStats(realResponsesStatuses, phantomResponsesStatuses)}
         {renderTable(realResponsesWithStatuses)}
         {renderPhantomTable(phantomResponsesWithStatuses)}
-        <ReactTooltip effect="solid" id="unsubmit-button">
+
+        <Tooltip id="unsubmit-button">
           <FormattedMessage {...translations.unsubmit} />
-        </ReactTooltip>
+        </Tooltip>
       </div>
     );
   };
@@ -342,4 +344,9 @@ ResponseIndex.propTypes = {
   isLoading: PropTypes.bool.isRequired,
 };
 
-export default connect((rootState) => rootState.responses)(ResponseIndex);
+const handle = translations.responses;
+
+export default Object.assign(
+  withSurveyLayout(connect(({ surveys }) => surveys.responses)(ResponseIndex)),
+  { handle },
+);

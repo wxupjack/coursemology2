@@ -5,7 +5,7 @@ import {
   injectIntl,
   WrappedComponentProps,
 } from 'react-intl';
-import { Add } from '@mui/icons-material';
+import { Add, ChevronRight } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -28,8 +28,6 @@ import Note from 'lib/components/core/Note';
 
 import { TableEnum } from '../../types';
 import SkillManagementButtons from '../buttons/SkillManagementButtons';
-
-import './SkillsTable.scss';
 
 interface Props extends WrappedComponentProps {
   data: SkillBranchMiniEntity[];
@@ -69,11 +67,11 @@ const translations = defineMessages({
   },
   addSkill: {
     id: 'course.assessment.skills.SkillsTable.addSkill',
-    defaultMessage: 'Add Skill',
+    defaultMessage: 'Skill',
   },
   addSkillBranch: {
     id: 'course.assessment.skills.SkillsTable.addSkillBranch',
-    defaultMessage: 'Add Skill Branch',
+    defaultMessage: 'Skill Branch',
   },
 });
 
@@ -181,6 +179,7 @@ const SkillsTable: FC<Props> = (props: Props) => {
               background: 'white',
               fontSize: 14,
               marginLeft: 12,
+              whiteSpace: 'nowrap',
             }}
             variant="outlined"
           >
@@ -198,8 +197,8 @@ const SkillsTable: FC<Props> = (props: Props) => {
         customBodyRenderLite: (dataIndex): JSX.Element | string => {
           if (tableType === TableEnum.SkillBranches) {
             return (
-              <span
-                className="fa fa-chevron-right"
+              <ChevronRight
+                className="p-0"
                 id={`skill_branch_${
                   tableData[dataIndex] ? tableData[dataIndex].id : ''
                 }`}
@@ -272,6 +271,7 @@ const SkillsTable: FC<Props> = (props: Props) => {
             >
               <Slide
                 appear
+                className="border-only-t-neutral-200"
                 container={containerRef.current}
                 direction="up"
                 in={isOpen}
@@ -280,8 +280,6 @@ const SkillsTable: FC<Props> = (props: Props) => {
                   overflow: 'auto',
                   maxHeight: '20vh',
                   minHeight: '20vh',
-                  borderRadius: '5px',
-                  borderTop: '1px solid #aaaaaa',
                 }}
               >
                 <Box>

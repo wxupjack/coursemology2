@@ -20,9 +20,10 @@ json.assessment do
   json.passwordProtected @assessment.session_password_protected?
   json.gamified @assessment.course.gamified?
   json.files @assessment.folder.materials do |material|
-    json.url url_for([@assessment.course, @assessment.folder, material])
+    json.url url_to_material(@assessment.course, @assessment.folder, material)
     json.name format_inline_text(material.name)
   end
+  json.isCodaveriEnabled current_course.component_enabled?(Course::CodaveriComponent)
 end
 
 current_answer_ids = @submission.current_answers.pluck(:id)
@@ -35,3 +36,5 @@ json.partial! 'questions', assessment: @assessment, submission: @submission, can
 json.partial! 'answers', submission: @submission, answers: answers
 json.partial! 'topics', submission: @submission, submission_questions: submission_questions, can_grade: can_grade
 json.partial! 'history', submission: @submission
+
+json.monitoringSessionId @monitoring_session_id if @monitoring_session_id.present?

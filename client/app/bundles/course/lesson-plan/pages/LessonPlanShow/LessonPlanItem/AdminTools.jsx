@@ -4,15 +4,13 @@ import { defineMessages, injectIntl } from 'react-intl';
 import { connect } from 'react-redux';
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
-import { Button } from '@mui/material';
+import { IconButton } from '@mui/material';
 import PropTypes from 'prop-types';
 
-import {
-  deleteEvent,
-  showDeleteConfirmation,
-  showEventForm,
-  updateEvent,
-} from 'course/lesson-plan/actions';
+import { showDeleteConfirmation } from 'lib/actions';
+
+import { deleteEvent, updateEvent } from '../../../operations';
+import { actions } from '../../../store';
 
 const translations = defineMessages({
   editEvent: {
@@ -40,15 +38,8 @@ const translations = defineMessages({
 const styles = {
   tools: {
     top: 16,
-    right: 66,
+    right: 20,
     position: 'absolute',
-  },
-  edit: {
-    minWidth: 40,
-  },
-  delete: {
-    minWidth: 40,
-    marginLeft: 10,
   },
 };
 
@@ -79,7 +70,7 @@ class AdminTools extends PureComponent {
     } = item;
 
     return dispatch(
-      showEventForm({
+      actions.showEventForm({
         onSubmit: this.updateEventHandler,
         formTitle: intl.formatMessage(translations.editEvent),
         initialValues: {
@@ -117,21 +108,13 @@ class AdminTools extends PureComponent {
 
     return (
       <span style={styles.tools}>
-        <Button
-          onClick={this.showEditEventDialog}
-          style={styles.edit}
-          variant="outlined"
-        >
+        <IconButton onClick={this.showEditEventDialog}>
           <Edit />
-        </Button>
-        <Button
-          color="secondary"
-          onClick={this.deleteEventHandler}
-          style={styles.delete}
-          variant="outlined"
-        >
+        </IconButton>
+
+        <IconButton color="error" onClick={this.deleteEventHandler}>
           <Delete />
-        </Button>
+        </IconButton>
       </span>
     );
   }
@@ -158,6 +141,6 @@ AdminTools.propTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-export default connect((state) => ({
-  canManageLessonPlan: state.flags.canManageLessonPlan,
+export default connect(({ lessonPlan }) => ({
+  canManageLessonPlan: lessonPlan.flags.canManageLessonPlan,
 }))(injectIntl(AdminTools));

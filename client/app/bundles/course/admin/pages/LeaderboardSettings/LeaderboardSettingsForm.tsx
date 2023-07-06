@@ -13,7 +13,8 @@ import commonTranslations from '../../translations';
 
 import translations from './translations';
 
-interface LeaderboardSettingsFormProps extends Emits<FormEmitter> {
+interface LeaderboardSettingsFormProps
+  extends Emits<FormEmitter<LeaderboardSettingsData>> {
   data: LeaderboardSettingsData;
   onSubmit: (data: LeaderboardSettingsData) => void;
   disabled?: boolean;
@@ -50,7 +51,7 @@ const LeaderboardSettingsForm = (
           />
 
           <Typography
-            className="!mt-2 !mb-4"
+            className="!mb-4 !mt-2"
             color="text.secondary"
             variant="body2"
           >

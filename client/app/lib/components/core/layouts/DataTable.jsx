@@ -1,4 +1,5 @@
 import { createTheme, ThemeProvider, useTheme } from '@mui/material/styles';
+import produce from 'immer';
 import MUIDataTable from 'mui-datatables';
 
 import styles from 'lib/components/core/layouts/layout.scss';
@@ -9,6 +10,7 @@ const options = {
   filterType: 'dropdown',
   responsive: 'standard',
   fixedSelectColumn: false,
+  elevation: 0,
 };
 
 const processTheme = (theme, newHeight, grid, alignCenter, newPadding) =>
@@ -58,59 +60,57 @@ const processTheme = (theme, newHeight, grid, alignCenter, newPadding) =>
   });
 
 const processColumns = (includeRowNumber, columns) => {
-  if (!columns) return columns;
+  if (!columns.length) return columns;
 
-  if (includeRowNumber) {
-    columns.unshift({
+  const processed = columns.map((column) => {
+    if (!column.options?.alignCenter && !column.options?.hideInSmallScreen)
+      return column;
+
+    return produce(column, (draft) => {
+      draft.options.setCellHeaderProps = () => {
+        let align = null;
+        let className = '';
+        if (column.options?.alignCenter) {
+          className += `${styles.centeredTableHead}`;
+          align = 'center';
+        }
+        if (column.options?.hideInSmallScreen) {
+          className += ' !hidden sm:!table-cell';
+        }
+        return {
+          ...(align && { align }),
+          className,
+        };
+      };
+
+      draft.options.setCellProps = () => {
+        let align = null;
+        let className = '';
+        if (column.options?.alignCenter) {
+          align = 'center';
+        }
+        if (column.options?.hideInSmallScreen)
+          className += ' !hidden sm:!table-cell';
+        return {
+          ...(align && { align }),
+          className,
+        };
+      };
+    });
+  });
+
+  if (includeRowNumber)
+    processed.unshift({
       name: 'S/N',
       options: {
         sort: false,
         filter: false,
-        customBodyRenderLite: (_dataIndex, rowIndex) => rowIndex + 1,
+        customBodyRenderLite: (dataIndex) => dataIndex + 1,
         download: false,
       },
     });
-  }
 
-  return columns.map((c) => {
-    if (c.options?.alignCenter || c.options?.hideInSmallScreen) {
-      return {
-        ...c,
-        options: {
-          ...c.options,
-          setCellHeaderProps: () => {
-            let align = null;
-            let className = '';
-            if (c.options?.alignCenter) {
-              className += `${styles.centeredTableHead}`;
-              align = 'center';
-            }
-            if (c.options?.hideInSmallScreen) {
-              className += ' !hidden sm:!table-cell';
-            }
-            return {
-              ...(align && { align }),
-              className,
-            };
-          },
-          setCellProps: () => {
-            let align = null;
-            let className = '';
-            if (c.options?.alignCenter) {
-              align = 'center';
-            }
-            if (c.options?.hideInSmallScreen)
-              className += ' !hidden sm:!table-cell';
-            return {
-              ...(align && { align }),
-              className,
-            };
-          },
-        },
-      };
-    }
-    return c;
-  });
+  return processed;
 };
 
 /**
@@ -136,7 +136,6 @@ const DataTable = (props) => {
         <MUIDataTable
           {...props}
           columns={processColumns(props.includeRowNumber, props.columns)}
-          elevation={1}
           options={{ ...options, ...(props.options ?? {}) }}
         />
       </div>
@@ -146,4 +145,7 @@ const DataTable = (props) => {
 
 DataTable.propTypes = MUIDataTable.propTypes;
 
+/**
+ * @deprecated `Use `lib/components/table` instead.
+ */
 export default DataTable;

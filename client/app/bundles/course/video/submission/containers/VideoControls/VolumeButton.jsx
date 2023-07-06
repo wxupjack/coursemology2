@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { VolumeDown, VolumeMute, VolumeUp } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 
 import { videoDefaults } from 'lib/constants/videoConstants';
@@ -13,12 +14,12 @@ const propTypes = {
 };
 
 const VolumeButton = (props) => {
-  let className = 'fa fa-volume-up';
+  let buttonIcon = <VolumeUp />;
 
   if (props.volume === 0) {
-    className = 'fa fa-volume-off';
+    buttonIcon = <VolumeMute />;
   } else if (props.volume < 0.5) {
-    className = 'fa fa-volume-down';
+    buttonIcon = <VolumeDown />;
   }
 
   return (
@@ -26,7 +27,7 @@ const VolumeButton = (props) => {
       className={styles.volumeButton}
       onClick={() => props.onClick(props.volume)}
     >
-      <i className={className} />
+      {buttonIcon}
     </span>
   );
 };

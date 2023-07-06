@@ -6,6 +6,8 @@ import { LoadingButton } from '@mui/lab';
 import { Box, IconButton, TextField } from '@mui/material';
 import equal from 'fast-deep-equal';
 
+import Link from 'lib/components/core/Link';
+
 interface Props {
   value: string;
   updateValue: (value: string) => void;
@@ -53,7 +55,7 @@ const InlineEditTextField: FC<Props> = (props): JSX.Element | null => {
     ...custom
   } = props;
   const [controlledVal, setControlledVal] = useState(value);
-  const [helperText, setHelperText] = useState('');
+  const [errorText, setHelperText] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   if (!renderIf) {
@@ -103,7 +105,7 @@ const InlineEditTextField: FC<Props> = (props): JSX.Element | null => {
   const renderDisplayField = (
     <Box className={className} sx={styles.displayFieldStyle}>
       <>
-        {link ? <a href={link}>{controlledVal}</a> : controlledVal}
+        {link ? <Link href={link}>{controlledVal}</Link> : controlledVal}
 
         <IconButton
           className="inline-edit-button"
@@ -122,7 +124,8 @@ const InlineEditTextField: FC<Props> = (props): JSX.Element | null => {
       <TextField
         className={className}
         disabled={disabled ?? isSaving}
-        helperText={helperText}
+        error={Boolean(errorText)}
+        helperText={errorText}
         label={label}
         onBlur={handleBlur}
         onChange={handleChange}

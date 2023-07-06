@@ -4,8 +4,8 @@ import { VideoSubmissionListData } from 'types/course/videoSubmissions';
 import BaseCourseAPI from './Base';
 
 export default class VideoSubmissionsAPI extends BaseCourseAPI {
-  _getUrlPrefix(): string {
-    return `/courses/${this.getCourseId()}/users/${this.getCourseUserId()}/video_submissions`;
+  get #urlPrefix(): string {
+    return `/courses/${this.courseId}/users/${this.courseUserId}/video_submissions`;
   }
 
   /**
@@ -16,6 +16,6 @@ export default class VideoSubmissionsAPI extends BaseCourseAPI {
       videoSubmissions: VideoSubmissionListData[];
     }>
   > {
-    return this.getClient().get(this._getUrlPrefix());
+    return this.client.get(this.#urlPrefix);
   }
 }

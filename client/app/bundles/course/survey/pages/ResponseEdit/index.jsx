@@ -18,7 +18,13 @@ import surveyTranslations from 'course/survey/translations';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import withRouter from 'lib/components/navigation/withRouter';
 
+import withSurveyLayout from '../../containers/SurveyLayout';
+
 const translations = defineMessages({
+  response: {
+    id: 'course.survey.ResponseEdit.response',
+    defaultMessage: 'Response',
+  },
   saveSuccess: {
     id: 'course.survey.ResponseEdit.saveSuccess',
     defaultMessage: 'Your response has been saved.',
@@ -123,4 +129,11 @@ ResponseEdit.propTypes = {
   dispatch: PropTypes.func.isRequired,
 };
 
-export default withRouter(connect((state) => state.responseForm)(ResponseEdit));
+const handle = translations.response;
+
+export default Object.assign(
+  withSurveyLayout(
+    withRouter(connect(({ surveys }) => surveys.responseForm)(ResponseEdit)),
+  ),
+  { handle },
+);

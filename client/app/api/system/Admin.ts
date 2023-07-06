@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import {
-  AnnouncementListData,
+  AnnouncementData,
   AnnouncementPermissions,
 } from 'types/course/announcements';
 import { CourseListData } from 'types/system/courses';
@@ -18,7 +18,7 @@ interface FilterParams {
 }
 
 export default class AdminAPI extends BaseSystemAPI {
-  static _getUrlPrefix(): string {
+  static get #urlPrefix(): string {
     return `/admin`;
   }
 
@@ -27,21 +27,18 @@ export default class AdminAPI extends BaseSystemAPI {
    */
   indexAnnouncements(): Promise<
     AxiosResponse<{
-      announcements: AnnouncementListData[];
+      announcements: AnnouncementData[];
       permissions: AnnouncementPermissions;
     }>
   > {
-    return this.getClient().get(`${AdminAPI._getUrlPrefix()}/announcements`);
+    return this.client.get(`${AdminAPI.#urlPrefix}/announcements`);
   }
 
   /**
    * Creates a system announcement.
    */
   createAnnouncement(params: FormData): Promise<AxiosResponse> {
-    return this.getClient().post(
-      `${AdminAPI._getUrlPrefix()}/announcements`,
-      params,
-    );
+    return this.client.post(`${AdminAPI.#urlPrefix}/announcements`, params);
   }
 
   /**
@@ -51,8 +48,8 @@ export default class AdminAPI extends BaseSystemAPI {
     announcementId: number,
     params: FormData,
   ): Promise<AxiosResponse> {
-    return this.getClient().patch(
-      `${AdminAPI._getUrlPrefix()}/announcements/${announcementId}`,
+    return this.client.patch(
+      `${AdminAPI.#urlPrefix}/announcements/${announcementId}`,
       params,
     );
   }
@@ -61,8 +58,8 @@ export default class AdminAPI extends BaseSystemAPI {
    * Deletes a system announcement.
    */
   deleteAnnouncement(announcementId: number): Promise<AxiosResponse> {
-    return this.getClient().delete(
-      `${AdminAPI._getUrlPrefix()}/announcements/${announcementId}`,
+    return this.client.delete(
+      `${AdminAPI.#urlPrefix}/announcements/${announcementId}`,
     );
   }
 
@@ -75,7 +72,7 @@ export default class AdminAPI extends BaseSystemAPI {
       counts: AdminStats;
     }>
   > {
-    return this.getClient().get(`${AdminAPI._getUrlPrefix()}/users/`, {
+    return this.client.get(`${AdminAPI.#urlPrefix}/users/`, {
       params,
     });
   }
@@ -84,19 +81,14 @@ export default class AdminAPI extends BaseSystemAPI {
    * Updates a system user.
    */
   updateUser(userId: number, params: FormData): Promise<AxiosResponse> {
-    return this.getClient().patch(
-      `${AdminAPI._getUrlPrefix()}/users/${userId}`,
-      params,
-    );
+    return this.client.patch(`${AdminAPI.#urlPrefix}/users/${userId}`, params);
   }
 
   /**
    * Deletes a system user.
    */
   deleteUser(userId: number): Promise<AxiosResponse> {
-    return this.getClient().delete(
-      `${AdminAPI._getUrlPrefix()}/users/${userId}`,
-    );
+    return this.client.delete(`${AdminAPI.#urlPrefix}/users/${userId}`);
   }
 
   /**
@@ -109,25 +101,22 @@ export default class AdminAPI extends BaseSystemAPI {
       counts: number;
     }>
   > {
-    return this.getClient().get(`${AdminAPI._getUrlPrefix()}/instances`);
+    return this.client.get(`${AdminAPI.#urlPrefix}/instances`);
   }
 
   /**
    * Creates an instance.
    */
   createInstance(params: FormData): Promise<AxiosResponse> {
-    return this.getClient().post(
-      `${AdminAPI._getUrlPrefix()}/instances`,
-      params,
-    );
+    return this.client.post(`${AdminAPI.#urlPrefix}/instances`, params);
   }
 
   /**
    * Updates an instance.
    */
   updateInstance(instanceId: number, params: FormData): Promise<AxiosResponse> {
-    return this.getClient().patch(
-      `${AdminAPI._getUrlPrefix()}/instances/${instanceId}`,
+    return this.client.patch(
+      `${AdminAPI.#urlPrefix}/instances/${instanceId}`,
       params,
     );
   }
@@ -136,9 +125,7 @@ export default class AdminAPI extends BaseSystemAPI {
    * Deletes an instance.
    */
   deleteInstance(instanceId: number): Promise<AxiosResponse> {
-    return this.getClient().delete(
-      `${AdminAPI._getUrlPrefix()}/instances/${instanceId}`,
-    );
+    return this.client.delete(`${AdminAPI.#urlPrefix}/instances/${instanceId}`);
   }
 
   /**
@@ -152,7 +139,7 @@ export default class AdminAPI extends BaseSystemAPI {
       coursesCount: number;
     }>
   > {
-    return this.getClient().get(`${AdminAPI._getUrlPrefix()}/courses`, {
+    return this.client.get(`${AdminAPI.#urlPrefix}/courses`, {
       params,
     });
   }
@@ -161,6 +148,6 @@ export default class AdminAPI extends BaseSystemAPI {
    * Deletes a course
    */
   deleteCourse(id: number): Promise<AxiosResponse> {
-    return this.getClient().delete(`${AdminAPI._getUrlPrefix()}/courses/${id}`);
+    return this.client.delete(`${AdminAPI.#urlPrefix}/courses/${id}`);
   }
 }

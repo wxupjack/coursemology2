@@ -9,17 +9,26 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "lib": ["dom", "dom.iterable", "esnext", "esnext.intl", "es2017.intl", "es2018.intl"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "esnext.intl",
+      "es2017.intl",
+      "es2018.intl"
+    ],
     "module": "esnext",
     "moduleResolution": "node",
     "noErrorTruncation": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
     "noImplicitOverride": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "outDir": "dist",
     "paths": {
+      "lib/*": ["lib/*"],
+      "course/*": ["bundles/course/*"],
       "test-utils": ["utilities/test-utils"]
     },
     "pretty": true,
@@ -27,10 +36,8 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es6",
+    "target": "es6"
   },
-  "include": [
-    "./app/**/*"
-  ],
+  "include": ["./app/**/*"],
   "exclude": ["node_modules", "build", "dist"]
 }

@@ -11,15 +11,12 @@ import {
 } from '@mui/material';
 import PropTypes from 'prop-types';
 
+import { createAssessment } from 'course/assessment/operations';
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
-import NotificationBar, {
-  notificationShape,
-} from 'lib/components/core/NotificationBar';
 import formTranslations from 'lib/translations/form';
 
-import * as actions from '../../actions';
 import AssessmentForm from '../../components/AssessmentForm';
-import actionTypes from '../../constants';
+import actionTypes, { DEFAULT_MONITORING_OPTIONS } from '../../constants';
 import translations from '../../translations';
 
 class NewAssessmentFormButton extends Component {
@@ -40,7 +37,7 @@ class NewAssessmentFormButton extends Component {
     };
 
     return dispatch(
-      actions.createAssessment(
+      createAssessment(
         categoryId,
         tabId,
         { assessment: attributes },
@@ -75,9 +72,10 @@ class NewAssessmentFormButton extends Component {
       dispatch,
       gamified,
       intl,
-      notification,
       visible,
       randomizationAllowed,
+      canManageMonitor,
+      monitoringEnabled,
     } = this.props;
 
     const formActions = [
@@ -117,6 +115,7 @@ class NewAssessmentFormButton extends Component {
       has_todo: true,
       autograded: false,
       block_student_viewing_after_submitted: false,
+      allow_record_draft_answer: false,
       skippable: false,
       allow_partial_submission: false,
       show_mcq_answer: true,
@@ -134,6 +133,7 @@ class NewAssessmentFormButton extends Component {
       randomization: false,
       has_personal_times: false,
       affects_personal_times: false,
+      monitoring: canManageMonitor ? DEFAULT_MONITORING_OPTIONS : undefined,
     };
 
     return (
@@ -161,11 +161,13 @@ class NewAssessmentFormButton extends Component {
           </DialogTitle>
           <DialogContent>
             <AssessmentForm
+              canManageMonitor={canManageMonitor}
               disabled={disabled}
               emitsVia={(assessmentForm) => this.setState({ assessmentForm })}
               gamified={gamified}
               initialValues={initialValues}
               modeSwitching
+              monitoringEnabled={monitoringEnabled}
               onSubmit={this.onFormSubmit}
               randomizationAllowed={randomizationAllowed}
             />
@@ -184,8 +186,6 @@ class NewAssessmentFormButton extends Component {
           open={confirmationDialogOpen}
         />
 
-        <NotificationBar notification={notification} />
-
         {this.state.redirectUrl && <Navigate to={this.state.redirectUrl} />}
       </>
     );
@@ -197,8 +197,9 @@ NewAssessmentFormButton.propTypes = {
   tabId: PropTypes.number.isRequired,
   gamified: PropTypes.bool,
   randomizationAllowed: PropTypes.bool,
+  canManageMonitor: PropTypes.bool,
+  monitoringEnabled: PropTypes.bool,
 
-  notification: notificationShape,
   dispatch: PropTypes.func.isRequired,
   visible: PropTypes.bool.isRequired,
   confirmationDialogOpen: PropTypes.bool.isRequired,
@@ -206,6 +207,6 @@ NewAssessmentFormButton.propTypes = {
   intl: PropTypes.object,
 };
 
-export default connect((state) => ({
-  ...state.formDialog,
+export default connect(({ assessments }) => ({
+  ...assessments.formDialog,
 }))(injectIntl(NewAssessmentFormButton));

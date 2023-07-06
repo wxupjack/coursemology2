@@ -7,9 +7,11 @@ json.display do
   json.isGamified current_course.gamified?
   json.allowRandomization current_course.allow_randomization
   json.isAchievementsEnabled achievements_enabled
+  json.isMonitoringEnabled @monitoring_component_enabled
   json.bonusAttributes show_bonus_attributes?
   json.endTimes show_end_at?
   json.canCreateAssessments can?(:create, Course::Assessment.new(tab: @tab))
+  json.canManageMonitor @can_manage_monitor && @monitoring_component_enabled
 
   json.category do
     json.id @category.id
@@ -21,13 +23,15 @@ json.display do
   end
 
   json.tabId @tab.id
+  json.tabTitle "#{@category.title}: #{@tab.title}"
+  json.tabUrl course_assessments_path(course_id: current_course, category: @category, tab: @tab)
 end
 
 json.assessments @assessments do |assessment|
   json.id assessment.id
   json.title assessment.title
 
-  json.passwordProtected !assessment.view_password.nil?
+  json.passwordProtected assessment.view_password_protected?
   json.published assessment.published?
   json.autograded assessment.autograded?
   json.hasPersonalTimes current_course.show_personalized_timeline_features && assessment.has_personal_times?
@@ -46,10 +50,8 @@ json.assessments @assessments do |assessment|
     achievement_conditionals = @conditional_service.achievement_conditional_for(assessment)
 
     top_conditionals = achievement_conditionals.first(3)
-    json.topConditionals top_conditionals do |achievement|
-      json.url course_achievement_path(current_course, achievement)
-      json.badgeUrl achievement_badge_path(achievement)
-      json.title achievement.title
+    json.topConditionals do
+      json.partial! 'achievement_badges', achievements: top_conditionals, course: current_course
     end
 
     conditionals_count = achievement_conditionals.size

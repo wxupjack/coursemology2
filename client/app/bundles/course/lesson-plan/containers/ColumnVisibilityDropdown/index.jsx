@@ -6,25 +6,18 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { Button, MenuItem, MenuList, Popover } from '@mui/material';
 import PropTypes from 'prop-types';
 
-import { setColumnVisibility } from 'course/lesson-plan/actions';
-import { fields } from 'course/lesson-plan/constants';
-import fieldTranslations from 'course/lesson-plan/translations';
+import { fields } from '../../constants';
+import { actions } from '../../store';
+import fieldTranslations from '../../translations';
 
 const { ITEM_TYPE, START_AT, BONUS_END_AT, END_AT, PUBLISHED } = fields;
 
 const translations = defineMessages({
   label: {
     id: 'course.lessonPlan.ColumnVisibilityDropdown.label',
-    defaultMessage: 'Toggle Column Visibility',
+    defaultMessage: 'Columns',
   },
 });
-
-const styles = {
-  dropdown: {
-    display: 'inline-block',
-    marginLeft: 16,
-  },
-};
 
 class ColumnVisibilityDropdown extends Component {
   constructor(props) {
@@ -55,7 +48,7 @@ class ColumnVisibilityDropdown extends Component {
     const { dispatch, columnsVisible } = this.props;
 
     return (
-      <div style={styles.dropdown}>
+      <>
         <Button
           color="secondary"
           endIcon={<KeyboardArrowDown />}
@@ -64,6 +57,7 @@ class ColumnVisibilityDropdown extends Component {
         >
           <FormattedMessage {...translations.label} />
         </Button>
+
         <Popover
           anchorEl={this.state.anchorEl}
           anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
@@ -79,7 +73,7 @@ class ColumnVisibilityDropdown extends Component {
                   <MenuItem
                     key={field}
                     onClick={() =>
-                      dispatch(setColumnVisibility(field, !isVisible))
+                      dispatch(actions.setColumnVisibility(field, !isVisible))
                     }
                     style={{ display: 'flex', justifyContent: 'space-between' }}
                   >
@@ -91,7 +85,7 @@ class ColumnVisibilityDropdown extends Component {
             )}
           </MenuList>
         </Popover>
-      </div>
+      </>
     );
   }
 }
@@ -101,6 +95,6 @@ ColumnVisibilityDropdown.propTypes = {
   dispatch: PropTypes.func.isRequired,
 };
 
-export default connect((state) => ({
-  columnsVisible: state.flags.editPageColumnsVisible,
+export default connect(({ lessonPlan }) => ({
+  columnsVisible: lessonPlan.flags.editPageColumnsVisible,
 }))(ColumnVisibilityDropdown);

@@ -1,19 +1,14 @@
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
-import {
-  Icon,
-  ListItemText,
-  ListSubheader,
-  MenuItem,
-  MenuList,
-} from '@mui/material';
+import { Cancel } from '@mui/icons-material';
+import { ListItemText, ListSubheader, MenuItem, MenuList } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 
-import { addParentNode } from 'course/learning-map/actions';
+import { addParentNode } from 'course/learning-map/operations';
 
 import { nodeShape, relatedNodeShape } from '../../propTypes';
-import translations from '../../translations.intl';
+import translations from '../../translations';
 
 // Remove padding from top of MenuList
 const theme = createTheme({
@@ -65,11 +60,7 @@ const NodeMenu = (props) => {
       <MenuList style={styles.wrapper}>
         <ListSubheader inset={false} style={styles.header}>
           <FormattedMessage {...translations.addCondition} />
-          <Icon
-            className="fa fa-window-close"
-            onClick={() => onCloseMenu()}
-            style={styles.closeIcon}
-          />
+          <Cancel onClick={onCloseMenu} style={styles.closeIcon} />
         </ListSubheader>
         {nodes.map((node) => (
           <MenuItem

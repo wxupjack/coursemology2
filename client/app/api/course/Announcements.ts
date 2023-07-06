@@ -1,39 +1,29 @@
-import { AxiosResponse } from 'axios';
 import {
   AnnouncementData,
-  AnnouncementListData,
-  AnnouncementPermissions,
+  FetchAnnouncementsData,
 } from 'types/course/announcements';
+
+import { APIResponse } from 'api/types';
 
 import BaseCourseAPI from './Base';
 
 export default class AnnouncementsAPI extends BaseCourseAPI {
-  _getUrlPrefix(): string {
-    return `/courses/${this.getCourseId()}/announcements`;
+  get #urlPrefix(): string {
+    return `/courses/${this.courseId}/announcements`;
   }
 
   /**
    * Fetches all the announcements
    */
-  index(): Promise<
-    AxiosResponse<{
-      announcements: AnnouncementListData[];
-      permissions: AnnouncementPermissions;
-    }>
-  > {
-    return this.getClient().get(this._getUrlPrefix());
+  index(): APIResponse<FetchAnnouncementsData> {
+    return this.client.get(this.#urlPrefix);
   }
 
   /**
    * Creates a new announcement
    */
-  create(params: FormData): Promise<
-    AxiosResponse<{
-      announcements: AnnouncementListData[];
-      permissions: AnnouncementPermissions;
-    }>
-  > {
-    return this.getClient().post(this._getUrlPrefix(), params);
+  create(params: FormData): APIResponse<AnnouncementData> {
+    return this.client.post(this.#urlPrefix, params);
   }
 
   /**
@@ -42,11 +32,8 @@ export default class AnnouncementsAPI extends BaseCourseAPI {
   update(
     announcementId: number,
     params: FormData | object,
-  ): Promise<AxiosResponse<AnnouncementData>> {
-    return this.getClient().patch(
-      `${this._getUrlPrefix()}/${announcementId}`,
-      params,
-    );
+  ): APIResponse<AnnouncementData> {
+    return this.client.patch(`${this.#urlPrefix}/${announcementId}`, params);
   }
 
   /**
@@ -57,7 +44,7 @@ export default class AnnouncementsAPI extends BaseCourseAPI {
    * success response: {}
    * error response: {}
    */
-  delete(announcementId: number): Promise<AxiosResponse> {
-    return this.getClient().delete(`${this._getUrlPrefix()}/${announcementId}`);
+  delete(announcementId: number): APIResponse {
+    return this.client.delete(`${this.#urlPrefix}/${announcementId}`);
   }
 }

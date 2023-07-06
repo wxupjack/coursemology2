@@ -1,5 +1,4 @@
 import { FormattedMessage } from 'react-intl';
-import { connect } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -17,7 +16,8 @@ import { updateSurvey } from 'course/survey/actions/surveys';
 import RespondButton from 'course/survey/containers/RespondButton';
 import { surveyShape } from 'course/survey/propTypes';
 import surveyTranslations from 'course/survey/translations';
-import { TableContainer } from 'lib/components/core/table';
+import TableContainer from 'lib/components/core/layouts/TableContainer';
+import { useAppDispatch } from 'lib/hooks/store';
 import { formatLongDateTime } from 'lib/moment';
 
 import DownloadResponsesButton from './DownloadResponsesButton';
@@ -37,8 +37,9 @@ const SurveyDetails = (props) => {
   const { survey, courseId, disabled } = props;
   const navigate = useNavigate();
 
+  const dispatch = useAppDispatch();
+
   const handlePublishToggle = (event, value) => {
-    const { dispatch } = props;
     dispatch(
       updateSurvey(
         survey.id,
@@ -99,8 +100,12 @@ const SurveyDetails = (props) => {
     return null;
   }
   return (
-    <Card>
-      <TableContainer dense variant="outlined">
+    <Card variant="outlined">
+      <TableContainer
+        className="border-only-b-neutral-200"
+        dense
+        variant="bare"
+      >
         <TableBody>
           <TableRow>
             <TableCell variant="head">
@@ -229,8 +234,6 @@ SurveyDetails.propTypes = {
   survey: surveyShape,
   courseId: PropTypes.string.isRequired,
   disabled: PropTypes.bool.isRequired,
-
-  dispatch: PropTypes.func.isRequired,
 };
 
-export default connect()(SurveyDetails);
+export default SurveyDetails;

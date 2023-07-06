@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { connect } from 'react-redux';
-import ReactTooltip from 'react-tooltip';
-import { Card, CardContent, CircularProgress, Icon } from '@mui/material';
+import { Tooltip } from 'react-tooltip';
+import { Cancel, Delete, ToggleOn } from '@mui/icons-material';
+import { Card, CardContent, CircularProgress, IconButton } from '@mui/material';
 import { green, orange, red } from '@mui/material/colors';
 import PropTypes from 'prop-types';
 
@@ -10,7 +11,7 @@ import {
   removeParentNode,
   resetSelection,
   toggleSatisfiabilityType,
-} from 'course/learning-map/actions';
+} from 'course/learning-map/operations';
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
 
 import { elementTypes, satisfiabilityTypes } from '../../constants';
@@ -19,7 +20,7 @@ import {
   responseShape,
   selectedElementShape,
 } from '../../propTypes';
-import translations from '../../translations.intl';
+import translations from '../../translations';
 
 const styles = {
   content: {
@@ -139,16 +140,17 @@ const Dashboard = (props) => {
 
     return (
       <>
-        <Icon
-          className="fa fa-trash"
-          data-for={tooltipId}
-          data-tip
+        <IconButton
+          data-tooltip-id={tooltipId}
           onClick={() => setDeleteArrowConfirmation(true)}
           style={{ ...styles.icon, color: 'red' }}
-        />
-        <ReactTooltip id={tooltipId}>
+        >
+          <Delete />
+        </IconButton>
+
+        <Tooltip id={tooltipId}>
           <FormattedMessage {...translations.deleteCondition} />
-        </ReactTooltip>
+        </Tooltip>
       </>
     );
   };
@@ -160,14 +162,15 @@ const Dashboard = (props) => {
 
     return (
       <>
-        <Icon
-          className="fa fa-toggle-on"
-          data-for={tooltipId}
-          data-tip
+        <IconButton
+          data-tooltip-id={tooltipId}
           onClick={() => toggleNodeSatisfiabilityType()}
           style={styles.icon}
-        />
-        <ReactTooltip id={tooltipId}>
+        >
+          <ToggleOn />
+        </IconButton>
+
+        <Tooltip id={tooltipId}>
           <FormattedMessage
             {...translations.toggleSatisfiabilityType}
             values={{
@@ -177,7 +180,7 @@ const Dashboard = (props) => {
                   : '"all conditions"',
             }}
           />
-        </ReactTooltip>
+        </Tooltip>
       </>
     );
   };
@@ -206,11 +209,9 @@ const Dashboard = (props) => {
           {text}
           {getActionElements()}
           {(!isEmptyResponse || selectedElement.type) && (
-            <Icon
-              className="fa fa-window-close"
-              onClick={() => reset()}
-              style={{ ...styles.icon }}
-            />
+            <IconButton onClick={() => reset()} style={{ ...styles.icon }}>
+              <Cancel />
+            </IconButton>
           )}
           {isLoading && (
             <CircularProgress size={30} style={styles.circularProgress} />

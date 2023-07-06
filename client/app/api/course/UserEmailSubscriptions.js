@@ -7,10 +7,9 @@ export default class UserEmailSubscriptionsAPI extends BaseCourseAPI {
    * @return {Promise}
    */
   fetch(params) {
-    return this.getClient().get(
-      `${this._getUrlPrefix()}/manage_email_subscription`,
-      { params },
-    );
+    return this.client.get(`${this.#urlPrefix}/manage_email_subscription`, {
+      params,
+    });
   }
 
   /**
@@ -24,13 +23,13 @@ export default class UserEmailSubscriptionsAPI extends BaseCourseAPI {
    * error response: {}
    */
   update(params) {
-    return this.getClient().patch(
-      `${this._getUrlPrefix()}/manage_email_subscription`,
+    return this.client.patch(
+      `${this.#urlPrefix}/manage_email_subscription`,
       params,
     );
   }
 
-  _getUrlPrefix() {
-    return `/courses/${this.getCourseId()}/users/${this.getCourseUserId()}`;
+  get #urlPrefix() {
+    return `/courses/${this.courseId}/users/${this.courseUserId}`;
   }
 }

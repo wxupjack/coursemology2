@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { TimeZones } from 'types/course/admin/course';
 import { EmailData } from 'types/users';
 
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import { FormEmitter } from 'lib/components/form/Form';
 import Preload from 'lib/components/wrappers/Preload';
@@ -30,7 +31,7 @@ const fetchAccountSettingsAndTimeZones = (): Promise<
 
 const AccountSettings = (): JSX.Element => {
   const { t } = useTranslation();
-  const [form, setForm] = useState<FormEmitter>();
+  const [form, setForm] = useState<FormEmitter<AccountSettingsData>>();
   const [reloadForm, setReloadForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -152,27 +153,31 @@ const AccountSettings = (): JSX.Element => {
   };
 
   return (
-    <Preload
-      render={<LoadingIndicator />}
-      syncsWith={[reloadForm]}
-      while={fetchAccountSettingsAndTimeZones}
-    >
-      {([settings, timeZones]): JSX.Element => (
-        <AccountSettingsForm
-          disabled={submitting}
-          emitsVia={setForm}
-          onAddEmail={handleAddEmail}
-          onRemoveEmail={handleRemoveEmail}
-          onResendConfirmationEmail={handleResendConfirmationEmail}
-          onSetEmailAsPrimary={handleSetEmailAsPrimary}
-          onSubmit={handleUpdateAccountSettings}
-          onUpdateProfilePicture={handleUploadProfilePicture}
-          settings={settings}
-          timeZones={timeZones}
-        />
-      )}
-    </Preload>
+    <Page>
+      <Preload
+        render={<LoadingIndicator />}
+        syncsWith={[reloadForm]}
+        while={fetchAccountSettingsAndTimeZones}
+      >
+        {([settings, timeZones]): JSX.Element => (
+          <AccountSettingsForm
+            disabled={submitting}
+            emitsVia={setForm}
+            onAddEmail={handleAddEmail}
+            onRemoveEmail={handleRemoveEmail}
+            onResendConfirmationEmail={handleResendConfirmationEmail}
+            onSetEmailAsPrimary={handleSetEmailAsPrimary}
+            onSubmit={handleUpdateAccountSettings}
+            onUpdateProfilePicture={handleUploadProfilePicture}
+            settings={settings}
+            timeZones={timeZones}
+          />
+        )}
+      </Preload>
+    </Page>
   );
 };
 
-export default AccountSettings;
+const handle = translations.accountSettings;
+
+export default Object.assign(AccountSettings, { handle });

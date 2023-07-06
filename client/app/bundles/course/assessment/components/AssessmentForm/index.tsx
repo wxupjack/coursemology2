@@ -1,50 +1,53 @@
 import { useEffect } from 'react';
 import useEmitterFactory from 'react-emitter-factory';
 import { Controller } from 'react-hook-form';
-import { injectIntl } from 'react-intl';
 import {
   Block as DraftIcon,
   CheckCircle as AutogradedIcon,
   Create as ManualIcon,
   Public as PublishedIcon,
 } from '@mui/icons-material';
-import { Grid, RadioGroup, Typography } from '@mui/material';
+import { Grid, InputAdornment, RadioGroup, Typography } from '@mui/material';
 
+import BetaChip from 'lib/components/core/BetaChip';
 import IconRadio from 'lib/components/core/buttons/IconRadio';
 import ErrorText from 'lib/components/core/ErrorText';
 import InfoLabel from 'lib/components/core/InfoLabel';
 import Section from 'lib/components/core/layouts/Section';
+import Link from 'lib/components/core/Link';
 import ConditionsManager from 'lib/components/extensions/conditions/ConditionsManager';
 import FormCheckboxField from 'lib/components/form/fields/CheckboxField';
 import FormDateTimePickerField from 'lib/components/form/fields/DateTimePickerField';
 import FormRichTextField from 'lib/components/form/fields/RichTextField';
 import FormSelectField from 'lib/components/form/fields/SelectField';
 import FormTextField from 'lib/components/form/fields/TextField';
+import { useAppDispatch } from 'lib/hooks/store';
+import useTranslation from 'lib/hooks/useTranslation';
 
 import FileManager from '../FileManager';
 
-import { fetchTabs } from './actions';
-import t from './translations.intl';
+import { fetchTabs } from './operations';
+import translations from './translations';
 import { AssessmentFormProps, connector } from './types';
 import useFormValidation from './useFormValidation';
 
 const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
   const {
     conditionAttributes,
-    containsCodaveri,
     disabled,
-    dispatch,
     editing,
     gamified,
     folderAttributes,
     initialValues,
     modeSwitching,
     onSubmit,
+    pulsegridUrl,
     // Randomized Assessment is temporarily hidden (PR#5406)
     // randomizationAllowed,
     showPersonalizedTimelineFeatures,
+    canManageMonitor,
     tabs,
-    intl,
+    monitoringEnabled,
   } = props;
 
   const {
@@ -55,9 +58,15 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
     formState: { errors, isDirty },
   } = useFormValidation(initialValues);
 
+  const { t } = useTranslation();
+
+  const dispatch = useAppDispatch();
+
   const autograded = watch('autograded');
   const passwordProtected = watch('password_protected');
   const sessionProtected = watch('session_protected');
+
+  const monitoring = watch('monitoring.enabled');
 
   // Load all tabs if data is loaded, otherwise fall back to current assessment tab.
   const loadedTabs = tabs ?? watch('tabs');
@@ -65,11 +74,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
   useEffect(() => {
     if (!editing) return;
 
-    const failureMessage = intl.formatMessage(t.fetchTabFailure);
-
-    // @ts-ignore until Assessment store and a custom dispatch for thunk is fully typed
-    // https://redux.js.org/tutorials/typescript-quick-start#define-typed-hooks
-    dispatch(fetchTabs(failureMessage));
+    dispatch(fetchTabs(t(translations.fetchTabFailure)));
   }, [dispatch]);
 
   useEmitterFactory(
@@ -91,7 +96,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
             field={field}
             fieldState={fieldState}
             fullWidth
-            label={intl.formatMessage(t.viewPassword)}
+            label={t(translations.viewPassword)}
             required
             type="password"
             variant="filled"
@@ -100,7 +105,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
       />
 
       <Typography className="!mt-0" color="text.secondary" variant="body2">
-        {intl.formatMessage(t.viewPasswordHint)}
+        {t(translations.viewPasswordHint)}
       </Typography>
 
       <Controller
@@ -108,11 +113,11 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
         name="session_protected"
         render={({ field, fieldState }): JSX.Element => (
           <FormCheckboxField
-            description={intl.formatMessage(t.sessionProtectionHint)}
+            description={t(translations.sessionProtectionHint)}
             disabled={autograded || disabled}
             field={field}
             fieldState={fieldState}
-            label={intl.formatMessage(t.sessionProtection)}
+            label={t(translations.sessionProtection)}
           />
         )}
       />
@@ -128,7 +133,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
                 field={field}
                 fieldState={fieldState}
                 fullWidth
-                label={intl.formatMessage(t.sessionPassword)}
+                label={t(translations.sessionPassword)}
                 required
                 type="password"
                 variant="filled"
@@ -137,7 +142,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
           />
 
           <Typography className="!mt-0" color="text.secondary" variant="body2">
-            {intl.formatMessage(t.sessionPasswordHint)}
+            {t(translations.sessionPasswordHint)}
           </Typography>
         </>
       )}
@@ -161,7 +166,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
             disabled={disabled}
             field={field}
             fieldState={fieldState}
-            label={intl.formatMessage(t.tab)}
+            label={t(translations.tab)}
             margin="0"
             options={options}
             variant="filled"
@@ -182,7 +187,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
 
       <Section
         sticksToNavbar={editing}
-        title={intl.formatMessage(t.assessmentDetails)}
+        title={t(translations.assessmentDetails)}
       >
         <Controller
           control={control}
@@ -194,7 +199,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
               field={field}
               fieldState={fieldState}
               fullWidth
-              label={intl.formatMessage(t.title)}
+              label={t(translations.title)}
               required
               variant="filled"
             />
@@ -213,7 +218,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
                   disableShrinkingLabel
                   field={field}
                   fieldState={fieldState}
-                  label={intl.formatMessage(t.startAt)}
+                  label={t(translations.startAt)}
                   required
                   variant="filled"
                 />
@@ -232,7 +237,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
                   disableShrinkingLabel
                   field={field}
                   fieldState={fieldState}
-                  label={intl.formatMessage(t.endAt)}
+                  label={t(translations.endAt)}
                   variant="filled"
                 />
               )}
@@ -251,7 +256,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
                     disableShrinkingLabel
                     field={field}
                     fieldState={fieldState}
-                    label={intl.formatMessage(t.bonusEndAt)}
+                    label={t(translations.bonusEndAt)}
                     variant="filled"
                   />
                 )}
@@ -260,7 +265,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
           )}
         </Grid>
 
-        <Typography>{intl.formatMessage(t.description)}</Typography>
+        <Typography>{t(translations.description)}</Typography>
 
         <Controller
           control={control}
@@ -279,7 +284,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
 
         {editing && (
           <>
-            <Typography>{intl.formatMessage(t.visibility)}</Typography>
+            <Typography>{t(translations.visibility)}</Typography>
 
             <Controller
               control={control}
@@ -294,16 +299,16 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
                   value={field.value === true ? 'published' : 'draft'}
                 >
                   <IconRadio
-                    description={intl.formatMessage(t.publishedHint)}
+                    description={t(translations.publishedHint)}
                     icon={PublishedIcon}
-                    label={intl.formatMessage(t.published)}
+                    label={t(translations.published)}
                     value="published"
                   />
 
                   <IconRadio
-                    description={intl.formatMessage(t.draftHint)}
+                    description={t(translations.draftHint)}
                     icon={DraftIcon}
-                    label={intl.formatMessage(t.draft)}
+                    label={t(translations.draft)}
                     value="draft"
                   />
                 </RadioGroup>
@@ -317,18 +322,18 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
           name="has_todo"
           render={({ field, fieldState }): JSX.Element => (
             <FormCheckboxField
-              description={intl.formatMessage(t.hasTodoHint)}
+              description={t(translations.hasTodoHint)}
               disabled={disabled}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.hasTodo)}
+              label={t(translations.hasTodo)}
             />
           )}
         />
 
         {editing && folderAttributes && (
           <>
-            <Typography>{intl.formatMessage(t.files)}</Typography>
+            <Typography>{t(translations.files)}</Typography>
 
             <FileManager
               disabled={!folderAttributes.enable_materials_action}
@@ -340,10 +345,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
       </Section>
 
       {gamified && (
-        <Section
-          sticksToNavbar={editing}
-          title={intl.formatMessage(t.gamification)}
-        >
+        <Section sticksToNavbar={editing} title={t(translations.gamification)}>
           <Grid container direction="row" spacing={2}>
             <Grid item xs>
               <Controller
@@ -356,7 +358,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
                     field={field}
                     fieldState={fieldState}
                     fullWidth
-                    label={intl.formatMessage(t.baseExp)}
+                    label={t(translations.baseExp)}
                     onWheel={(event): void => event.currentTarget.blur()}
                     type="number"
                     variant="filled"
@@ -376,7 +378,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
                     field={field}
                     fieldState={fieldState}
                     fullWidth
-                    label={intl.formatMessage(t.timeBonusExp)}
+                    label={t(translations.timeBonusExp)}
                     onWheel={(event): void => event.currentTarget.blur()}
                     type="number"
                     variant="filled"
@@ -389,22 +391,18 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
           {editing && conditionAttributes && (
             <ConditionsManager
               conditionsData={conditionAttributes}
-              description={intl.formatMessage(t.unlockConditionsHint)}
-              title={intl.formatMessage(t.unlockConditions)}
+              description={t(translations.unlockConditionsHint)}
+              title={t(translations.unlockConditions)}
             />
           )}
         </Section>
       )}
 
-      <Section sticksToNavbar={editing} title={intl.formatMessage(t.grading)}>
-        <Typography>{intl.formatMessage(t.gradingMode)}</Typography>
+      <Section sticksToNavbar={editing} title={t(translations.grading)}>
+        <Typography>{t(translations.gradingMode)}</Typography>
 
         {!modeSwitching && (
-          <InfoLabel label={intl.formatMessage(t.modeSwitchingDisabled)} />
-        )}
-
-        {containsCodaveri && (
-          <InfoLabel label={intl.formatMessage(t.containsCodaveriQuestion)} />
+          <InfoLabel label={t(translations.modeSwitchingDisabled)} />
         )}
 
         <Controller
@@ -420,15 +418,15 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
               value={field.value === true ? 'autograded' : 'manual'}
             >
               <IconRadio
-                description={intl.formatMessage(t.autogradedHint)}
-                disabled={!!containsCodaveri || !!disabled || !modeSwitching}
+                description={t(translations.autogradedHint)}
+                disabled={!!disabled || !modeSwitching}
                 icon={AutogradedIcon}
                 label="Autograded"
                 value="autograded"
               />
 
               <IconRadio
-                disabled={!!containsCodaveri || !!disabled || !modeSwitching}
+                disabled={!!disabled || !modeSwitching}
                 icon={ManualIcon}
                 label="Manual"
                 value="manual"
@@ -437,7 +435,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
           )}
         />
 
-        <Typography>{intl.formatMessage(t.calculateGradeWith)}</Typography>
+        <Typography>{t(translations.calculateGradeWith)}</Typography>
 
         <Controller
           control={control}
@@ -447,7 +445,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
               disabled={disabled}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.usePublic)}
+              label={t(translations.usePublic)}
             />
           )}
         />
@@ -459,7 +457,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
               disabled={disabled}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.usePrivate)}
+              label={t(translations.usePrivate)}
             />
           )}
         />
@@ -471,7 +469,7 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
               disabled={disabled}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.useEvaluation)}
+              label={t(translations.useEvaluation)}
             />
           )}
         />
@@ -481,16 +479,12 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
           name="delayed_grade_publication"
           render={({ field, fieldState }): JSX.Element => (
             <FormCheckboxField
-              description={intl.formatMessage(t.delayedGradePublicationHint)}
+              description={t(translations.delayedGradePublicationHint)}
               disabled={autograded || disabled}
-              disabledHint={
-                <InfoLabel
-                  label={intl.formatMessage(t.unavailableInAutograded)}
-                />
-              }
+              disabledHint={t(translations.unavailableInAutograded)}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.delayedGradePublication)}
+              label={t(translations.delayedGradePublication)}
             />
           )}
         />
@@ -498,20 +492,30 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
 
       <Section
         sticksToNavbar={editing}
-        title={intl.formatMessage(t.answersAndTestCases)}
+        title={t(translations.answersAndTestCases)}
       >
+        <Controller
+          control={control}
+          name="allow_record_draft_answer"
+          render={({ field, fieldState }): JSX.Element => (
+            <FormCheckboxField
+              disabled={disabled}
+              field={field}
+              fieldState={fieldState}
+              label={t(translations.allowRecordDraftAnswer)}
+            />
+          )}
+        />
         <Controller
           control={control}
           name="skippable"
           render={({ field, fieldState }): JSX.Element => (
             <FormCheckboxField
               disabled={!autograded || disabled}
-              disabledHint={
-                <InfoLabel label={intl.formatMessage(t.skippableManualHint)} />
-              }
+              disabledHint={t(translations.skippableManualHint)}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.skippable)}
+              label={t(translations.skippable)}
             />
           )}
         />
@@ -521,30 +525,26 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
           render={({ field, fieldState }): JSX.Element => (
             <FormCheckboxField
               disabled={!autograded || disabled}
-              disabledHint={
-                <InfoLabel
-                  label={intl.formatMessage(t.unavailableInManuallyGraded)}
-                />
-              }
+              disabledHint={t(translations.unavailableInManuallyGraded)}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.allowPartialSubmission)}
+              label={t(translations.allowPartialSubmission)}
             />
           )}
         />
 
-        <Typography>{intl.formatMessage(t.afterSubmissionGraded)}</Typography>
+        <Typography>{t(translations.afterSubmissionGraded)}</Typography>
 
         <Controller
           control={control}
           name="show_private"
           render={({ field, fieldState }): JSX.Element => (
             <FormCheckboxField
-              description={intl.formatMessage(t.forProgrammingQuestions)}
+              description={t(translations.forProgrammingQuestions)}
               disabled={disabled}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.showPrivate)}
+              label={t(translations.showPrivate)}
             />
           )}
         />
@@ -553,11 +553,11 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
           name="show_evaluation"
           render={({ field, fieldState }): JSX.Element => (
             <FormCheckboxField
-              description={intl.formatMessage(t.forProgrammingQuestions)}
+              description={t(translations.forProgrammingQuestions)}
               disabled={disabled}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.showEvaluation)}
+              label={t(translations.showEvaluation)}
             />
           )}
         />
@@ -570,16 +570,13 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
               disabled={disabled}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.showMcqMrqSolution)}
+              label={t(translations.showMcqMrqSolution)}
             />
           )}
         />
       </Section>
 
-      <Section
-        sticksToNavbar={editing}
-        title={intl.formatMessage(t.organization)}
-      >
+      <Section sticksToNavbar={editing} title={t(translations.organization)}>
         {editing && renderTabs()}
 
         <Controller
@@ -590,16 +587,16 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
               disabled={autograded || disabled}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.displayAssessmentAs)}
+              label={t(translations.displayAssessmentAs)}
               margin="0"
               options={[
                 {
                   value: false,
-                  label: intl.formatMessage(t.singlePage),
+                  label: t(translations.singlePage),
                 },
                 {
                   value: true,
-                  label: intl.formatMessage(t.tabbedView),
+                  label: t(translations.tabbedView),
                 },
               ]}
               type="boolean"
@@ -611,25 +608,21 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
 
       <Section
         sticksToNavbar={editing}
-        title={intl.formatMessage(t.examsAndAccessControl)}
+        title={t(translations.examsAndAccessControl)}
       >
         <Controller
           control={control}
           name="block_student_viewing_after_submitted"
           render={({ field, fieldState }): JSX.Element => (
             <FormCheckboxField
-              description={intl.formatMessage(
-                t.blockStudentViewingAfterSubmittedHint,
+              description={t(
+                translations.blockStudentViewingAfterSubmittedHint,
               )}
               disabled={autograded || disabled}
-              disabledHint={
-                <InfoLabel
-                  label={intl.formatMessage(t.unavailableInAutograded)}
-                />
-              }
+              disabledHint={t(translations.unavailableInAutograded)}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.blockStudentViewingAfterSubmitted)}
+              label={t(translations.blockStudentViewingAfterSubmitted)}
             />
           )}
         />
@@ -641,11 +634,11 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
             name="randomization"
             render={({ field, fieldState }): JSX.Element => (
               <FormCheckboxField
-                description={intl.formatMessage(t.enableRandomizationHint)}
+                description={t(translations.enableRandomizationHint)}
                 disabled={disabled}
                 field={field}
                 fieldState={fieldState}
-                label={intl.formatMessage(t.enableRandomization)}
+                label={t(translations.enableRandomization)}
               />
             )}
           />
@@ -656,16 +649,12 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
           name="show_mcq_answer"
           render={({ field, fieldState }): JSX.Element => (
             <FormCheckboxField
-              description={intl.formatMessage(t.showMcqAnswerHint)}
+              description={t(translations.showMcqAnswerHint)}
               disabled={!autograded || disabled}
-              disabledHint={
-                <InfoLabel
-                  label={intl.formatMessage(t.unavailableInManuallyGraded)}
-                />
-              }
+              disabledHint={t(translations.unavailableInManuallyGraded)}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.showMcqAnswer)}
+              label={t(translations.showMcqAnswer)}
             />
           )}
         />
@@ -676,36 +665,195 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
           render={({ field, fieldState }): JSX.Element => (
             <FormCheckboxField
               disabled={autograded || disabled}
-              disabledHint={
-                <InfoLabel
-                  label={intl.formatMessage(t.unavailableInAutograded)}
-                />
-              }
+              disabledHint={t(translations.unavailableInAutograded)}
               field={field}
               fieldState={fieldState}
-              label={intl.formatMessage(t.passwordProtection)}
+              label={t(translations.passwordProtection)}
+              labelClassName="mt-10"
             />
           )}
         />
 
         {!autograded && passwordProtected && renderPasswordFields()}
+
+        {passwordProtected && monitoringEnabled && (
+          <Controller
+            control={control}
+            name="monitoring.enabled"
+            render={({ field, fieldState }): JSX.Element => (
+              <FormCheckboxField
+                description={t(translations.examMonitoringHint, {
+                  pulsegrid: (chunk) => (
+                    <Link href={pulsegridUrl} opensInNewTab>
+                      {chunk}
+                    </Link>
+                  ),
+                })}
+                disabled={!canManageMonitor || disabled}
+                disabledHint={t(translations.onlyManagersOwnersCanEdit)}
+                field={field}
+                fieldState={fieldState}
+                label={
+                  <span className="flex items-center space-x-2">
+                    <span>{t(translations.examMonitoring)}</span>
+                    <BetaChip disabled={!canManageMonitor || disabled} />
+                  </span>
+                }
+                labelClassName="mt-10"
+              />
+            )}
+          />
+        )}
+
+        {passwordProtected && monitoring && (
+          <>
+            <Controller
+              control={control}
+              name="monitoring.secret"
+              render={({ field, fieldState }): JSX.Element => (
+                <FormTextField
+                  disabled={!canManageMonitor || disabled}
+                  field={field}
+                  fieldState={fieldState}
+                  fullWidth
+                  label={t(translations.secret)}
+                  variant="filled"
+                />
+              )}
+            />
+
+            <Typography
+              className="!mt-0"
+              color="text.secondary"
+              variant="body2"
+            >
+              {t(translations.secretHint, {
+                pulsegrid: (chunk) => (
+                  <Link href={pulsegridUrl} opensInNewTab>
+                    {chunk}
+                  </Link>
+                ),
+              })}
+            </Typography>
+
+            <Grid container direction="row" spacing={2}>
+              <Grid item xs>
+                <Grid container direction="row" spacing={2}>
+                  <Grid item xs>
+                    <Controller
+                      control={control}
+                      name="monitoring.min_interval_ms"
+                      render={({ field, fieldState }): JSX.Element => (
+                        <FormTextField
+                          disabled={!canManageMonitor || disabled}
+                          field={field}
+                          fieldState={fieldState}
+                          fullWidth
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                {t(translations.milliseconds)}
+                              </InputAdornment>
+                            ),
+                          }}
+                          label={t(translations.minInterval)}
+                          required
+                          type="number"
+                          variant="filled"
+                        />
+                      )}
+                    />
+                  </Grid>
+
+                  <Grid item xs>
+                    <Controller
+                      control={control}
+                      name="monitoring.max_interval_ms"
+                      render={({ field, fieldState }): JSX.Element => (
+                        <FormTextField
+                          disabled={!canManageMonitor || disabled}
+                          field={field}
+                          fieldState={fieldState}
+                          fullWidth
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                {t(translations.milliseconds)}
+                              </InputAdornment>
+                            ),
+                          }}
+                          label={t(translations.maxInterval)}
+                          required
+                          type="number"
+                          variant="filled"
+                        />
+                      )}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Typography
+                  className="!mt-0"
+                  color="text.secondary"
+                  variant="body2"
+                >
+                  {t(translations.intervalHint)}
+                </Typography>
+              </Grid>
+
+              <Grid item xs>
+                <Controller
+                  control={control}
+                  name="monitoring.offset_ms"
+                  render={({ field, fieldState }): JSX.Element => (
+                    <FormTextField
+                      disabled={!canManageMonitor || disabled}
+                      field={field}
+                      fieldState={fieldState}
+                      fullWidth
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            {t(translations.milliseconds)}
+                          </InputAdornment>
+                        ),
+                      }}
+                      label={t(translations.offset)}
+                      required
+                      type="number"
+                      variant="filled"
+                    />
+                  )}
+                />
+
+                <Typography
+                  className="!mt-0"
+                  color="text.secondary"
+                  variant="body2"
+                >
+                  {t(translations.offsetHint)}
+                </Typography>
+              </Grid>
+            </Grid>
+          </>
+        )}
       </Section>
 
       {showPersonalizedTimelineFeatures && (
         <Section
           sticksToNavbar={editing}
-          title={intl.formatMessage(t.personalisedTimelines)}
+          title={t(translations.personalisedTimelines)}
         >
           <Controller
             control={control}
             name="has_personal_times"
             render={({ field, fieldState }): JSX.Element => (
               <FormCheckboxField
-                description={intl.formatMessage(t.hasPersonalTimesHint)}
+                description={t(translations.hasPersonalTimesHint)}
                 disabled={disabled}
                 field={field}
                 fieldState={fieldState}
-                label={intl.formatMessage(t.hasPersonalTimes)}
+                label={t(translations.hasPersonalTimes)}
               />
             )}
           />
@@ -715,11 +863,11 @@ const AssessmentForm = (props: AssessmentFormProps): JSX.Element => {
             name="affects_personal_times"
             render={({ field, fieldState }): JSX.Element => (
               <FormCheckboxField
-                description={intl.formatMessage(t.affectsPersonalTimesHint)}
+                description={t(translations.affectsPersonalTimesHint)}
                 disabled={disabled}
                 field={field}
                 fieldState={fieldState}
-                label={intl.formatMessage(t.affectsPersonalTimes)}
+                label={t(translations.affectsPersonalTimes)}
               />
             )}
           />
@@ -733,4 +881,4 @@ AssessmentForm.defaultProps = {
   gamified: true,
 };
 
-export default connector(injectIntl(AssessmentForm));
+export default connector(AssessmentForm);

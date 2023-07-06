@@ -1,11 +1,8 @@
-import { BrowserRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
-import { fireEvent, render, RenderResult, waitFor } from 'utilities/test-utils';
+import { fireEvent, render, RenderResult, waitFor } from 'test-utils';
 
 import CourseAPI from 'api/course';
-import ProviderWrapper from 'lib/components/wrappers/ProviderWrapper';
 
-import storeCreator from '../../../store';
 import AssessmentEdit from '../AssessmentEditPage';
 
 const INITIAL_VALUES = {
@@ -26,6 +23,7 @@ const INITIAL_VALUES = {
   has_todo: false,
   allow_partial_submission: false,
   block_student_viewing_after_submitted: false,
+  allow_record_draft_answer: false,
   delayed_grade_publication: false,
   password_protected: false,
   view_password: null,
@@ -35,6 +33,7 @@ const INITIAL_VALUES = {
   show_mcq_answer: false,
   show_mcq_mrq_solution: false,
   skippable: false,
+  monitoring: { enabled: false },
 };
 
 const NEW_VALUES = {
@@ -44,22 +43,16 @@ const NEW_VALUES = {
   use_public: false,
 };
 
-let store;
 let initialValues;
 let form: RenderResult;
 let updateApi: jest.SpyInstance;
 
 const getComponent = (): JSX.Element => (
-  <ProviderWrapper store={store}>
-    <BrowserRouter>
-      {/* @ts-ignore until AssessmentEdit/index.jsx is fully typed */}
-      <AssessmentEdit initialValues={initialValues} modeSwitching />
-    </BrowserRouter>
-  </ProviderWrapper>
+  /* @ts-ignore until AssessmentEdit/index.jsx is fully typed */
+  <AssessmentEdit initialValues={initialValues} modeSwitching />
 );
 
 beforeEach(() => {
-  store = storeCreator({ assessments: {} });
   initialValues = INITIAL_VALUES;
   updateApi = jest.spyOn(CourseAPI.assessment.assessments, 'update');
 

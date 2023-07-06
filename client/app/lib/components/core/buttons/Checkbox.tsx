@@ -6,9 +6,11 @@ import {
   Typography,
 } from '@mui/material';
 
+import InfoLabel from '../InfoLabel';
+
 type CheckboxProps = ComponentProps<typeof MuiCheckbox> & {
   component?: ElementType;
-  label?: string;
+  label?: string | JSX.Element;
   description?: string;
   disabledHint?: string | JSX.Element;
   error?: string;
@@ -32,13 +34,16 @@ const Checkbox = forwardRef<HTMLButtonElement, CheckboxProps>(
       ...checkboxProps
     } = props;
 
+    const textVariant =
+      variant ?? (props.size === 'small' ? 'body2' : undefined);
+
     return (
       <div>
         <FormControlLabel
           className={`mb-0 ${props.readOnly ? 'cursor-auto' : ''} ${
             labelClassName ?? ''
           }`}
-          componentsProps={{ typography: { variant } }}
+          componentsProps={{ typography: { variant: textVariant } }}
           control={createElement(component ?? MuiCheckbox, {
             ref,
             ...checkboxProps,
@@ -56,7 +61,7 @@ const Checkbox = forwardRef<HTMLButtonElement, CheckboxProps>(
             dangerouslySetInnerHTML ? (
               <Typography
                 dangerouslySetInnerHTML={dangerouslySetInnerHTML}
-                variant={variant}
+                variant={textVariant}
               />
             ) : (
               label
@@ -64,17 +69,24 @@ const Checkbox = forwardRef<HTMLButtonElement, CheckboxProps>(
           }
         />
 
-        <div className="ml-[34px] space-y-2">
+        <div
+          className={`${
+            props.size === 'small' ? 'ml-[2.9rem]' : 'ml-[3.4rem]'
+          } space-y-2`}
+        >
           {description && (
             <Typography
               color={props.disabled ? 'text.disabled' : 'text.secondary'}
-              variant={descriptionVariant ?? 'body2'}
+              variant={
+                descriptionVariant ??
+                (props.size === 'small' ? 'caption' : 'body2')
+              }
             >
               {description}
             </Typography>
           )}
 
-          {props.disabled && disabledHint}
+          {props.disabled && disabledHint && <InfoLabel label={disabledHint} />}
 
           {error && (
             <FormHelperText error={Boolean(error)}>{error}</FormHelperText>

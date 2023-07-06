@@ -4,6 +4,7 @@ import { Grid, Typography } from '@mui/material';
 import { AchievementMiniEntity } from 'types/course/achievements';
 
 import AvatarWithLabel from 'lib/components/core/AvatarWithLabel';
+import Link from 'lib/components/core/Link';
 import { getAchievementURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
 
@@ -37,7 +38,7 @@ const translations = defineMessages({
 const UserProfileAchievements: FC<Props> = ({ achievements, intl }: Props) => {
   return (
     <>
-      <Typography component="h2" id="user-profile-achievements" variant="h4">
+      <Typography id="user-profile-achievements" variant="h4">
         {intl.formatMessage(translations.achivementsHeader)}
       </Typography>
       {achievements.length > 0 ? (
@@ -52,13 +53,13 @@ const UserProfileAchievements: FC<Props> = ({ achievements, intl }: Props) => {
               xs={4}
             >
               <Grid container sx={styles.achievementMiniEntityContainer}>
-                <a href={getAchievementURL(getCourseId(), achievement.id)}>
+                <Link to={getAchievementURL(getCourseId(), achievement.id)}>
                   <AvatarWithLabel
                     imageUrl={achievement.badge.url}
                     label={achievement.title}
                     size="md"
                   />
-                </a>
+                </Link>
               </Grid>
             </Grid>
           ))}

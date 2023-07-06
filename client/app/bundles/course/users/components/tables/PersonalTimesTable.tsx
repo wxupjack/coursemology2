@@ -1,8 +1,6 @@
 import { FC } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
 import {
-  Icon,
-  Link,
   Paper,
   Table,
   TableBody,
@@ -12,12 +10,27 @@ import {
 } from '@mui/material';
 import { PersonalTimeMiniEntity } from 'types/course/personalTimes';
 
-import { ITEM_ACTABLE_TYPES } from 'lib/constants/sharedConstants';
+import Link from 'lib/components/core/Link';
+import {
+  CourseComponentIconName,
+  defensivelyGetIcon,
+} from 'lib/constants/icons';
 import { getAssessmentURL, getVideoURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
 import tableTranslations from 'lib/translations/table';
 
 import PersonalTimeEditor from '../misc/PersonalTimeEditor';
+
+const ITEM_ACTABLE_TYPES = {
+  video: {
+    name: 'Course::Video',
+    value: 'video',
+  },
+  assessment: {
+    name: 'Course::Assessment',
+    value: 'assessment',
+  },
+};
 
 interface Props extends WrappedComponentProps {
   personalTimes: PersonalTimeMiniEntity[];
@@ -30,11 +43,6 @@ const translations = defineMessages({
   },
 });
 
-const icons = {
-  assessment: 'fa fa-plane',
-  video: 'fa fa-video-camera',
-};
-
 const getLink = (item: PersonalTimeMiniEntity): JSX.Element => {
   let url = '';
   const courseId = getCourseId();
@@ -45,7 +53,7 @@ const getLink = (item: PersonalTimeMiniEntity): JSX.Element => {
   }
 
   return (
-    <Link href={url} style={{ textDecoration: 'none' }}>
+    <Link to={url} underline="hover">
       {item.title}
     </Link>
   );
@@ -60,16 +68,9 @@ const getIcon = (item: PersonalTimeMiniEntity): JSX.Element => {
     materialType = 'assessment';
   }
 
-  return (
-    <Icon
-      className={icons[materialType]}
-      style={{
-        fontSize: 12,
-        marginRight: '4px',
-        verticalAlign: 'inherit',
-      }}
-    />
-  );
+  const Icon = defensivelyGetIcon(materialType as CourseComponentIconName);
+
+  return <Icon fontSize="small" />;
 };
 
 const PersonalTimesTable: FC<Props> = (props) => {
@@ -78,7 +79,7 @@ const PersonalTimesTable: FC<Props> = (props) => {
   const renderRow = (item: PersonalTimeMiniEntity): JSX.Element => {
     return (
       <TableRow key={item.id} hover>
-        <TableCell>
+        <TableCell className="flex items-center space-x-1">
           {getIcon(item)}
           {getLink(item)}
         </TableCell>

@@ -1,8 +1,8 @@
 import { FormattedMessage } from 'react-intl';
-import { Icon } from '@mui/material';
+import { LockOpen } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 
-import translations from '../../translations.intl';
+import translations from '../../translations';
 
 const styles = {
   content: {
@@ -16,8 +16,8 @@ const styles = {
   },
   icon: {
     fontSize: '12px',
-    margin: 'auto',
-    padding: '0px',
+    marginBottom: '0.5em',
+    padding: '1px',
   },
   unfilledPortion: {
     backgroundColor: 'white',
@@ -38,7 +38,7 @@ const UnlockRateDisplay = (props) => {
 
   return (
     <div>
-      <Icon className="fa fa-unlock" style={styles.icon} />
+      <LockOpen style={styles.icon} />
       <div style={{ ...styles.unlockRateBar, width }}>
         <div style={{ ...styles.filledPortion, width: unlockRate * width }} />
         <div

@@ -4,6 +4,7 @@ require 'rails_helper'
 RSpec.describe Course::Assessment do
   it { is_expected.to act_as(Course::LessonPlan::Item) }
   it { is_expected.to belong_to(:tab).without_validating_presence }
+  it { is_expected.to belong_to(:monitor).without_validating_presence }
   it { is_expected.to have_many(:questions) }
   it { is_expected.to have_many(:multiple_response_questions).through(:questions) }
   it { is_expected.to have_many(:text_response_questions).through(:questions) }
@@ -404,22 +405,6 @@ RSpec.describe Course::Assessment do
 
         expect(autograded_assessment).to be_autograded
         expect(autograded_assessment.skippable).to be_truthy
-      end
-    end
-
-    describe '#contains_programming_codaveri' do
-      context 'when there is no codaveri question' do
-        let(:assessment_traits) { [:published_with_all_question_types] }
-        it 'does not contain programming codaveri quesetion' do
-          expect(assessment.contains_programming_codaveri?).to eq false
-        end
-      end
-
-      context 'when there is codaveri question' do
-        let(:assessment_traits) { [:with_programming_codaveri_question] }
-        it 'does not contain programming codaveri quesetion' do
-          expect(assessment.contains_programming_codaveri?).to eq true
-        end
       end
     end
   end

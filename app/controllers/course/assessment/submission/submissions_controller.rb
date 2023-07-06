@@ -14,6 +14,8 @@ class Course::Assessment::Submission::SubmissionsController < \
   # edited or updated.
   before_action :load_or_create_submission_questions, only: [:edit, :update]
 
+  after_action :stop_monitoring_session_if_submitted, only: [:update]
+
   delegate_to_service(:update)
   delegate_to_service(:submit_answer)
   delegate_to_service(:load_or_create_answers)
@@ -41,41 +43,36 @@ class Course::Assessment::Submission::SubmissionsController < \
   end
 
   def create # rubocop:disable Metrics/AbcSize
-    if cannot?(:access, @assessment)
-      head :forbidden
-      return
-    end
+    authorize! :access, @assessment
 
     existing_submission = @assessment.submissions.find_by(creator: current_user)
-    if existing_submission
-      @submission = existing_submission
-      return redirect_to edit_course_assessment_submission_path(current_course, @assessment, @submission)
-    end
+    create_success_response(existing_submission) and return if existing_submission
 
-    @submission.session_id = authentication_service.generate_authentication_token
-    success = @assessment.create_new_submission(@submission, current_user)
+    ActiveRecord::Base.transaction do
+      @submission.session_id = authentication_service.generate_authentication_token
+      success = @assessment.create_new_submission(@submission, current_user)
+      raise ActiveRecord::Rollback unless success
 
-    if success
       authentication_service.save_token_to_session(@submission.session_id)
       log_service.log_submission_access(request) if @assessment.session_password_protected?
-      redirect_to edit_course_assessment_submission_path(current_course, @assessment, @submission,
-                                                         new_submission: true)
-    else
-      redirect_to course_assessments_path(current_course),
-                  danger: t('.failure', error: @submission.errors.full_messages.to_sentence)
+      monitoring_service&.create_new_session_if_not_exist! if should_monitor?
+
+      create_success_response(@submission)
     end
+  rescue StandardError
+    error_message = @submission.errors.full_messages.to_sentence
+    render json: { error: error_message }, status: :bad_request
   end
 
   def edit
-    return if @submission.attempting?
-
-    render 'blocked' if @submission.submission_view_blocked?(current_course_user)
+    @monitoring_session_id = monitoring_service&.session&.id if should_monitor?
 
     respond_to do |format|
-      format.html {} # rubocop:disable Lint/EmptyBlock
+      format.html
       format.json do
-        calculated_fields = [:graded_at, :grade]
-        @submission = @submission.calculated(*calculated_fields)
+        return render json: { isSubmissionBlocked: true } if @submission.submission_view_blocked?(current_course_user)
+
+        @submission = @submission.calculated(:graded_at, :grade) unless @submission.attempting?
       end
     end
   end
@@ -88,13 +85,21 @@ class Course::Assessment::Submission::SubmissionsController < \
   end
 
   def reevaluate_answer
-    authorize!(:grade, @submission)
     @answer = @submission.answers.find_by(id: reload_answer_params[:answer_id])
 
     return head :bad_request if @answer.nil?
 
     job = @answer.auto_grade!(redirect_to_path: nil, reduce_priority: true)
     render partial: 'jobs/submitted', locals: { job: job.job }
+  end
+
+  def generate_feedback
+    @answer = @submission.answers.find_by(id: reload_answer_params[:answer_id])
+
+    return head :bad_request if @answer.nil?
+
+    job = @answer.generate_feedback
+    render partial: 'jobs/submitted', locals: { job: job }
   end
 
   # Reload the current answer or reset it, depending on parameters.
@@ -178,18 +183,19 @@ class Course::Assessment::Submission::SubmissionsController < \
 
   def unsubmit
     authorize!(:update, @assessment)
-    submission = @assessment.submissions.find(params[:submission_id])
-    success = submission.transaction do
-      submission.update!('unmark' => 'true') if submission.graded?
-      submission.update!('unsubmit' => 'true')
+    @submission = @assessment.submissions.find(params[:submission_id])
+    success = @submission.transaction do
+      @submission.update!('unmark' => 'true') if @submission.graded?
+      @submission.update!('unsubmit' => 'true')
+      monitoring_service&.continue_listening!
 
       true
     end
     if success
       head :ok
     else
-      logger.error("Failed to unsubmit submission: #{submission.errors.inspect}")
-      render json: { errors: submission.errors }, status: :bad_request
+      logger.error("Failed to unsubmit submission: #{@submission.errors.inspect}")
+      render json: { errors: @submission.errors }, status: :bad_request
     end
   end
 
@@ -209,16 +215,16 @@ class Course::Assessment::Submission::SubmissionsController < \
     @submission = @assessment.submissions.find(params[:submission_id])
     authorize!(:delete_submission, @submission)
 
-    success = @submission.transaction do
+    ActiveRecord::Base.transaction do
       reset_question_bundle_assignments if @assessment.randomization == 'prepared'
-      @submission.destroy
-    end
-    if success
+      monitoring_service&.stop!
+      @submission.destroy!
+
       head :ok
-    else
-      logger.error("Failed to delete submission: #{submission.errors.inspect}")
-      render json: { errors: submission.errors }, status: :bad_request
     end
+  rescue StandardError
+    logger.error("Failed to delete submission: #{@submission.errors.inspect}")
+    render json: { errors: @submission.errors }, status: :bad_request
   end
 
   def reset_question_bundle_assignments
@@ -243,6 +249,11 @@ class Course::Assessment::Submission::SubmissionsController < \
 
   def create_params
     { course_user: current_course_user }
+  end
+
+  def create_success_response(submission)
+    redirect_url = edit_course_assessment_submission_path(current_course, @assessment, submission)
+    render json: { redirectUrl: redirect_url }
   end
 
   def authorize_assessment!
@@ -275,7 +286,7 @@ class Course::Assessment::Submission::SubmissionsController < \
     log_service.log_submission_access(request)
 
     respond_to do |format|
-      format.html { redirect_to new_session_path }
+      format.html { render 'edit' }
       format.json { render json: { newSessionUrl: new_session_path } }
     end
   end
@@ -288,6 +299,32 @@ class Course::Assessment::Submission::SubmissionsController < \
   def log_service
     @log_service ||=
       Course::Assessment::SessionLogService.new(@assessment, session, @submission)
+  end
+
+  def monitoring_component_enabled?
+    current_component_host[:course_monitoring_component].present?
+  end
+
+  def should_monitor?
+    monitoring_component_enabled? &&
+      current_user.id == @submission.creator_id &&
+      current_course_user.student? &&
+      can?(:create, Course::Monitoring::Session.new(creator_id: current_user.id)) &&
+      @assessment&.monitor&.enabled?
+  end
+
+  def can_update_monitoring_session?
+    can?(:update, Course::Monitoring::Session.new)
+  end
+
+  def monitoring_service
+    return nil unless should_monitor? || can_update_monitoring_session?
+
+    @monitoring_service ||= Course::Assessment::Submission::MonitoringService.for(@submission, @assessment)
+  end
+
+  def stop_monitoring_session_if_submitted
+    monitoring_service&.stop! if @submission.submitted?
   end
 
   def not_downloadable
@@ -316,9 +353,7 @@ class Course::Assessment::Submission::SubmissionsController < \
 
     dead_answers = submitted_answers.select do |a|
       job = a.auto_grading&.job
-      job&.submitted? &&
-        job.created_at < Time.zone.now -
-                         Course::Assessment::ProgrammingEvaluationService::DEFAULT_TIMEOUT
+      job&.submitted? && job.created_at < Time.zone.now - 60.minutes
     end
 
     dead_answers.each do |a|

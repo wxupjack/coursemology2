@@ -1,6 +1,5 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Grid } from '@mui/material';
 import {
@@ -8,10 +7,10 @@ import {
   SkillBranchOptions,
   SkillMiniEntity,
 } from 'types/course/assessment/skills/skills';
-import { AppDispatch, AppState } from 'types/store';
 
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 
 import SkillDialog from '../../components/dialogs/SkillDialog';
 import SkillsTable from '../../components/tables/SkillsTable';
@@ -38,7 +37,7 @@ const translations = defineMessages({
 
 const SkillsIndex: FC<Props> = (props) => {
   const { intl } = props;
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [dialogType, setDialogType] = useState(DialogTypes.NewSkill);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -48,15 +47,9 @@ const SkillsIndex: FC<Props> = (props) => {
   const [skillBranchId, setSkillBranchId] = useState(null as number | null);
   const [skillId, setSkillId] = useState(null as number | null);
 
-  const skillPermissions = useSelector((state: AppState) =>
-    getSkillPermissions(state),
-  );
-  const skillBranchEntities = useSelector((state: AppState) =>
-    getAllSkillBranchMiniEntities(state),
-  );
-  const skillEntities = useSelector((state: AppState) =>
-    getAllSkillMiniEntities(state),
-  );
+  const skillPermissions = useAppSelector(getSkillPermissions);
+  const skillBranchEntities = useAppSelector(getAllSkillBranchMiniEntities);
+  const skillEntities = useAppSelector(getAllSkillMiniEntities);
   const data: SkillBranchMiniEntity[] = skillBranchEntities
     .map((branch) => {
       return {
@@ -144,14 +137,23 @@ const SkillsIndex: FC<Props> = (props) => {
   };
 
   return (
-    <>
-      <PageHeader title={intl.formatMessage(translations.skills)} />
+    <Page title={intl.formatMessage(translations.skills)} unpadded>
       {isLoading ? (
         <LoadingIndicator />
       ) : (
         <>
-          <Grid columnGap={0.2} container direction="row">
-            <Grid id="skill-branches" item xs>
+          <Grid
+            className="border-only-b-neutral-200"
+            columnGap={0.2}
+            container
+            direction="row"
+          >
+            <Grid
+              className="border-only-r-neutral-200"
+              id="skill-branches"
+              item
+              xs
+            >
               <SkillsTable
                 addClick={newSkillBranchClick}
                 addDisabled={!skillPermissions.canCreateSkill}
@@ -192,8 +194,10 @@ const SkillsIndex: FC<Props> = (props) => {
           />
         </>
       )}
-    </>
+    </Page>
   );
 };
 
-export default injectIntl(SkillsIndex);
+const handle = translations.skills;
+
+export default Object.assign(injectIntl(SkillsIndex), { handle });

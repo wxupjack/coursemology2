@@ -1,12 +1,11 @@
 import CourseAPI from 'api/course';
+import { setNotification } from 'lib/actions';
 import pollJob from 'lib/helpers/jobHelpers';
 import { setReactHookFormError } from 'lib/helpers/react-hook-form-helper';
 import { getCourseId } from 'lib/helpers/url-helpers';
 
 import actionTypes from '../constants';
 import translations from '../translations';
-
-import { setNotification } from './index';
 
 const DOWNLOAD_JOB_POLL_INTERVAL_MS = 2000;
 
@@ -58,6 +57,16 @@ export function loadSurvey(survey) {
   };
 }
 
+export function loadSurveys(surveys, canCreate) {
+  return (dispatch) => {
+    dispatch({
+      type: actionTypes.LOAD_SURVEYS_SUCCESS,
+      surveys,
+      canCreate,
+    });
+  };
+}
+
 export function fetchSurvey(surveyId) {
   return (dispatch) => {
     dispatch({ type: actionTypes.LOAD_SURVEY_REQUEST, surveyId });
@@ -79,11 +88,7 @@ export function fetchSurveys() {
     return CourseAPI.survey.surveys
       .index()
       .then((response) => {
-        dispatch({
-          type: actionTypes.LOAD_SURVEYS_SUCCESS,
-          surveys: response.data.surveys,
-          canCreate: response.data.canCreate,
-        });
+        loadSurveys(response.data.surveys, response.data.canCreate)(dispatch);
       })
       .catch(() => {
         dispatch({ type: actionTypes.LOAD_SURVEYS_FAILURE });

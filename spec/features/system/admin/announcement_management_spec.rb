@@ -23,8 +23,8 @@ RSpec.feature 'System: Administration: Announcements' do
         find('button.btn-submit').click
         wait_for_page
         expect(current_path).to eq(admin_announcements_path)
-        expect(page).to have_selector('h3', text: announcement[:title])
-        expect(page).to have_selector('p', text: announcement[:content])
+        expect(page).to have_text(announcement[:title])
+        expect(page).to have_text(announcement[:content])
         expect_toastify('New announcement posted!')
       end
 
@@ -48,14 +48,14 @@ RSpec.feature 'System: Administration: Announcements' do
 
         expect(current_path).to eq admin_announcements_path
         within find("#announcement-#{announcement.id}") do
-          expect(page).to have_selector('h3', text: new_title)
+          expect(page).to have_text(new_title)
         end
         expect(announcement.reload.title).to eq(new_title)
       end
 
       scenario 'I can see all announcements' do
         create_list(:system_announcement, 2)
-        announcements = System::Announcement.sorted_by_date.first(2)
+        announcements = System::Announcement.first(2)
         visit admin_announcements_path
         expect(page).to have_selector('#new-announcement-button')
 
@@ -68,7 +68,7 @@ RSpec.feature 'System: Administration: Announcements' do
 
       scenario 'I can delete announcements' do
         create(:system_announcement)
-        announcement = System::Announcement.sorted_by_date.first
+        announcement = System::Announcement.first
         visit admin_announcements_path
 
         find("#announcement-delete-button-#{announcement.id}").click

@@ -13,6 +13,14 @@ const translations = defineMessages({
     id: 'lib.translations.summary',
     defaultMessage: 'Summary',
   },
+  beta: {
+    id: 'lib.translations.beta',
+    defaultMessage: 'Beta',
+  },
+  experimental: {
+    id: 'lib.translations.experimental',
+    defaultMessage: 'Experimental',
+  },
 });
 
 export default translations;

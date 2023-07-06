@@ -72,6 +72,9 @@ class PastAnswers extends Component {
       return (
         <MenuItem key={index} value={answer}>
           {formatLongDateTime(answer.createdAt)}
+          {answer.isDraftAnswer && (
+            <>&nbsp;{intl.formatMessage(translations.draftAnswer)}</>
+          )}
         </MenuItem>
       );
     };
@@ -99,7 +102,10 @@ class PastAnswers extends Component {
     return (
       <div key={answer.id}>
         <h4>
-          {intl.formatMessage(translations.submittedAt)}: {date}
+          {answer.isDraftAnswer
+            ? intl.formatMessage(translations.savedAt)
+            : intl.formatMessage(translations.submittedAt)}
+          : {date}
         </h4>
         {this.getAnswersHistory(question, answer)}
         <hr style={styles.horizontalRule} />
@@ -147,12 +153,12 @@ PastAnswers.propTypes = {
   graderView: PropTypes.bool,
 };
 
-function mapStateToProps(state, ownProps) {
+function mapStateToProps({ assessments: { submission } }, ownProps) {
   const { question } = ownProps;
-  const selectedAnswerIds = state.history.questions[question.id].selected;
-  const answerIds = state.history.questions[question.id].answerIds;
-  const answers = state.history.answers;
-  const graderView = state.submission.graderView;
+  const selectedAnswerIds = submission.history.questions[question.id].selected;
+  const answerIds = submission.history.questions[question.id].answerIds;
+  const answers = submission.history.answers;
+  const graderView = submission.submission.graderView;
 
   return {
     selectedAnswerIds,

@@ -1,9 +1,12 @@
 import { Component } from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
+import { ChevronRight, Delete, ExpandMore } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 import { green, red } from '@mui/material/colors';
 import PropTypes from 'prop-types';
 
 import { postPackShape } from 'course/assessment/submission/propTypes';
+import Link from 'lib/components/core/Link';
 import { getForumTopicURL, getForumURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
 
@@ -61,9 +64,9 @@ export default class SelectedPostCard extends Component {
       renderedName = `${renderedName.slice(0, MAX_NAME_LENGTH)}...`;
     }
     return (
-      <a href={url} rel="noopener noreferrer" target="_blank">
-        {renderedName} <i className="fa fa-external-link" />
-      </a>
+      <Link opensInNewTab to={url}>
+        {renderedName}
+      </Link>
     );
   }
 
@@ -87,12 +90,11 @@ export default class SelectedPostCard extends Component {
 
     return (
       <div style={styles.labelLeft}>
-        <i
-          className={
-            this.state.isExpanded ? 'fa fa-angle-down' : 'fa fa-angle-right'
-          }
-          style={{ width: 20 }}
-        />
+        {this.state.isExpanded ? (
+          <ExpandMore fontSize="small" />
+        ) : (
+          <ChevronRight fontSize="small" />
+        )}
         {topic.isDeleted ? (
           <span>
             <FormattedMessage {...translations.topicDeleted} />
@@ -123,14 +125,14 @@ export default class SelectedPostCard extends Component {
       return null;
     }
     return (
-      <button
+      <IconButton
         className="pull-right"
-        onClick={() => this.props.onRemovePostPack()}
+        onClick={this.props.onRemovePostPack}
         style={styles.trashButton}
         type="button"
       >
-        <i className="fa fa-trash" />
-      </button>
+        <Delete />
+      </IconButton>
     );
   }
 

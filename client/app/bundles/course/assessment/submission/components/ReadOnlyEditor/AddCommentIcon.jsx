@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { AddBox } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 
 export default class AddCommentIcon extends Component {
@@ -10,9 +11,9 @@ export default class AddCommentIcon extends Component {
     const { hovered, onClick } = this.props;
     return (
       <div onClick={onClick}>
-        <i
-          className="fa fa-plus-square"
-          style={{ visibility: hovered ? 'visible' : 'hidden' }}
+        <AddBox
+          className={`${hovered ? 'visible' : 'hidden'} flex items-center`}
+          fontSize="small"
         />
       </div>
     );

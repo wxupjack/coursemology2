@@ -1,6 +1,5 @@
 import { FC, ReactElement, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import {
   CircularProgress,
@@ -14,20 +13,21 @@ import {
   TableOptions,
   TableState,
 } from 'types/components/DataTable';
-import { AppDispatch } from 'types/store';
 import {
   InstanceAdminStats,
   InstanceUserMiniEntity,
-  InstanceUserRole,
+  InstanceUserRoles,
 } from 'types/system/instance/users';
 
 import DataTable from 'lib/components/core/layouts/DataTable';
+import Link from 'lib/components/core/Link';
 import {
   DEFAULT_TABLE_ROWS_PER_PAGE,
   FIELD_DEBOUNCE_DELAY_MS,
   INSTANCE_USER_ROLES,
 } from 'lib/constants/sharedConstants';
 import rebuildObjectFromRow from 'lib/helpers/mui-datatables-helpers';
+import { useAppDispatch } from 'lib/hooks/store';
 import tableTranslations from 'lib/translations/table';
 
 import { indexUsers, updateUser } from '../../operations';
@@ -71,7 +71,7 @@ const UsersTable: FC<Props> = (props) => {
   const { title, renderRowActionComponent, intl, users, userCounts, filter } =
     props;
   const [isLoading, setIsLoading] = useState(false);
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   const [tableState, setTableState] = useState<TableState>({
     count: userCounts.usersCount,
@@ -90,7 +90,7 @@ const UsersTable: FC<Props> = (props) => {
     ) as InstanceUserMiniEntity;
     const newUser = {
       ...user,
-      role: newRole as InstanceUserRole,
+      role: newRole as InstanceUserRoles,
     };
     return dispatch(updateUser(user.id, newUser))
       .then(() => {
@@ -265,19 +265,15 @@ const UsersTable: FC<Props> = (props) => {
         customBodyRenderLite: (dataIndex): JSX.Element => {
           const user = users[dataIndex];
           return (
-            <Typography
+            <Link
               key={`courses-${user.id}`}
               className="user_courses"
-              variant="body2"
+              opensInNewTab
+              to={`/users/${user.userId}`}
+              underline="hover"
             >
-              <a
-                href={`/users/${user.id}`}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {user.courses}
-              </a>
-            </Typography>
+              {user.courses}
+            </Link>
           );
         },
       },
@@ -324,9 +320,9 @@ const UsersTable: FC<Props> = (props) => {
         sort: false,
         alignCenter: true,
         customBodyRender: (_value, tableMeta): JSX.Element => {
-          const rowData = tableMeta.rowData as InstanceUserMiniEntity;
+          const rowData = tableMeta.rowData;
           const user = rebuildObjectFromRow(columns, rowData);
-          return renderRowActionComponent(user);
+          return renderRowActionComponent(user as InstanceUserMiniEntity);
         },
       },
     },

@@ -1,15 +1,17 @@
 import { Component } from 'react';
 import { defineMessages, FormattedMessage, injectIntl } from 'react-intl';
 import { connect } from 'react-redux';
+import { Add } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import PropTypes from 'prop-types';
 
-import { createMilestone, showMilestoneForm } from 'course/lesson-plan/actions';
+import { createMilestone } from '../../operations';
+import { actions } from '../../store';
 
 const translations = defineMessages({
   newMilestone: {
     id: 'course.lessonPlan.LessonPlanLayout.NewMilestoneButton.newMilestone',
-    defaultMessage: 'New Milestone',
+    defaultMessage: 'Milestone',
   },
   success: {
     id: 'course.lessonPlan.LessonPlanLayout.NewMilestoneButton.success',
@@ -20,12 +22,6 @@ const translations = defineMessages({
     defaultMessage: 'Failed to create milestone.',
   },
 });
-
-const styles = {
-  button: {
-    marginRight: 16,
-  },
-};
 
 class NewMilestoneButton extends Component {
   createMilestoneHandler = (data, setError) => {
@@ -40,7 +36,7 @@ class NewMilestoneButton extends Component {
   showForm = () => {
     const { dispatch, intl } = this.props;
     return dispatch(
-      showMilestoneForm({
+      actions.showMilestoneForm({
         onSubmit: this.createMilestoneHandler,
         formTitle: intl.formatMessage(translations.newMilestone),
         initialValues: { title: '', description: '', start_at: null },
@@ -54,12 +50,7 @@ class NewMilestoneButton extends Component {
     }
 
     return (
-      <Button
-        color="primary"
-        onClick={this.showForm}
-        style={styles.button}
-        variant="contained"
-      >
+      <Button onClick={this.showForm} startIcon={<Add />} variant="contained">
         <FormattedMessage {...translations.newMilestone} />
       </Button>
     );
@@ -73,6 +64,6 @@ NewMilestoneButton.propTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-export default connect((state) => ({
-  canManageLessonPlan: state.flags.canManageLessonPlan,
+export default connect(({ lessonPlan }) => ({
+  canManageLessonPlan: lessonPlan.flags.canManageLessonPlan,
 }))(injectIntl(NewMilestoneButton));

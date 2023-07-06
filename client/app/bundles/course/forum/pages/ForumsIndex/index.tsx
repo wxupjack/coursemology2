@@ -1,12 +1,11 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { AppDispatch, AppState } from 'types/store';
 
 import AddButton from 'lib/components/core/buttons/AddButton';
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import MarkAllAsReadButton from '../../components/buttons/MarkAllAsReadButton';
@@ -50,14 +49,10 @@ const ForumsIndex: FC = () => {
   const [isForumNewDialogOpen, setIsForumNewDialogOpen] = useState(false);
   const [isMarking, setIsMarking] = useState(false);
 
-  const dispatch = useDispatch<AppDispatch>();
-  const forums = useSelector((state: AppState) => getAllForums(state));
-  const forumPermissions = useSelector((state: AppState) =>
-    getForumPermissions(state),
-  );
-  const forumMetadata = useSelector((state: AppState) =>
-    getForumMetadata(state),
-  );
+  const dispatch = useAppDispatch();
+  const forums = useAppSelector(getAllForums);
+  const forumPermissions = useAppSelector(getForumPermissions);
+  const forumMetadata = useAppSelector(getForumMetadata);
 
   useEffect(() => {
     dispatch(fetchForums())
@@ -103,17 +98,19 @@ const ForumsIndex: FC = () => {
   );
 
   return (
-    <>
-      <PageHeader title={t(translations.header)} toolbars={headerToolbars} />
+    <Page actions={headerToolbars} title={t(translations.header)} unpadded>
       {!isLoading && isForumNewDialogOpen && (
         <ForumNew
           onClose={(): void => setIsForumNewDialogOpen(false)}
           open={isForumNewDialogOpen}
         />
       )}
+
       {isLoading ? <LoadingIndicator /> : <ForumTable forums={forums} />}
-    </>
+    </Page>
   );
 };
 
-export default ForumsIndex;
+const handle = translations.header;
+
+export default Object.assign(ForumsIndex, { handle });

@@ -25,8 +25,8 @@ export default class CommentsAPI extends BaseCourseAPI {
    * }
    */
 
-  _getUrlPrefix(): string {
-    return `/courses/${this.getCourseId()}/comments`;
+  get #urlPrefix(): string {
+    return `/courses/${this.courseId}/comments`;
   }
 
   /**
@@ -39,7 +39,7 @@ export default class CommentsAPI extends BaseCourseAPI {
       tabs: CommentTabInfo;
     }>
   > {
-    return this.getClient().get(this._getUrlPrefix());
+    return this.client.get(this.#urlPrefix);
   }
 
   /**
@@ -54,8 +54,8 @@ export default class CommentsAPI extends BaseCourseAPI {
       topicList: CommentTopicData[];
     }>
   > {
-    return this.getClient().get(
-      `${this._getUrlPrefix()}/${tabValue}?page_num=${pageNum}`,
+    return this.client.get(
+      `${this.#urlPrefix}/${tabValue}?page_num=${pageNum}`,
     );
   }
 
@@ -63,18 +63,14 @@ export default class CommentsAPI extends BaseCourseAPI {
    * Updates comment topic to be isPending.
    */
   togglePending(topicId: number): Promise<AxiosResponse<void>> {
-    return this.getClient().patch(
-      `${this._getUrlPrefix()}/${topicId}/toggle_pending`,
-    );
+    return this.client.patch(`${this.#urlPrefix}/${topicId}/toggle_pending`);
   }
 
   /**
    * Updates comment topic to be marked as read.
    */
   markAsRead(topicId: number): Promise<AxiosResponse<void>> {
-    return this.getClient().patch(
-      `${this._getUrlPrefix()}/${topicId}/mark_as_read`,
-    );
+    return this.client.patch(`${this.#urlPrefix}/${topicId}/mark_as_read`);
   }
 
   /**
@@ -90,10 +86,7 @@ export default class CommentsAPI extends BaseCourseAPI {
     topicId: string,
     params: object,
   ): Promise<AxiosResponse<CommentPostListData>> {
-    return this.getClient().post(
-      `${this._getUrlPrefix()}/${topicId}/posts/`,
-      params,
-    );
+    return this.client.post(`${this.#urlPrefix}/${topicId}/posts/`, params);
   }
 
   /**
@@ -111,8 +104,8 @@ export default class CommentsAPI extends BaseCourseAPI {
     postId: string,
     params: object,
   ): Promise<AxiosResponse<CommentPostListData>> {
-    return this.getClient().patch(
-      `${this._getUrlPrefix()}/${topicId}/posts/${postId}`,
+    return this.client.patch(
+      `${this.#urlPrefix}/${topicId}/posts/${postId}`,
       params,
     );
   }
@@ -126,8 +119,6 @@ export default class CommentsAPI extends BaseCourseAPI {
    * success response: {}
    */
   delete(topicId: string, postId: string): Promise<AxiosResponse<void>> {
-    return this.getClient().delete(
-      `${this._getUrlPrefix()}/${topicId}/posts/${postId}`,
-    );
+    return this.client.delete(`${this.#urlPrefix}/${topicId}/posts/${postId}`);
   }
 }

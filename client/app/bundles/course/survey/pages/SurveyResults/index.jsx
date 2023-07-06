@@ -15,9 +15,15 @@ import { sectionShape, surveyShape } from 'course/survey/propTypes';
 import surveyTranslations from 'course/survey/translations';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 
+import withSurveyLayout from '../../containers/SurveyLayout';
+
 import ResultsSection from './ResultsSection';
 
 const translations = defineMessages({
+  results: {
+    id: 'course.survey.SurveyResults.results',
+    defaultMessage: 'Results',
+  },
   includePhantoms: {
     id: 'course.survey.SurveyResults.includePhantoms',
     defaultMessage: 'Include Phantom Students',
@@ -36,7 +42,7 @@ const translations = defineMessages({
   },
 });
 
-class SurveyResults extends Component {
+export class SurveyResults extends Component {
   constructor(props) {
     super(props);
     this.state = { includePhantoms: true };
@@ -145,5 +151,9 @@ SurveyResults.propTypes = {
   sections: PropTypes.arrayOf(sectionShape),
 };
 
-const mapStateToProps = (state) => state.results;
-export default connect(mapStateToProps)(SurveyResults);
+const handle = translations.results;
+
+export default Object.assign(
+  withSurveyLayout(connect(({ surveys }) => surveys.results)(SurveyResults)),
+  { handle },
+);

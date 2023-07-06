@@ -41,6 +41,10 @@ module.exports = {
           ['utilities', './app/utilities'],
           ['course', './app/bundles/course'],
           ['testUtils', './app/__test__/utils'],
+          ['test-utils', './app/utilities/test-utils'],
+          ['mocks', './app/__test__/mocks'],
+          ['workers', './app/workers'],
+          ['store', './app/store'],
         ],
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
       },
@@ -106,7 +110,7 @@ module.exports = {
       },
     ],
     'import/no-extraneous-dependencies': ['warn', { devDependencies: true }],
-    'import/prefer-default-export': 'warn',
+    'import/prefer-default-export': 'off',
     'jsx-a11y/anchor-is-valid': 'off',
     'jsx-a11y/click-events-have-key-events': 'off',
     'jsx-a11y/label-has-for': 'off',
@@ -147,6 +151,13 @@ module.exports = {
     'object-curly-newline': ['error', { consistent: true }],
     'prefer-destructuring': 'off',
     'no-restricted-exports': 'off',
+    'no-param-reassign': [
+      'error',
+      {
+        props: true,
+        ignorePropertyModificationsFor: ['draft', 'reducerObject'],
+      },
+    ],
   },
   globals: {
     window: true,

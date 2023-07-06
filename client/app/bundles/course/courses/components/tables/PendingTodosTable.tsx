@@ -1,18 +1,20 @@
-import { FC, memo, useEffect, useState } from 'react';
+import { CSSProperties, FC, memo, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
+import { KeyboardArrowDown } from '@mui/icons-material';
 import {
   Button,
-  Link,
   Stack,
-  Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Typography,
 } from '@mui/material';
 import equal from 'fast-deep-equal';
 import { TodoData } from 'types/course/lesson-plan/todos';
 
+import TableContainer from 'lib/components/core/layouts/TableContainer';
+import Link from 'lib/components/core/Link';
 import PersonalStartEndTime from 'lib/components/extensions/PersonalStartEndTime';
 import {
   getAssessmentAttemptURL,
@@ -58,15 +60,15 @@ const translations = defineMessages({
   },
   tableHeaderStartAt: {
     id: 'course.courses.PendingTodosTable.tableHeaderStartAt',
-    defaultMessage: 'Start At',
+    defaultMessage: 'Starts at',
   },
   tableHeaderEndAt: {
     id: 'course.courses.PendingTodosTable.tableHeaderEndAt',
-    defaultMessage: 'End At',
+    defaultMessage: 'Ends at',
   },
   tableSeeMore: {
     id: 'course.courses.PendingTodosTable.tableSeeMore',
-    defaultMessage: 'SEE MORE',
+    defaultMessage: 'See {n} more',
   },
   accessButtonRespond: {
     id: 'course.courses.PendingTodosTable.accessButtonRespond',
@@ -74,7 +76,7 @@ const translations = defineMessages({
   },
   accessButtonEnterPassword: {
     id: 'course.courses.PendingTodosTable.accessButtonEnterPassword',
-    defaultMessage: 'Enter Password',
+    defaultMessage: 'Unlock',
   },
   accessButtonAttempt: {
     id: 'course.courses.PendingTodosTable.accessButtonAttempt',
@@ -104,6 +106,7 @@ const PendingTodosTable: FC<Props> = (props) => {
     let accessButtonText = '';
     let accessButtonLink = '';
     let submissionUrl;
+    // TODO: Refactor below by changing switch to dictionary
     switch (todoType) {
       case 'surveys':
         accessButtonText = intl.formatMessage(translations.accessButtonRespond);
@@ -196,7 +199,7 @@ const PendingTodosTable: FC<Props> = (props) => {
     );
   };
 
-  const getBackgroundColor = (todo: TodoData): React.CSSProperties => {
+  const getBackgroundColor = (todo: TodoData): CSSProperties => {
     let backgroundColor = '#ffffff';
     if (
       todo.endTimeInfo.effectiveTime &&
@@ -228,23 +231,25 @@ const PendingTodosTable: FC<Props> = (props) => {
   };
 
   return (
-    <>
-      <h2>{header}</h2>
-      <Table>
+    <section className="space-y-2">
+      <Typography variant="h6">{header}</Typography>
+
+      <TableContainer dense variant="outlined">
         <TableHead>
           <TableRow>
-            <TableCell>
+            <TableCell className="whitespace-nowrap">
               {intl.formatMessage(translations.tableHeaderTitle)}
             </TableCell>
-            <TableCell>
+            <TableCell className="whitespace-nowrap">
               {intl.formatMessage(translations.tableHeaderStartAt)}
             </TableCell>
-            <TableCell>
+            <TableCell className="whitespace-nowrap">
               {intl.formatMessage(translations.tableHeaderEndAt)}
             </TableCell>
             <TableCell />
           </TableRow>
         </TableHead>
+
         <TableBody>
           {shavedTodos.map((todo) => (
             <TableRow
@@ -254,10 +259,10 @@ const PendingTodosTable: FC<Props> = (props) => {
             >
               <TableCell>
                 <Link
-                  href={`${getCourseURL(getCourseId())}/${todoType}/${
+                  to={`${getCourseURL(getCourseId())}/${todoType}/${
                     todo.itemActableId
                   }`}
-                  style={{ textDecoration: 'none' }}
+                  underline="hover"
                 >
                   {todo.itemActableTitle}
                 </Link>
@@ -272,24 +277,18 @@ const PendingTodosTable: FC<Props> = (props) => {
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </TableContainer>
+
       {todos.length > shavedTodos.length && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            padding: 10,
-            marginTop: 10,
-          }}
-        >
-          <Button onClick={handleSeeMore}>
-            {`${intl.formatMessage(translations.tableSeeMore)} (${
-              todos.length - shavedTodos.length
-            })`}
+        <div className="mt-4 flex justify-center">
+          <Button endIcon={<KeyboardArrowDown />} onClick={handleSeeMore}>
+            {intl.formatMessage(translations.tableSeeMore, {
+              n: todos.length - shavedTodos.length,
+            })}
           </Button>
         </div>
       )}
-    </>
+    </section>
   );
 };
 

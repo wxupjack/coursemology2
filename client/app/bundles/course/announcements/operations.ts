@@ -1,9 +1,9 @@
+import { Operation } from 'store';
 import { AnnouncementFormData } from 'types/course/announcements';
-import { Operation } from 'types/store';
 
 import CourseAPI from 'api/course';
 
-import * as actions from './actions';
+import { actions } from './store';
 
 /**
  * Prepares and maps object attributes to a FormData object for an post/patch request.
@@ -43,10 +43,7 @@ export function createAnnouncement(formData: AnnouncementFormData): Operation {
   const attributes = formatAttributes(formData);
   return async (dispatch) =>
     CourseAPI.announcements.create(attributes).then((response) => {
-      const data = response.data;
-      dispatch(
-        actions.saveAnnouncementList(data.announcements, data.permissions),
-      );
+      dispatch(actions.saveAnnouncement(response.data));
     });
 }
 

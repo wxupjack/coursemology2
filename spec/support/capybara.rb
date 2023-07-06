@@ -98,7 +98,7 @@ module Capybara::TestGroupHelpers
 
     # Finds a react-beautiful-dnd draggable element
     def find_rbd_with_draggable_id(draggable_id)
-      find("div[data-rbd-draggable-id='#{draggable_id}']")
+      find("div[data-rfd-draggable-id='#{draggable_id}']")
     end
 
     # Finds a react-beautiful-dnd draggable drag handle element
@@ -107,7 +107,7 @@ module Capybara::TestGroupHelpers
     # For example, an assessment category is a draggable, but only the header in which the
     # category title is contained is the drag handle.
     def find_rbd_with_drag_handle_id(drag_handle_id)
-      find("div[data-rbd-drag-handle-draggable-id='#{drag_handle_id}']")
+      find("div[data-rfd-drag-handle-draggable-id='#{drag_handle_id}']")
     end
 
     # Finds a react-beautiful-dnd draggable survey question
@@ -142,6 +142,16 @@ module Capybara::TestGroupHelpers
 
     def find_react_hook_form_error
       expect(page).to have_text('Failed submitting this form. Please try again.')
+    end
+
+    def find_sidebar
+      all('aside').first
+    end
+
+    def perform_logout_in_course(user_name)
+      find_sidebar.find_all('div', text: user_name).first.click
+      find('span', text: 'Sign out').click
+      wait_for_page
     end
 
     def confirm_registartion_token_via_email

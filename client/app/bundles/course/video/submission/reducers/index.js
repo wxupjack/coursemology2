@@ -4,9 +4,6 @@ import discussion, {
   initialState as discussionState,
   organiseDiscussionEntities,
 } from './discussion';
-import notification, {
-  initialState as notificationState,
-} from './notification';
 import oldSessions, {
   initialState as oldSessionsState,
   persistTransform as oldSessionsTransform,
@@ -26,7 +23,7 @@ import video, {
  *
  * The rest are simply JS objects to make manipulation code terse elsewhere.
  * @param props The props parsed from JSON
- * @returns {{video: *, discussion: *, notification: *}} The initial store state
+ * @returns {{video: *, discussion: *, oldSessions: *}} The initial store state
  */
 export function createInitialState(props) {
   return {
@@ -35,7 +32,6 @@ export function createInitialState(props) {
       ...discussionState,
       ...organiseDiscussionEntities(props.discussion),
     },
-    notification: { ...notificationState, ...props.notification },
     oldSessions: oldSessionsState.merge(props.oldSessions),
   };
 }
@@ -45,6 +41,5 @@ export const persistTransforms = [videoTransform, oldSessionsTransform];
 export default combineReducers({
   video,
   discussion,
-  notification,
   oldSessions,
 });

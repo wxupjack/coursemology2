@@ -1,13 +1,12 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { Box, Grid, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { InvitationResult } from 'types/course/userInvitations';
-import { AppDispatch, AppState } from 'types/store';
 
+import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
-import PageHeader from 'lib/components/navigation/PageHeader';
+import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
 
 import UserManagementTabs from '../../../users/components/navigation/UserManagementTabs';
 import RegistrationCodeButton from '../../components/buttons/RegistrationCodeButton';
@@ -43,14 +42,10 @@ const InviteUsers: FC<Props> = (props) => {
   const [showInvitationResultDialog, setShowInvitationResultDialog] =
     useState(false);
   const [invitationResult, setInvitationResult] = useState({});
-  const permissions = useSelector((state: AppState) =>
-    getManageCourseUserPermissions(state),
-  );
-  const sharedData = useSelector((state: AppState) =>
-    getManageCourseUsersSharedData(state),
-  );
+  const permissions = useAppSelector(getManageCourseUserPermissions);
+  const sharedData = useAppSelector(getManageCourseUsersSharedData);
 
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(fetchPermissionsAndSharedData())
@@ -66,8 +61,7 @@ const InviteUsers: FC<Props> = (props) => {
   };
 
   return (
-    <>
-      <PageHeader title={intl.formatMessage(translations.manageUsersHeader)} />
+    <Page title={intl.formatMessage(translations.manageUsersHeader)} unpadded>
       {isLoading ? (
         <LoadingIndicator />
       ) : (
@@ -76,7 +70,8 @@ const InviteUsers: FC<Props> = (props) => {
             permissions={permissions}
             sharedData={sharedData}
           />
-          <Box>
+
+          <Page.PaddedSection>
             <Grid
               alignItems="flex-end"
               container
@@ -93,7 +88,8 @@ const InviteUsers: FC<Props> = (props) => {
               </Grid>
             </Grid>
             <IndividualInviteForm openResultDialog={openResultDialog} />
-          </Box>
+          </Page.PaddedSection>
+
           <InvitationResultDialog
             handleClose={(): void => setShowInvitationResultDialog(false)}
             invitationResult={invitationResult}
@@ -101,7 +97,7 @@ const InviteUsers: FC<Props> = (props) => {
           />
         </>
       )}
-    </>
+    </Page>
   );
 };
 

@@ -1,8 +1,14 @@
 const { join, resolve } = require('path');
-const { IgnorePlugin, ContextReplacementPlugin } = require('webpack');
+const {
+  IgnorePlugin,
+  ContextReplacementPlugin,
+  DefinePlugin,
+} = require('webpack');
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const Dotenv = require('dotenv-webpack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+
+const packageJSON = require('./package.json');
 
 module.exports = {
   entry: {
@@ -28,15 +34,33 @@ module.exports = {
       bundles: resolve('./app/bundles'),
       course: resolve('./app/bundles/course'),
       testUtils: resolve('./app/__test__/utils'),
+      workers: resolve('./app/workers'),
+      store: resolve('./app/store'),
     },
   },
   optimization: {
     splitChunks: {
       chunks: 'all',
-      name: (_module, chunks, cacheGroupKey) => {
-        const allChunksNames = chunks.map((chunk) => chunk.name).join('~');
+      name: (_, chunks, cacheGroupKey) => {
+        /**
+         * Workers are not part of the `coursemology` runtime, so their dependencies
+         * are packed in a separate chunk. This chunk has `name` set to `undefined`.
+         * When simply `Array.prototype.join`ed, we will get weird chunk names like
+         * `vendors~coursemology~.js` or `vendors~.js` that `application_helper.rb`
+         * should inject. Normally, this isn't an issue with `HtmlWebpackPlugin`, but
+         * since we don't have that and are manually injecting webpack assets in
+         * `layouts/default.html.slim`, we combine these `undefined` chunks into
+         * `coursemology`'s runtime. So, we have one `vendors~coursemology.js`.
+         */
+        const allChunksNames =
+          chunks
+            .map((chunk) => chunk.name)
+            .filter((name) => Boolean(name))
+            .join('~') || 'coursemology';
+
         const prefix =
           cacheGroupKey === 'defaultVendors' ? 'vendors' : cacheGroupKey;
+
         return `${prefix}~${allChunksNames}`;
       },
     },
@@ -60,20 +84,13 @@ module.exports = {
         mode: 'write-references',
       },
     }),
+    new DefinePlugin({
+      FIRST_BUILD_YEAR: JSON.stringify(packageJSON.firstBuildYear),
+      LATEST_BUILD_YEAR: JSON.stringify(new Date().getFullYear()),
+    }),
   ],
   module: {
     rules: [
-      {
-        test: /\.(js|jsx|ts|tsx)$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            cacheCompression: false,
-            cacheDirectory: true,
-          },
-        },
-        exclude: /node_modules/,
-      },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
@@ -82,6 +99,10 @@ module.exports = {
           resolve(
             __dirname,
             'node_modules/react-image-crop/dist/ReactCrop.css',
+          ),
+          resolve(
+            __dirname,
+            'node_modules/react-tooltip/dist/react-tooltip.min.css',
           ),
           resolve(__dirname, 'app/lib/components/core/fields/CKEditor.css'),
         ],

@@ -1,8 +1,6 @@
-import { mount } from 'enzyme';
+import { render } from 'test-utils';
 
-import storeCreator from 'course/lesson-plan/store';
-
-import { UnconnectedLessonPlanShow as LessonPlanShow } from '../index';
+import { LessonPlanShow } from '../index';
 
 const data = {
   groups: [
@@ -36,56 +34,61 @@ const data = {
     },
   ],
   visibility: { Event: true },
+  isLoading: false,
 };
 
-const mockUsedNavigate = jest.fn();
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockUsedNavigate,
-}));
-
 describe('<LessonPlanShow />', () => {
-  const contextOptions = buildContextOptions(storeCreator());
-
   describe('when all milestones are expanded by default', () => {
-    const wrapper = mount(
-      <LessonPlanShow canManageLessonPlan milestonesExpanded="all" {...data} />,
-      contextOptions,
-    );
-
     it('shows all visible items', () => {
-      expect(wrapper.find('LessonPlanItem')).toHaveLength(2);
+      const page = render(
+        <LessonPlanShow
+          canManageLessonPlan
+          milestonesExpanded="all"
+          {...data}
+        />,
+      );
+
+      data.groups.forEach((group) =>
+        group.items.forEach((item) =>
+          expect(page.getByText(item.title)).toBeVisible(),
+        ),
+      );
     });
   });
 
   describe('when none of the milestones are expanded by default', () => {
-    const wrapper = mount(
-      <LessonPlanShow
-        canManageLessonPlan
-        milestonesExpanded="none"
-        {...data}
-      />,
-      contextOptions,
-    );
-
     it('shows no items', () => {
-      expect(wrapper.find('LessonPlanItem')).toHaveLength(0);
+      const page = render(
+        <LessonPlanShow
+          canManageLessonPlan
+          milestonesExpanded="none"
+          {...data}
+        />,
+      );
+
+      data.groups.forEach((group) =>
+        group.items.forEach((item) =>
+          expect(page.queryByText(item.title)).not.toBeInTheDocument(),
+        ),
+      );
     });
   });
 
-  describe('when only of the current milestone is expanded by default', () => {
-    const wrapper = mount(
-      <LessonPlanShow
-        canManageLessonPlan
-        milestonesExpanded="current"
-        {...data}
-      />,
-      contextOptions,
-    );
-
+  describe('when only one of the current milestone is expanded by default', () => {
     it('shows items for current group', () => {
-      expect(wrapper.find('LessonPlanItem')).toHaveLength(1);
+      const page = render(
+        <LessonPlanShow
+          canManageLessonPlan
+          milestonesExpanded="current"
+          {...data}
+        />,
+      );
+
+      const hiddenItem = data.groups[0].items[0].title;
+      const shownItem = data.groups[1].items[0].title;
+
+      expect(page.queryByText(hiddenItem)).not.toBeInTheDocument();
+      expect(page.getByText(shownItem)).toBeVisible();
     });
   });
 });

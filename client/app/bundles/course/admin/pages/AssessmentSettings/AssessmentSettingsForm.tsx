@@ -1,5 +1,6 @@
 import { Emits } from 'react-emitter-factory';
 import { Controller } from 'react-hook-form';
+import { InputAdornment, Typography } from '@mui/material';
 import { AssessmentSettingsData } from 'types/course/admin/assessments';
 import * as yup from 'yup';
 
@@ -13,7 +14,8 @@ import useTranslation from 'lib/hooks/useTranslation';
 import AssessmentCategoriesManager from './AssessmentCategoriesManager';
 import translations from './translations';
 
-interface AssessmentsSettingsFormProps extends Emits<FormEmitter> {
+interface AssessmentsSettingsFormProps
+  extends Emits<FormEmitter<AssessmentSettingsData>> {
   data: AssessmentSettingsData;
   onSubmit?: (data: AssessmentSettingsData) => void;
   disabled?: boolean;
@@ -43,6 +45,38 @@ const AssessmentsSettingsForm = (
       {(control): JSX.Element => (
         <>
           <Section sticksToNavbar title={t(translations.assessmentSettings)}>
+            {/* Randomized Assessment is temporarily hidden (PR#5406) */}
+            {/* <Controller
+                control={control}
+                name="allowRandomization"
+                render={({ field, fieldState }): JSX.Element => (
+                  <FormCheckboxField
+                    disabled={props.disabled}
+                    field={field}
+                    fieldState={fieldState}
+                    label={t(translations.enableRandomisedAssessments)}
+                  />
+                )}
+              /> */}
+
+            <Controller
+              control={control}
+              name="allowMrqOptionsRandomization"
+              render={({ field, fieldState }): JSX.Element => (
+                <FormCheckboxField
+                  disabled={props.disabled}
+                  field={field}
+                  fieldState={fieldState}
+                  label={t(translations.enableMcqChoicesRandomisations)}
+                />
+              )}
+            />
+          </Section>
+
+          <Section
+            sticksToNavbar
+            title={t(translations.programmingQuestionSettings)}
+          >
             <Subsection spaced title={t(translations.allowStudentsToView)}>
               <Controller
                 control={control}
@@ -71,45 +105,8 @@ const AssessmentsSettingsForm = (
               />
             </Subsection>
 
-            <Subsection
-              className="!mt-8"
-              spaced
-              title={t(translations.randomisation)}
-            >
-              {/* Randomized Assessment is temporarily hidden (PR#5406) */}
-              {/* <Controller
-                control={control}
-                name="allowRandomization"
-                render={({ field, fieldState }): JSX.Element => (
-                  <FormCheckboxField
-                    disabled={props.disabled}
-                    field={field}
-                    fieldState={fieldState}
-                    label={t(translations.enableRandomisedAssessments)}
-                  />
-                )}
-              /> */}
-
-              <Controller
-                control={control}
-                name="allowMrqOptionsRandomization"
-                render={({ field, fieldState }): JSX.Element => (
-                  <FormCheckboxField
-                    disabled={props.disabled}
-                    field={field}
-                    fieldState={fieldState}
-                    label={t(translations.enableMcqChoicesRandomisations)}
-                  />
-                )}
-              />
-            </Subsection>
-
             {props.data.maxProgrammingTimeLimit && (
-              <Subsection
-                className="!mt-8"
-                spaced
-                title={t(translations.maxProgrammingTimeLimit)}
-              >
+              <div>
                 <Controller
                   control={control}
                   name="maxProgrammingTimeLimit"
@@ -119,13 +116,24 @@ const AssessmentsSettingsForm = (
                       field={field}
                       fieldState={fieldState}
                       fullWidth
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            {t(translations.seconds)}
+                          </InputAdornment>
+                        ),
+                      }}
                       label={t(translations.maxProgrammingTimeLimit)}
                       type="number"
                       variant="filled"
                     />
                   )}
                 />
-              </Subsection>
+
+                <Typography color="text.secondary" variant="body2">
+                  {t(translations.maxProgrammingTimeLimitHint)}
+                </Typography>
+              </div>
             )}
           </Section>
 

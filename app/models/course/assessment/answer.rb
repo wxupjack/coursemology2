@@ -60,6 +60,7 @@ class Course::Assessment::Answer < ApplicationRecord
 
   default_scope { order(:created_at) }
 
+  scope :with_attempting_state, -> { where(workflow_state: :attempting) }
   scope :without_attempting_state, -> { where.not(workflow_state: :attempting) }
   scope :non_current_answers, -> { where(current_answer: false) }
   scope :current_answers, -> { where(current_answer: true) }
@@ -113,6 +114,20 @@ class Course::Assessment::Answer < ApplicationRecord
 
   def assign_params(params)
     self.grade = params[:grade].to_f if params[:grade]
+  end
+
+  # Generates a feedback for an answer
+  #
+  # @return [TrackableJob::Job] The job for creating the feedback
+  # @raise [NotImplementedError] answer#generate_feedback was not implemented.
+  def generate_feedback
+    raise NotImplementedError unless actable.self_respond_to?(:generate_feedback)
+
+    actable.generate_feedback
+  end
+
+  def draft_answer?
+    attempting? && !current_answer?
   end
 
   protected

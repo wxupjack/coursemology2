@@ -1,7 +1,7 @@
 import { FC, memo } from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
-import { Icon, Switch } from '@mui/material';
+import { DragIndicator } from '@mui/icons-material';
+import { Switch } from '@mui/material';
 import equal from 'fast-deep-equal';
 import { TableColumns, TableOptions } from 'types/components/DataTable';
 import {
@@ -10,6 +10,7 @@ import {
 } from 'types/course/achievements';
 
 import DataTable from 'lib/components/core/layouts/DataTable';
+import Link from 'lib/components/core/Link';
 import Note from 'lib/components/core/Note';
 import { getAchievementURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
@@ -20,6 +21,7 @@ interface Props {
   achievements: AchievementMiniEntity[];
   permissions: AchievementPermissions | null;
   onTogglePublished: (achievementId: number, data: boolean) => void;
+  isReordering: boolean;
 }
 
 const translations = defineMessages({
@@ -38,7 +40,7 @@ const styles = {
 };
 
 const AchievementTable: FC<Props> = (props) => {
-  const { achievements, permissions, onTogglePublished } = props;
+  const { achievements, permissions, onTogglePublished, isReordering } = props;
 
   if (achievements && achievements.length === 0) {
     return (
@@ -86,9 +88,7 @@ const AchievementTable: FC<Props> = (props) => {
       options: {
         filter: false,
         sort: false,
-        customBodyRenderLite: (_dataIndex) => (
-          <Icon className="fa fa-reorder hidden" />
-        ),
+        customBodyRenderLite: (_) => (isReordering ? <DragIndicator /> : null),
       },
     },
     {
@@ -237,6 +237,4 @@ const AchievementTable: FC<Props> = (props) => {
   );
 };
 
-export default memo(AchievementTable, (prevProps, nextProps) => {
-  return equal(prevProps.achievements, nextProps.achievements);
-});
+export default memo(AchievementTable, equal);

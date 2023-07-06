@@ -19,7 +19,7 @@ export default class LearningMapAPI extends BaseCourseAPI {
    * error response: { errors: Array.<string> }
    */
   index() {
-    return this.getClient().get(this._getUrlPrefix());
+    return this.client.get(this.#urlPrefix);
   }
 
   /**
@@ -40,10 +40,7 @@ export default class LearningMapAPI extends BaseCourseAPI {
    * error response: { errors: Array.<string> }
    */
   addParentNode(params) {
-    return this.getClient().post(
-      `${this._getUrlPrefix()}/add_parent_node`,
-      params,
-    );
+    return this.client.post(`${this.#urlPrefix}/add_parent_node`, params);
   }
 
   /**
@@ -64,10 +61,7 @@ export default class LearningMapAPI extends BaseCourseAPI {
    * error response: { errors: Array.<string> }
    */
   removeParentNode(params) {
-    return this.getClient().post(
-      `${this._getUrlPrefix()}/remove_parent_node`,
-      params,
-    );
+    return this.client.post(`${this.#urlPrefix}/remove_parent_node`, params);
   }
 
   /**
@@ -88,13 +82,13 @@ export default class LearningMapAPI extends BaseCourseAPI {
    * error response: { errors: Array.<string> }
    */
   toggleSatisfiabilityType(params) {
-    return this.getClient().post(
-      `${this._getUrlPrefix()}/toggle_satisfiability_type`,
+    return this.client.post(
+      `${this.#urlPrefix}/toggle_satisfiability_type`,
       params,
     );
   }
 
-  _getUrlPrefix() {
-    return `/courses/${this.getCourseId()}/learning_map`;
+  get #urlPrefix() {
+    return `/courses/${this.courseId}/learning_map`;
   }
 }

@@ -1,15 +1,17 @@
 import { Component } from 'react';
 import { defineMessages, FormattedMessage, injectIntl } from 'react-intl';
 import { connect } from 'react-redux';
+import { Add } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import PropTypes from 'prop-types';
 
-import { createEvent, showEventForm } from 'course/lesson-plan/actions';
+import { createEvent } from '../../operations';
+import { actions } from '../../store';
 
 const translations = defineMessages({
   newEvent: {
     id: 'course.lessonPlan.LessonPlanLayout.NewEventButton.newEvent',
-    defaultMessage: 'New Event',
+    defaultMessage: 'Event',
   },
   success: {
     id: 'course.lessonPlan.LessonPlanLayout.NewEventButton.success',
@@ -32,7 +34,7 @@ class NewEventButton extends Component {
   showForm = () => {
     const { dispatch, intl } = this.props;
     return dispatch(
-      showEventForm({
+      actions.showEventForm({
         onSubmit: this.createEventHandler,
         formTitle: intl.formatMessage(translations.newEvent),
         initialValues: {
@@ -49,12 +51,10 @@ class NewEventButton extends Component {
   };
 
   render() {
-    if (!this.props.canManageLessonPlan) {
-      return <div />;
-    }
+    if (!this.props.canManageLessonPlan) return null;
 
     return (
-      <Button color="primary" onClick={this.showForm} variant="contained">
+      <Button onClick={this.showForm} startIcon={<Add />} variant="contained">
         <FormattedMessage {...translations.newEvent} />
       </Button>
     );
@@ -68,6 +68,6 @@ NewEventButton.propTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-export default connect((state) => ({
-  canManageLessonPlan: state.flags.canManageLessonPlan,
+export default connect(({ lessonPlan }) => ({
+  canManageLessonPlan: lessonPlan.flags.canManageLessonPlan,
 }))(injectIntl(NewEventButton));

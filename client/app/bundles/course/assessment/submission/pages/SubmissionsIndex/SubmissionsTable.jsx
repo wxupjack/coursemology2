@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
-import ReactTooltip from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
 import Delete from '@mui/icons-material/Delete';
 import GetApp from '@mui/icons-material/GetApp'; // TODO MUI - Change to download once icons lib is updated
 import MoreVert from '@mui/icons-material/MoreVert';
@@ -20,6 +20,7 @@ import { pink, red } from '@mui/material/colors';
 import PropTypes from 'prop-types';
 
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
+import TableContainer from 'lib/components/core/layouts/TableContainer';
 
 import { workflowStates } from '../../constants';
 import { assessmentShape } from '../../propTypes';
@@ -35,7 +36,7 @@ const styles = {
   tableCell: {
     padding: '0.5em',
     textOverflow: 'initial',
-    whiteSpace: 'normal',
+    whiteSpace: 'nowrap',
     wordBreak: 'break-word',
     alignItems: 'center',
   },
@@ -52,10 +53,6 @@ export default class SubmissionsTable extends Component {
       deleteAllConfirmation: false,
       anchorEl: null,
     };
-  }
-
-  componentDidUpdate() {
-    ReactTooltip.rebuild();
   }
 
   handleClickMenu = (event) => {
@@ -281,9 +278,9 @@ export default class SubmissionsTable extends Component {
       submissionsTranslations.deleteSubmission,
     ];
     return tooltipIds.map((tooltipId, index) => (
-      <ReactTooltip key={tooltipId} effect="solid" id={tooltipId}>
+      <Tooltip key={tooltipId} id={tooltipId}>
         <FormattedMessage {...formattedMessages[index]} />
-      </ReactTooltip>
+      </Tooltip>
     ));
   };
 
@@ -359,7 +356,7 @@ export default class SubmissionsTable extends Component {
     );
 
     return (
-      <>
+      <TableContainer dense variant="bare">
         <Table style={{ ...(isActive ? {} : styles.hideTable) }}>
           <TableHead>
             <TableRow>
@@ -384,7 +381,7 @@ export default class SubmissionsTable extends Component {
           <TableBody>{this.renderRowUsers()}</TableBody>
         </Table>
         {this.renderRowTooltips()}
-      </>
+      </TableContainer>
     );
   }
 }

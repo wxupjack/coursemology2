@@ -1,10 +1,10 @@
-import { FC } from 'react';
+import { FC, MouseEvent } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { Link } from 'react-router-dom';
 import { scroller } from 'react-scroll';
 import { Avatar, Card, CardContent, Grid, Typography } from '@mui/material';
 import { CourseUserEntity } from 'types/course/courseUsers';
 
+import Link from 'lib/components/core/Link';
 import { COURSE_USER_ROLES } from 'lib/constants/sharedConstants';
 
 import UserProfileCardStats from './UserProfileCardStats';
@@ -30,7 +30,7 @@ const translations = defineMessages({
 });
 
 const UserProfileCard: FC<Props> = ({ user, intl }) => {
-  const handleScrollToAchievements = (e: React.MouseEvent): void => {
+  const handleScrollToAchievements = (e: MouseEvent): void => {
     e.preventDefault();
     scroller.scrollTo('user-profile-achievements', {
       smooth: true,
@@ -65,7 +65,7 @@ const UserProfileCard: FC<Props> = ({ user, intl }) => {
           </Link>
         )}
         {user.achievements && (
-          <a
+          <Link
             href="#user-profile-achievements"
             onClick={(e): void => handleScrollToAchievements(e)}
           >
@@ -74,7 +74,7 @@ const UserProfileCard: FC<Props> = ({ user, intl }) => {
               title={intl.formatMessage(translations.achievements)}
               value={user.achievements.length}
             />
-          </a>
+          </Link>
         )}
       </Grid>
     );
@@ -97,7 +97,11 @@ const UserProfileCard: FC<Props> = ({ user, intl }) => {
             sm="auto"
             xs={12}
           >
-            <Avatar className={styles.courseUserImage} src={user.imageUrl} />
+            <Avatar
+              alt={user.name}
+              className={styles.courseUserImage}
+              src={user.imageUrl}
+            />
           </Grid>
           <Grid
             alignItems={{ xs: 'center', sm: 'start' }}
@@ -109,6 +113,7 @@ const UserProfileCard: FC<Props> = ({ user, intl }) => {
             <Typography>
               <strong>{COURSE_USER_ROLES[user.role]}</strong>
             </Typography>
+            <Typography>{user.email}</Typography>
             {renderUserStats()}
           </Grid>
         </Grid>

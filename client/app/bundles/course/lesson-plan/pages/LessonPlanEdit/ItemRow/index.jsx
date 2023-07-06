@@ -3,8 +3,10 @@ import { defineMessages, FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import { updateItem } from 'course/lesson-plan/actions';
-import { fields } from 'course/lesson-plan/constants';
+import Link from 'lib/components/core/Link';
+
+import { fields } from '../../../constants';
+import { updateItem } from '../../../operations';
 
 import DateCell from './DateCell';
 import PublishedCell from './PublishedCell';
@@ -67,7 +69,9 @@ class ItemRow extends Component {
     return (
       <tr>
         {columnsVisible[fields.ITEM_TYPE] ? <td>{type}</td> : null}
-        <td>{itemPath ? <a href={itemPath}>{title}</a> : title}</td>
+        <td>
+          <Link to={itemPath}>{title}</Link>
+        </td>
         {columnsVisible[fields.START_AT] ? (
           <DateCell fieldName="start_at" fieldValue={startAt} {...dateProps} />
         ) : null}
@@ -107,7 +111,7 @@ ItemRow.propTypes = {
   dispatch: PropTypes.func.isRequired,
 };
 
-export default connect((state) => ({
-  visibility: state.lessonPlan.visibilityByType,
-  columnsVisible: state.flags.editPageColumnsVisible,
+export default connect(({ lessonPlan }) => ({
+  visibility: lessonPlan.lessonPlan.visibilityByType,
+  columnsVisible: lessonPlan.flags.editPageColumnsVisible,
 }))(ItemRow);

@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { defineMessages, injectIntl } from 'react-intl';
-import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Tab, Tabs } from '@mui/material';
 import PropTypes from 'prop-types';
 
 import CourseAPI from 'api/course';
+import Page from 'lib/components/core/layouts/Page';
+import Link from 'lib/components/core/Link';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import Note from 'lib/components/core/Note';
-import PageHeader from 'lib/components/navigation/PageHeader';
 
 import GroupNew from '../GroupNew';
 
@@ -68,6 +69,7 @@ const GroupIndex = (props) => {
         {groupCategories.groupCategories.map((category) => (
           <Tab
             key={category.id}
+            className="no-underline outline-none"
             component={Link}
             label={category.name}
             to={`${category.id}`}
@@ -82,19 +84,18 @@ const GroupIndex = (props) => {
       <Note message={intl.formatMessage(translations.noCategory)} />
     ) : (
       <>
-        {renderTabs}
+        <Page.UnpaddedSection>{renderTabs}</Page.UnpaddedSection>
         <Outlet />
       </>
     );
 
   return (
-    <>
-      <PageHeader
-        title={intl.formatMessage(translations.groups)}
-        toolbars={headerToolbars}
-      />
+    <Page
+      actions={headerToolbars}
+      title={intl.formatMessage(translations.groups)}
+    >
       {isLoading ? <LoadingIndicator /> : renderBody}
-    </>
+    </Page>
   );
 };
 
@@ -102,4 +103,6 @@ GroupIndex.propTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-export default injectIntl(GroupIndex);
+const handle = translations.groups;
+
+export default Object.assign(injectIntl(GroupIndex), { handle });

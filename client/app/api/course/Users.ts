@@ -6,7 +6,7 @@ import {
   CourseUserListData,
   ManageCourseUsersPermissions,
   ManageCourseUsersSharedData,
-  StaffRole,
+  StaffRoles,
   UpdateCourseUserPatchData,
 } from 'types/course/courseUsers';
 import { TimelineData } from 'types/course/referenceTimelines';
@@ -14,7 +14,7 @@ import { TimelineData } from 'types/course/referenceTimelines';
 import BaseCourseAPI from './Base';
 
 export default class UsersAPI extends BaseCourseAPI {
-  _baseUrlPrefix: string = `/courses/${this.getCourseId()}`;
+  #baseUrlPrefix: string = `/courses/${this.courseId}`;
 
   /**
    * Fetches a list of users in a course.
@@ -32,7 +32,7 @@ export default class UsersAPI extends BaseCourseAPI {
       manageCourseUsersData?: ManageCourseUsersSharedData;
     }>
   > {
-    return this.getClient().get(`${this._baseUrlPrefix}/users`, {
+    return this.client.get(`${this.#baseUrlPrefix}/users`, {
       params: { as_basic_data: asBasicData },
     });
   }
@@ -48,7 +48,7 @@ export default class UsersAPI extends BaseCourseAPI {
       timelines?: Record<TimelineData['id'], string>;
     }>
   > {
-    return this.getClient().get(`${this._baseUrlPrefix}/students`);
+    return this.client.get(`${this.#baseUrlPrefix}/students`);
   }
 
   /**
@@ -62,7 +62,7 @@ export default class UsersAPI extends BaseCourseAPI {
       manageCourseUsersData: ManageCourseUsersSharedData;
     }>
   > {
-    return this.getClient().get(`${this._baseUrlPrefix}/staff`);
+    return this.client.get(`${this.#baseUrlPrefix}/staff`);
   }
 
   /**
@@ -73,7 +73,7 @@ export default class UsersAPI extends BaseCourseAPI {
       user: CourseUserData;
     }>
   > {
-    return this.getClient().get(`${this._baseUrlPrefix}/users/${userId}`);
+    return this.client.get(`${this.#baseUrlPrefix}/users/${userId}`);
   }
 
   /**
@@ -85,7 +85,7 @@ export default class UsersAPI extends BaseCourseAPI {
    * error response: {}
    */
   delete(userId: number): Promise<AxiosResponse> {
-    return this.getClient().delete(`${this._baseUrlPrefix}/users/${userId}`);
+    return this.client.delete(`${this.#baseUrlPrefix}/users/${userId}`);
   }
 
   /**
@@ -101,23 +101,20 @@ export default class UsersAPI extends BaseCourseAPI {
     userId: number,
     params: UpdateCourseUserPatchData | object,
   ): Promise<AxiosResponse> {
-    return this.getClient().patch(
-      `${this._baseUrlPrefix}/users/${userId}`,
-      params,
-    );
+    return this.client.patch(`${this.#baseUrlPrefix}/users/${userId}`, params);
   }
 
   /**
    * Upgrade a user to staff.
    *
    * @param {CourseUserBasicMiniEntity[]} users
-   * @param {StaffRole} role
+   * @param {StaffRoles} role
    * @return {Promise} list of upgraded users
    * error response: { errors: [] } - An array of errors will be returned upon validation error.
    */
   upgradeToStaff(
     users: CourseUserBasicMiniEntity[],
-    role: StaffRole,
+    role: StaffRoles,
   ): Promise<AxiosResponse> {
     const userIds = users.map((user) => user.id);
     const params = {
@@ -130,10 +127,7 @@ export default class UsersAPI extends BaseCourseAPI {
       },
     };
 
-    return this.getClient().patch(
-      `${this._baseUrlPrefix}/upgrade_to_staff`,
-      params,
-    );
+    return this.client.patch(`${this.#baseUrlPrefix}/upgrade_to_staff`, params);
   }
 
   assignToTimeline(
@@ -142,8 +136,8 @@ export default class UsersAPI extends BaseCourseAPI {
   ): Promise<AxiosResponse> {
     const params = { course_users: { ids, reference_timeline_id: timelineId } };
 
-    return this.getClient().patch(
-      `${this._baseUrlPrefix}/users/assign_timeline`,
+    return this.client.patch(
+      `${this.#baseUrlPrefix}/users/assign_timeline`,
       params,
     );
   }

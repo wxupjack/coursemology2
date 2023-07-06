@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
-import { Card, CardContent, Icon } from '@mui/material';
+import { Lock } from '@mui/icons-material';
+import { Card, CardContent } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 
+import Link from 'lib/components/core/Link';
+import { defensivelyGetIcon } from 'lib/constants/icons';
+
 import { nodeShape } from '../../propTypes';
-import translations from '../../translations.intl';
+import translations from '../../translations';
 import ConnectionPoint from '../ConnectionPoint';
 import NodeMenu from '../NodeMenu';
 import UnlockRateDisplay from '../UnlockRateDisplay';
@@ -50,14 +54,6 @@ const styles = {
     padding: 0,
     position: 'absolute',
   },
-  icon: {
-    fontSize: 12,
-    padding: '0px',
-  },
-  lockIcon: {
-    marginLeft: 4,
-    opacity: 1.0,
-  },
   node: {
     border: '1px solid black',
     padding: 4,
@@ -79,15 +75,6 @@ const styles = {
   },
 };
 
-const icons = {
-  achievement: 'fa fa-trophy',
-  assessment: 'fa fa-plane',
-  lock: 'fa fa-lock',
-  material: 'fa fa-folder',
-  survey: 'fa fa-pie-chart',
-  video: 'fa fa-video-camera',
-};
-
 const Node = (props) => {
   const { canModify, getNodeConnectionPointId, node } = props;
 
@@ -98,6 +85,8 @@ const Node = (props) => {
     event.stopPropagation();
     setIsNodeMenuDisplayed(true);
   };
+
+  const Icon = defensivelyGetIcon(node.courseMaterialType);
 
   return (
     <div style={{ ...styles.wrapper, zIndex }}>
@@ -119,27 +108,15 @@ const Node = (props) => {
                 />
               </div>
             )}
-            <Icon
-              className={icons[node.courseMaterialType]}
-              style={styles.icon}
-            />
-            {!canModify && !node.unlocked && (
-              <Icon
-                className={icons.lock}
-                style={{ ...styles.icon, ...styles.lockIcon }}
-              />
-            )}
+            <Icon style={styles.icon} />
+            {!canModify && !node.unlocked && <Lock />}
           </CardContent>
           <div style={styles.content}>
             <CardContent style={styles.contentText}>
               <div>
-                <a
-                  href={`${node.contentUrl}`}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
+                <Link opensInNewTab to={`${node.contentUrl}`}>
                   {node.title}
-                </a>
+                </Link>
               </div>
               {canModify && (
                 <UnlockRateDisplay

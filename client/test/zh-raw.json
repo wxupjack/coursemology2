@@ -3639,7 +3639,7 @@
       "en": "Grade"
     },
     "course.assessment.submissions.SubmissionsTableButton.viewButton": {
-      "defaultMessage": "视角",
+      "defaultMessage": "查看",
       "en": "View"
     },
     "course.assessment.update.fail": {
@@ -3739,7 +3739,7 @@
       "en": "Unlock this assessment by fulfilling:"
     },
     "course.assessments.index.view": {
-      "defaultMessage": "视角",
+      "defaultMessage": "查看",
       "en": "View"
     },
     "course.asssessment.submission.submit": {
@@ -3939,7 +3939,7 @@
       "en": "Respond"
     },
     "course.courses.PendingTodosTable.accessButtonResume": {
-      "defaultMessage": "恢复",
+      "defaultMessage": "继续答题",
       "en": "Resume"
     },
     "course.courses.PendingTodosTable.accessButtonWatch": {
@@ -8107,7 +8107,7 @@
       "en": "Created At"
     },
     "lib.translations.table.column.designation": {
-      "defaultMessage": "指定",
+      "defaultMessage": "职位",
       "en": "Designation"
     },
     "lib.translations.table.column.email": {

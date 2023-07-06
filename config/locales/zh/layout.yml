@@ -1,6 +1,6 @@
 zh:
   layout:
-    coursemology: 'Coursemology 科睿儿'
+    coursemology: 'Coursemology'
     navbar:
       toggle_navigation: '切换导航'
       courses: '课程'
@@ -48,7 +48,7 @@ zh:
       achievements: '+ %{difference}更多内容'
       level: '等级%{level}'
       experience_points: '%{exp}经验值'
-      next_level: '距离下一级%{difference}经验值'
+      next_level: '升级还需 %{difference} 经验值'
       max_level: '祝贺你--达到了最高的等级!'
     code_formatter:
       size_too_big: '该文件太大，无法显示。'

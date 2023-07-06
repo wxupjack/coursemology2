@@ -2,9 +2,6 @@ zh:
   instance:
     mailer:
       user_invitation_email:
-
-
-
         subject: '邀请以%{role}加入%{instance}实例'
         click_here: '点击此处'
         message: >

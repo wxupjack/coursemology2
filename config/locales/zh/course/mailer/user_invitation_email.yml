@@ -2,11 +2,6 @@ zh:
   course:
     mailer:
       user_invitation_email:
-
-
-
-
-
         subject: '邀请报名参加%{course}'
         click_here: '点击此处'
         message: >

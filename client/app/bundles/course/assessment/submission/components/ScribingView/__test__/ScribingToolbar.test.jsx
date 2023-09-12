@@ -1,4 +1,4 @@
-import MockAdapter from 'axios-mock-adapter';
+import { createMockAdapter } from 'mocks/axiosMock';
 import { dispatch } from 'store';
 import { act, fireEvent, render } from 'test-utils';
 
@@ -15,7 +15,7 @@ import actionTypes, {
 } from '../../../constants';
 
 const client = CourseAPI.assessment.answer.scribing.client;
-const mock = new MockAdapter(client);
+const mock = createMockAdapter(client);
 
 const assessmentId = 1;
 const submissionId = 2;
@@ -137,12 +137,6 @@ const props = {
   setUndo: jest.fn(),
   setRedo: jest.fn(),
 };
-
-// stub import function
-jest.mock(
-  'course/assessment/submission/loaders/ScribingViewLoader',
-  () => () => Promise.resolve(),
-);
 
 beforeEach(() => {
   mock.reset();

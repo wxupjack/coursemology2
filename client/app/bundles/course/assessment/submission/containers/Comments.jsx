@@ -1,9 +1,10 @@
 import { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
-import { toast } from 'react-toastify';
-import { grey } from '@mui/material/colors';
+import { Typography } from '@mui/material';
 import PropTypes from 'prop-types';
+
+import toast from 'lib/hooks/toast';
 
 import * as commentActions from '../actions/comments';
 import CommentCard from '../components/comment/CommentCard';
@@ -32,10 +33,11 @@ class VisibleComments extends Component {
     } = this.props;
 
     return (
-      <div>
-        <h4 style={{ color: grey['600'] }}>
+      <div className="mt-8">
+        <Typography className="mb-5" variant="h6">
           <FormattedMessage {...translations.comments} />
-        </h4>
+        </Typography>
+
         {posts.map(
           (post) =>
             (graderView || !post.isDelayed) && (
@@ -49,6 +51,7 @@ class VisibleComments extends Component {
               />
             ),
         )}
+
         <CommentField
           createComment={createComment}
           handleChange={handleCreateChange}

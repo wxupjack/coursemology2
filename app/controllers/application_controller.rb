@@ -4,13 +4,9 @@ class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by providing a null session when the token is missing from the request.
   protect_from_forgery(prepend: true, with: :exception)
 
-  # Custom flash types. We follow Bootstrap's convention.
-  add_flash_types :success, :info, :warning, :danger
-
   include ApplicationControllerMultitenancyConcern
   include ApplicationComponentsConcern
   include ApplicationInternationalizationConcern
-  include ApplicationThemingConcern
   include ApplicationUserConcern
   include ApplicationUserTimeZoneConcern
   include ApplicationInstanceUserConcern
@@ -20,6 +16,9 @@ class ApplicationController < ActionController::Base
 
   rescue_from IllegalStateError, with: :handle_illegal_state_error
   rescue_from ActionController::InvalidAuthenticityToken, with: :handle_csrf_error
+
+  def index
+  end
 
   protected
 
@@ -38,21 +37,14 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # Handles +IllegalStateError+s with a HTTP 422.
   def handle_illegal_state_error(exception)
     @exception = exception
-    respond_to do |format|
-      format.html { render file: 'public/422', layout: false, status: 422 }
-      format.json { render file: 'public/422.json', layout: false, status: 422 }
-    end
+    render json: { error: exception.message }, status: :unprocessable_entity
   end
 
   def handle_csrf_error(exception)
     @exception = exception
-    respond_to do |format|
-      format.html { render file: 'public/403', layout: false, status: 403 }
-      format.json { render file: 'public/403.json', layout: false, status: 403 }
-    end
+    render json: { error: "Can't verify CSRF token authenticity - #{exception.message}" }, status: :forbidden
   end
 
   # lograge
@@ -66,7 +58,6 @@ class ApplicationController < ActionController::Base
                       else
                         'ERROR'
                       end
-
     payload[:remote_ip] = request.ip
     payload[:current_user_id] = current_user.id if current_user.present?
   end

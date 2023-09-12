@@ -1,12 +1,12 @@
 import { FC, ReactElement, useEffect, useState } from 'react';
 import { defineMessages } from 'react-intl';
 import { useSearchParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { Button } from '@mui/material';
 
+import AddButton from 'lib/components/core/buttons/AddButton';
 import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
+import toast from 'lib/hooks/toast';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import VideoTabs from '../../components/misc/VideoTabs';
@@ -74,15 +74,9 @@ const VideosIndex: FC = () => {
 
   if (videoPermissions?.canManage) {
     headerToolbars.push(
-      <Button
-        key="new-video-button"
-        className="new-video-button bg-white"
-        color="primary"
-        onClick={(): void => setIsOpen(true)}
-        variant="outlined"
-      >
+      <AddButton onClick={(): void => setIsOpen(true)}>
         {t(translations.newVideo)}
-      </Button>,
+      </AddButton>,
     );
   }
 

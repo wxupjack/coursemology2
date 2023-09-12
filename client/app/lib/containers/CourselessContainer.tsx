@@ -10,21 +10,30 @@ import useTranslation, { translatable } from 'lib/hooks/useTranslation';
 
 import BrandingHead from '../components/navigation/BrandingHead';
 
+import { useAppContext } from './AppContainer';
+
 const getLastCrumbTitle = (crumbs: CrumbData[]): CrumbTitle | null => {
-  const content = crumbs.at(-1)?.content;
+  const content = crumbs[crumbs.length - 1]?.content;
   if (!content) return null;
 
-  const actualContent = Array.isArray(content) ? content.at(-1) : content;
+  const actualContent = Array.isArray(content)
+    ? content[content.length - 1]
+    : content;
   if (!actualContent) return null;
 
   return actualContent.title;
 };
 
-/**
- * Container for non-course pages. Pending name and design.
- */
-const CourselessContainer = (): JSX.Element => {
+interface CourselessContainerProps {
+  withCourseSwitcher?: boolean;
+  withGotoCoursesLink?: boolean;
+  withUserMenu?: boolean;
+}
+
+const CourselessContainer = (props: CourselessContainerProps): JSX.Element => {
   const { t } = useTranslation();
+
+  const context = useAppContext();
 
   const { crumbs } = useDynamicNest();
 
@@ -33,14 +42,19 @@ const CourselessContainer = (): JSX.Element => {
 
   return (
     <div className="flex h-full w-full flex-col">
-      <header className="border-only-b-neutral-200">
-        <BrandingHead title={title} />
+      <header>
+        <BrandingHead
+          title={title}
+          withCourseSwitcher={props.withCourseSwitcher}
+          withGotoCoursesLink={props.withGotoCoursesLink}
+          withUserMenu={props.withUserMenu}
+        />
       </header>
 
       <div className="relative h-full">
-        <main className="min-h-[calc(100%_-_4rem)] w-full">
-          <Outlet />
-        </main>
+        <div className="min-h-[calc(100vh_-_4.5rem)] w-full">
+          <Outlet context={context} />
+        </div>
 
         <Footer />
       </div>

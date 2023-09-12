@@ -1,12 +1,12 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
 
 import AddButton from 'lib/components/core/buttons/AddButton';
 import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
+import toast from 'lib/hooks/toast';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import ForumManagementButtons from '../../components/buttons/ForumManagementButtons';
@@ -104,12 +104,9 @@ const ForumShow: FC = () => {
         showSubscribeButton
       />
       {forum.permissions.canCreateTopic && (
-        <AddButton
-          key="new-topic-button"
-          className="new-topic-button"
-          onClick={(): void => setIsOpen(true)}
-          tooltip={t(translations.newTopic)}
-        />
+        <AddButton onClick={(): void => setIsOpen(true)}>
+          {t(translations.newTopic)}
+        </AddButton>
       )}
     </>
   );

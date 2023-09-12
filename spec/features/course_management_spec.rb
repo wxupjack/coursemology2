@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-RSpec.feature 'Courses' do
+RSpec.feature 'Courses', js: true do
   subject { page }
   let(:instance) { create(:instance) }
 
@@ -9,7 +9,7 @@ RSpec.feature 'Courses' do
     let(:user) { create(:instance_user, :instructor).user }
     before { login_as(user, scope: :user) }
 
-    scenario 'Users can see a list of published courses', js: true do
+    scenario 'Users can see a list of published courses' do
       unpublished_course = create(:course)
       published_course = create(:course, :published)
 
@@ -30,10 +30,10 @@ RSpec.feature 'Courses' do
       expect(page).not_to have_link(other_course.title, href: course_path(other_course))
     end
 
-    scenario 'Users can create a new course', js: true do
+    scenario 'Users can create a new course' do
       visit courses_path
 
-      find('button.new-course-button').click
+      click_button 'New Course'
       expect(page).to have_selector('h2', text: 'New Course')
       expect(subject).to have_field('title')
 

@@ -136,7 +136,7 @@ module.exports = {
     ],
     'simple-import-sort/exports': 'error',
     'sonarjs/cognitive-complexity': 'off',
-    'sonarjs/no-duplicate-string': ['error', 5],
+    'sonarjs/no-duplicate-string': ['error', { threshold: 5 }],
     'sonarjs/no-small-switch': 'off',
     'sonarjs/no-nested-template-literals': 'off',
     camelcase: ['warn', { properties: 'never', allow: ['^UNSAFE_'] }],
@@ -158,6 +158,7 @@ module.exports = {
         ignorePropertyModificationsFor: ['draft', 'reducerObject'],
       },
     ],
+    'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
   },
   globals: {
     window: true,
@@ -193,7 +194,6 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-unused-vars': ['warn', { args: 'none' }],
         'no-unused-vars': 'off',
-        'no-console': ['error', { allow: ['warn', 'error'] }],
         'react-hooks/rules-of-hooks': 'warn',
         'react/react-in-jsx-scope': 'off',
         'no-param-reassign': 'off',
@@ -248,7 +248,6 @@ module.exports = {
           { allow: ['arrowFunctions'] },
         ],
         '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/prefer-nullish-coalescing': 'error',
         '@typescript-eslint/prefer-optional-chain': 'error',
         '@typescript-eslint/prefer-as-const': 'error',
         '@typescript-eslint/restrict-template-expressions': [

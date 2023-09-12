@@ -1,6 +1,5 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { toast } from 'react-toastify';
 import { LoadingButton } from '@mui/lab';
 import {
   Alert,
@@ -15,6 +14,7 @@ import {
 } from '@mui/material';
 
 import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
+import toast from 'lib/hooks/toast';
 
 import {
   fetchRegistrationCode,
@@ -142,7 +142,7 @@ const InviteUsersRegistrationCode: FC<Props> = (props) => {
       }}
     >
       <DialogTitle>
-        {`${intl.formatMessage(translations.registrationCode)}`}
+        {intl.formatMessage(translations.registrationCode)}
       </DialogTitle>
       <DialogContent>
         <Stack spacing={2}>

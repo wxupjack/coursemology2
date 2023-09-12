@@ -3,6 +3,7 @@ import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
 import { Grid, Typography } from '@mui/material';
 import { AchievementMiniEntity } from 'types/course/achievements';
 
+import { getAchievementBadgeUrl } from 'course/helper/achievements';
 import AvatarWithLabel from 'lib/components/core/AvatarWithLabel';
 import Link from 'lib/components/core/Link';
 import { getAchievementURL } from 'lib/helpers/url-builders';
@@ -38,7 +39,7 @@ const translations = defineMessages({
 const UserProfileAchievements: FC<Props> = ({ achievements, intl }: Props) => {
   return (
     <>
-      <Typography id="user-profile-achievements" variant="h4">
+      <Typography id="user-profile-achievements" variant="h6">
         {intl.formatMessage(translations.achivementsHeader)}
       </Typography>
       {achievements.length > 0 ? (
@@ -55,7 +56,10 @@ const UserProfileAchievements: FC<Props> = ({ achievements, intl }: Props) => {
               <Grid container sx={styles.achievementMiniEntityContainer}>
                 <Link to={getAchievementURL(getCourseId(), achievement.id)}>
                   <AvatarWithLabel
-                    imageUrl={achievement.badge.url}
+                    imageUrl={getAchievementBadgeUrl(
+                      achievement.badge.url,
+                      true,
+                    )}
                     label={achievement.title}
                     size="md"
                   />

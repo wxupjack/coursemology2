@@ -10,6 +10,9 @@ gem 'rails', '~> 6.0.6.1'
 # Use PostgreSQL for the backend
 gem 'pg'
 
+# Enables CORS configuration to allow sharing resources with client on another domain
+gem 'rack-cors'
+
 # Instance/Course settings
 gem 'settings_on_rails'
 # Manage read/unread status
@@ -35,38 +38,17 @@ gem 'active_record_upsert', '0.11.1'
 # Create pretty URLs and work with human-friendly strings
 gem 'friendly_id'
 
-# Use SCSS for stylesheets
-gem 'sass-rails'
-# Use Uglifier as compressor for JavaScript assets
-gem 'uglifier', '>= 1.3.0'
-
-# TODO: Check compatibility with webpacker 3.2.0 when it is released.
-# https://github.com/rails/webpacker/blob/4f65c5ee58666bbe58b234c48d47ec7d48fab4d8/CHANGELOG.md
-gem 'webpacker', '<= 5.4.4'
-# Internationalisation for JavaScript.
-gem 'i18n-js', '<= 3.10.0'
-
-# Use jQuery as the JavaScript library
-gem 'jquery-rails'
-# Our Coursemology will be themed using Bootstrap
-gem 'bootstrap-sass'
-gem 'bootstrap-sass-extras', '>= 0.1.0'
-gem 'autoprefixer-rails'
-# Use font-awesome for icons
-gem 'font-awesome-rails'
 # HTML Pipeline and dependencies
 gem 'html-pipeline'
 gem 'sanitize', '>= 4.6.3'
 gem 'rinku'
 gem 'html-pipeline-rouge_filter', git: 'https://github.com/ekowidianto/html-pipeline-rouge_filter.git'
+gem 'ruby-oembed'
+
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder'
 # Slim as the templating language
 gem 'slim-rails'
-# ejs for client-side templates
-gem 'ejs'
-# High Voltage for static pages
-gem 'high_voltage'
 # Paginator for Rails
 gem 'kaminari'
 # Work with Docker
@@ -84,10 +66,6 @@ group :development do
   gem 'spring', platforms: [:ruby]
   gem 'listen'
 
-  # Gems to make development mode faster and less painful
-
-  gem 'wdm', '>= 0.0.3', platforms: [:mswin, :mswin64]
-
   # Helps to prevent database slowdowns
   gem 'lol_dba', require: false
 
@@ -97,24 +75,18 @@ group :development do
   # bundle exec yardoc generates the API under doc/.
   # Use yard stats --list-undoc to find what needs documenting.
   gem 'yard', group: :doc
-
-  # Gem to generate favicon
-  gem 'rails_real_favicon'
 end
 
 group :test do
   gem 'email_spec'
   gem 'rspec-html-matchers'
   gem 'should_not'
-  gem 'simplecov'
   gem 'shoulda-matchers'
 
   # Capybara for feature testing
   gem 'capybara'
   gem 'capybara-selenium'
-  gem 'webdrivers'
 
-  gem 'aws-sdk-s3'
   # Make screen shots in tests, helps with the debugging of JavaScript tests.
   gem 'capybara-screenshot'
 end
@@ -139,11 +111,13 @@ group :development, :test do
 
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platform: :mri
+
+  # Code Coverage reporters
+  gem 'simplecov'
+  gem 'codecov', require: false
 end
 
 group :ci do
-  # Code Coverage reporters
-  gem 'codecov', require: false
   gem 'rspec-retry'
   gem 'rspec_junit_formatter'
   gem 'rubocop-rails'
@@ -161,13 +135,17 @@ group :production, :test do
   gem 'puma'
 end
 
+group :production, :ci do
+  gem 'aws-sdk-s3'
+end
+
 group :production, :development do
   gem 'redis-rails'
 end
 
 group :production do
   # Use fog-aws as CarrierWave's storage provider
-  gem 'fog-aws', '3.8.0'
+  gem 'fog-aws', '3.19.0'
   gem 'flamegraph'
   gem 'stackprof'
   gem 'sidekiq'
@@ -199,18 +177,6 @@ gem 'cancancan'
 # We also want stricter sanitization.
 gem 'rails_utils', git: 'https://github.com/raymondtangsc/rails_utils.git', branch: 'full-sanitize-flash'
 
-# Themes for instances
-gem 'themes_on_rails', '>= 0.3.1', git: 'https://github.com/raymondtangsc/themes_on_rails',
-                                   branch: 'xtang/rails_6'
-
-# Forms made easy for Rails
-gem 'simple_form'
-gem 'simple_form-bootstrap', git: 'https://github.com/purfectliterature/simple_form-bootstrap'
-# Dynamic nested forms
-gem 'cocoon'
-gem 'bootstrap_tokenfield_rails'
-gem 'twitter-typeahead-rails'
-
 # Using CarrierWave for file uploads
 gem 'carrierwave'
 # Generate sequential filenames
@@ -236,6 +202,5 @@ gem 'rwordnet', git: 'https://github.com/makqien/rwordnet'
 gem 'loofah', '>= 2.2.1'
 gem 'rails-html-sanitizer', '>= 1.0.4'
 
-gem 'sprockets', '< 4.0.0'
 gem 'mimemagic', '0.4.3'
 gem 'ffi', '>= 1.14.2'

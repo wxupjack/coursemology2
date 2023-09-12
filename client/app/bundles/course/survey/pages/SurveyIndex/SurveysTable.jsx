@@ -17,7 +17,7 @@ import { surveyShape } from 'course/survey/propTypes';
 import translations from 'course/survey/translations';
 import TableContainer from 'lib/components/core/layouts/TableContainer';
 import Link from 'lib/components/core/Link';
-import { formatShortDateTime } from 'lib/moment';
+import { formatMiniDateTime } from 'lib/moment';
 
 import SurveyBadges from './SurveyBadges';
 
@@ -38,10 +38,12 @@ const SurveysTable = (props) => {
   const {
     surveys,
     courseId,
-    surveysFlags: { canCreate },
+    surveysFlags: { canCreate, studentsCount },
   } = props;
 
   const navigate = useNavigate();
+  const canManageSurveys = surveys.some((survey) => survey.canManage);
+  const shouldShowResponsesCount = canManageSurveys && studentsCount !== null;
 
   const renderPublishToggle = (survey) => {
     const { dispatch } = props;
@@ -95,11 +97,16 @@ const SurveysTable = (props) => {
           <TableCell colSpan={5}>
             <FormattedMessage {...translations.bonusEndsAt} />
           </TableCell>
-          {canCreate ? (
+          {shouldShowResponsesCount && (
+            <TableCell colSpan={2}>
+              <FormattedMessage {...translations.responses} />
+            </TableCell>
+          )}
+          {canCreate && (
             <TableCell colSpan={2}>
               <FormattedMessage {...translations.published} />
             </TableCell>
-          ) : null}
+          )}
           <TableCell colSpan={canCreate ? 14 : 4} />
         </TableRow>
       </TableHead>
@@ -123,16 +130,30 @@ const SurveysTable = (props) => {
             <TableCell colSpan={3}>{survey.base_exp}</TableCell>
             <TableCell colSpan={3}>{survey.time_bonus_exp}</TableCell>
             <TableCell colSpan={5} style={styles.wrap}>
-              {formatShortDateTime(survey.start_at)}
+              {formatMiniDateTime(survey.start_at)}
             </TableCell>
             <TableCell colSpan={5} style={styles.wrap}>
-              {formatShortDateTime(survey.end_at)}
+              {formatMiniDateTime(survey.end_at)}
             </TableCell>
             <TableCell colSpan={5} style={styles.wrap}>
               {survey.bonus_end_at
-                ? formatShortDateTime(survey.bonus_end_at)
+                ? formatMiniDateTime(survey.bonus_end_at)
                 : '-'}
             </TableCell>
+            {shouldShowResponsesCount &&
+              (survey.canManage ? (
+                <TableCell className="text-right" colSpan={2}>
+                  <Link
+                    className="line-clamp-2 xl:line-clamp-1"
+                    to={`/courses/${courseId}/surveys/${survey.id}/responses`}
+                    underline="hover"
+                  >
+                    {`${survey.responsesCount}/${studentsCount}`}
+                  </Link>
+                </TableCell>
+              ) : (
+                <TableCell colSpan={2}>-</TableCell>
+              ))}
             {canCreate ? (
               <TableCell colSpan={2}>{renderPublishToggle(survey)}</TableCell>
             ) : null}
@@ -149,19 +170,6 @@ const SurveysTable = (props) => {
                     variant="outlined"
                   >
                     <FormattedMessage {...translations.results} />
-                  </Button>
-                )}
-                {survey.canManage && (
-                  <Button
-                    onClick={() =>
-                      navigate(
-                        `/courses/${courseId}/surveys/${survey.id}/responses`,
-                      )
-                    }
-                    style={styles.button}
-                    variant="outlined"
-                  >
-                    <FormattedMessage {...translations.responses} />
                   </Button>
                 )}
                 <RespondButton
@@ -190,6 +198,7 @@ SurveysTable.propTypes = {
   surveys: PropTypes.arrayOf(surveyShape),
   surveysFlags: PropTypes.shape({
     canCreate: PropTypes.bool.isRequired,
+    studentsCount: PropTypes.number.isRequired,
   }).isRequired,
   dispatch: PropTypes.func.isRequired,
 };

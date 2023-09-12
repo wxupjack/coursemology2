@@ -1,14 +1,14 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { toast } from 'react-toastify';
-import { Button } from '@mui/material';
 
 import AnnouncementsDisplay from 'bundles/course/announcements/components/misc/AnnouncementsDisplay';
 import AnnouncementNew from 'bundles/course/announcements/pages/AnnouncementNew';
+import AddButton from 'lib/components/core/buttons/AddButton';
 import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import Note from 'lib/components/core/Note';
 import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
+import toast from 'lib/hooks/toast';
 
 import {
   createAnnouncement,
@@ -24,10 +24,6 @@ import {
 type Props = WrappedComponentProps;
 
 const translations = defineMessages({
-  header: {
-    id: 'system.admin.instance.instance.InstanceAnnouncementsIndex.header',
-    defaultMessage: 'Instance Announcements',
-  },
   fetchAnnouncementsFailure: {
     id: 'system.admin.instance.instance.InstanceAnnouncementsIndex.fetchAnnouncementsFailure',
     defaultMessage: 'Unable to fetch announcements',
@@ -64,14 +60,14 @@ const InstanceAnnouncementsIndex: FC<Props> = (props) => {
   return (
     <Page>
       {announcementPermission && (
-        <Button
-          key="new-announcement-button"
+        <AddButton
+          className="float-right"
+          fixed
           id="new-announcement-button"
           onClick={(): void => setIsOpen(true)}
-          variant="outlined"
         >
           {intl.formatMessage(translations.newAnnouncement)}
-        </Button>
+        </AddButton>
       )}
 
       {announcements.length === 0 ? (

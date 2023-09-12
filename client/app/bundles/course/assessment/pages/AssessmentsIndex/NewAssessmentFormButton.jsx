@@ -12,6 +12,7 @@ import {
 import PropTypes from 'prop-types';
 
 import { createAssessment } from 'course/assessment/operations';
+import AddButton from 'lib/components/core/buttons/AddButton';
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
 import formTranslations from 'lib/translations/form';
 
@@ -138,14 +139,9 @@ class NewAssessmentFormButton extends Component {
 
     return (
       <>
-        <Button
-          className="bg-white"
-          disabled={disabled}
-          onClick={this.handleOpen}
-          variant="outlined"
-        >
+        <AddButton onClick={this.handleOpen}>
           {intl.formatMessage(translations.newAssessment)}
-        </Button>
+        </AddButton>
 
         <Dialog
           disableEnforceFocus
@@ -159,7 +155,7 @@ class NewAssessmentFormButton extends Component {
           <DialogTitle>
             {intl.formatMessage(translations.newAssessment)}
           </DialogTitle>
-          <DialogContent>
+          <DialogContent className="pt-1">
             <AssessmentForm
               canManageMonitor={canManageMonitor}
               disabled={disabled}

@@ -1,12 +1,6 @@
 import { FC, memo, useEffect, useState } from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
-import {
-  Avatar,
-  AvatarGroup,
-  Box,
-  Tooltip,
-  useMediaQuery,
-} from '@mui/material';
+import { Avatar, AvatarGroup, Box, Tooltip } from '@mui/material';
 import { TableColumns } from 'types/components/DataTable';
 import {
   GroupLeaderboardAchievement,
@@ -15,10 +9,12 @@ import {
   LeaderboardPoints,
 } from 'types/course/leaderboard';
 
+import { getAchievementBadgeUrl } from 'course/helper/achievements';
 import DataTable from 'lib/components/core/layouts/DataTable';
 import Link from 'lib/components/core/Link';
 import { getAchievementURL, getCourseUserURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
+import useMedia from 'lib/hooks/useMedia';
 
 import { LeaderboardTableType } from '../../types';
 
@@ -82,8 +78,8 @@ const styles = {
 
 const LeaderboardTable: FC<Props> = (props: Props) => {
   const { data, id: tableType } = props;
-  const tabletView = useMediaQuery('(max-width:600px)');
-  const phoneView = useMediaQuery('(max-width:450px)');
+  const tabletView = useMedia.MinWidth('sm');
+  const phoneView = useMedia.MinWidth('xs');
   const [maxAvatars, setMaxAvatars] = useState(6);
 
   useEffect(() => {
@@ -139,12 +135,9 @@ const LeaderboardTable: FC<Props> = (props: Props) => {
             <Avatar
               alt={individualData[dataIndex].name}
               component={Link}
-              href={getCourseUserURL(
-                getCourseId(),
-                individualData[dataIndex].id,
-              )}
               marginRight={1}
               src={individualData[dataIndex].imageUrl}
+              to={getCourseUserURL(getCourseId(), individualData[dataIndex].id)}
               underline="none"
             />
             <Link
@@ -235,9 +228,9 @@ const LeaderboardTable: FC<Props> = (props: Props) => {
                     alt={achievement.badge.name}
                     className="achievement"
                     component={Link}
-                    href={getAchievementURL(getCourseId(), achievement.id)}
                     id={`achievement_${achievement.id}`}
-                    src={achievement.badge.url}
+                    src={getAchievementBadgeUrl(achievement.badge.url, true)}
+                    to={getAchievementURL(getCourseId(), achievement.id)}
                     underline="none"
                   />
                 </Tooltip>
@@ -296,8 +289,8 @@ const LeaderboardTable: FC<Props> = (props: Props) => {
                   <Avatar
                     alt={user.name}
                     component={Link}
-                    href={getCourseUserURL(getCourseId(), user.id)}
                     src={user.imageUrl}
+                    to={getCourseUserURL(getCourseId(), user.id)}
                     underline="none"
                   />
                 </Tooltip>

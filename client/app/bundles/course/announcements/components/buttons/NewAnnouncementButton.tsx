@@ -20,11 +20,10 @@ const NewAnnouncementButton: FC<Props> = (props) => {
   return (
     <AddButton
       id="new-announcement-button"
-      onClick={(): void => {
-        setIsOpen(true);
-      }}
-      tooltip={intl.formatMessage(translations.newAnnouncementTooltip)}
-    />
+      onClick={(): void => setIsOpen(true)}
+    >
+      {intl.formatMessage(translations.newAnnouncementTooltip)}
+    </AddButton>
   );
 };
 

@@ -32,7 +32,6 @@ class Course::Assessment::Submission::SubmissionsController < \
     authorize!(:view_all_submissions, @assessment)
 
     respond_to do |format|
-      format.html {} # rubocop:disable Lint/EmptyBlock
       format.json do
         @assessment = @assessment.calculated(:maximum_grade)
         @submissions = @submissions.calculated(:log_count, :graded_at, :grade, :grader_ids)
@@ -68,7 +67,6 @@ class Course::Assessment::Submission::SubmissionsController < \
     @monitoring_session_id = monitoring_service&.session&.id if should_monitor?
 
     respond_to do |format|
-      format.html
       format.json do
         return render json: { isSubmissionBlocked: true } if @submission.submission_view_blocked?(current_course_user)
 
@@ -159,7 +157,6 @@ class Course::Assessment::Submission::SubmissionsController < \
     else
       job = download_job
       respond_to do |format|
-        format.html { redirect_to(job_path(job)) }
         format.json { render partial: 'jobs/submitted', locals: { job: job } }
       end
     end
@@ -176,7 +173,6 @@ class Course::Assessment::Submission::SubmissionsController < \
     job = Course::Assessment::Submission::StatisticsDownloadJob.
           perform_later(current_course, current_user, submission_ids).job
     respond_to do |format|
-      format.html { redirect_to(job_path(job)) }
       format.json { render partial: 'jobs/submitted', locals: { job: job } }
     end
   end
@@ -240,7 +236,6 @@ class Course::Assessment::Submission::SubmissionsController < \
     job = Course::Assessment::Submission::DeletingJob.
           perform_later(current_user, submission_ids, @assessment).job
     respond_to do |format|
-      format.html { redirect_to(job_path(job)) }
       format.json { render partial: 'jobs/submitted', locals: { job: job } }
     end
   end
@@ -286,7 +281,6 @@ class Course::Assessment::Submission::SubmissionsController < \
     log_service.log_submission_access(request)
 
     respond_to do |format|
-      format.html { render 'edit' }
       format.json { render json: { newSessionUrl: new_session_path } }
     end
   end
@@ -308,7 +302,7 @@ class Course::Assessment::Submission::SubmissionsController < \
   def should_monitor?
     monitoring_component_enabled? &&
       current_user.id == @submission.creator_id &&
-      current_course_user.student? &&
+      current_course_user&.student? &&
       can?(:create, Course::Monitoring::Session.new(creator_id: current_user.id)) &&
       @assessment&.monitor&.enabled?
   end

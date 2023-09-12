@@ -6,8 +6,7 @@ import {
   WrappedComponentProps,
 } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { Button, Checkbox, Grid, Tooltip } from '@mui/material';
+import { Button, Checkbox, Grid, Tooltip, Typography } from '@mui/material';
 import { blue, green, red } from '@mui/material/colors';
 import equal from 'fast-deep-equal';
 import { TableColumns, TableOptions } from 'types/components/DataTable';
@@ -16,14 +15,15 @@ import {
   AchievementEntity,
 } from 'types/course/achievements';
 
+import { getAchievementBadgeUrl } from 'course/helper/achievements';
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
 import DataTable from 'lib/components/core/layouts/DataTable';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import Note from 'lib/components/core/Note';
-import { DEFAULT_TABLE_ROWS_PER_PAGE } from 'lib/constants/sharedConstants';
 import { getAchievementURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
 import { useAppDispatch } from 'lib/hooks/store';
+import toast from 'lib/hooks/toast';
 import { formatShortDateTime } from 'lib/moment';
 
 import { awardAchievement } from '../../operations';
@@ -179,9 +179,8 @@ const AchievementAwardManager: FC<Props> = (props) => {
     download: false,
     filter: false,
     jumpToPage: true,
+    pagination: false,
     print: false,
-    rowsPerPage: DEFAULT_TABLE_ROWS_PER_PAGE,
-    rowsPerPageOptions: [DEFAULT_TABLE_ROWS_PER_PAGE],
     selectableRows: 'none',
     setRowProps: (_row, dataIndex, _rowIndex) => {
       const obtainedAchievement =
@@ -309,14 +308,18 @@ const AchievementAwardManager: FC<Props> = (props) => {
           >
             <img
               alt={achievement.badge.name}
-              src={achievement.badge.url}
+              src={getAchievementBadgeUrl(
+                achievement.badge.url,
+                achievement.permissions.canDisplayBadge,
+              )}
               style={styles.badge}
             />
           </Tooltip>
           <div style={styles.description}>
-            <p
+            <Typography
               dangerouslySetInnerHTML={{ __html: achievement.description }}
               style={{ whiteSpace: 'normal' }}
+              variant="body2"
             />
           </div>
         </Grid>

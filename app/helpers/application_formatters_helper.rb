@@ -20,30 +20,12 @@ module ApplicationFormattersHelper
     user&.name
   end
 
-  # Displays the given user's image.
-  #
-  # @param [User] user The user to display
-  # @return [String] A HTML fragment containing the image to display for the user.
-  def display_user_image(user)
-    content_tag(:span, class: ['image']) do
-      if user.nil? || user.profile_photo.medium.url.nil?
-        image_tag('user_silhouette.svg')
-      else
-        image_tag(user.profile_photo.medium.url)
-      end
-    end
-  end
-
   # Return the given user's image url.
   #
   # @param [User] user The user to display
   # @return [String] A url for the image.
   def user_image(user)
-    if user.nil? || user.profile_photo.medium.url.nil?
-      image_path('user_silhouette.svg')
-    else
-      image_path(user.profile_photo.medium.url)
-    end
+    image_path(user.profile_photo.medium.url) if user&.profile_photo&.medium&.url
   end
 
   # Links to the given User.
@@ -98,44 +80,5 @@ module ApplicationFormattersHelper
     minutes = (total_seconds / 60) % 60
     hours = total_seconds / (60 * 60)
     format('%<hours>02dH%<minutes>02dM%<seconds>02dS', hours: hours, minutes: minutes, seconds: seconds)
-  end
-
-  # A helper for generating CSS classes, based on the time-bounded status of the item.
-  #
-  # @param [ActiveRecord::Base] item An ActiveRecord object which has time-bounded fields.
-  # @return [Array<String>] An array of CSS classes applicable for the provided item.
-  def time_period_class(item)
-    if !item.started?
-      ['not-started']
-    elsif item.ended?
-      ['ended']
-    else # Started, but not yet ended.
-      ['currently-active']
-    end
-  end
-
-  # A helper for retrieving the title for a time-bounded item's status.
-  #
-  # @param [ActiveRecord::Base] item An ActiveRecord object which has time-bounded fields.
-  # @return [String] A translated string representing the status of the item.
-  # @return [nil] If the item is valid.
-  def time_period_message(item)
-    if !item.started?
-      t('common.not_started')
-    elsif item.ended?
-      t('common.ended')
-    end
-  end
-
-  # A helper for generating CSS classes, based on the unread status of the item.
-  #
-  # @param [ActiveRecord::Base] item An ActiveRecord object which acts as readable.
-  # @return [Array<String>] An array of CSS classes applicable for the provided item.
-  def unread_class(item)
-    if item.unread?(current_user)
-      ['unread']
-    else
-      []
-    end
   end
 end

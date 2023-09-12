@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 class Course::Condition::AchievementsController < Course::ConditionsController
+  include Course::Achievement::AchievementsHelper
+  include ActionView::Helpers::AssetUrlHelper
   load_resource :achievement_condition, class: Course::Condition::Achievement.name, parent: false
   before_action :set_course, only: [:create]
   authorize_resource :achievement_condition, class: Course::Condition::Achievement.name
@@ -39,7 +41,7 @@ class Course::Condition::AchievementsController < Course::ConditionsController
         achievement.id,
         title: achievement.title,
         description: achievement.description,
-        badge: achievement.badge.url
+        badge: achievement_badge_path(achievement)
       ]
     end
 

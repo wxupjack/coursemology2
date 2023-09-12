@@ -3,7 +3,7 @@ import { ReactNode, useState } from 'react';
 import useEmitterFactory, { Emits } from 'react-emitter-factory';
 import {
   Control,
-  DeepPartial,
+  DefaultValues,
   FieldPath,
   FieldPathValue,
   FieldValues,
@@ -13,13 +13,13 @@ import {
   useForm,
   UseFormWatch,
 } from 'react-hook-form';
-import { toast } from 'react-toastify';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Slide, Typography } from '@mui/material';
 import { isEmpty } from 'lodash';
 import { AnyObjectSchema } from 'yup';
 
 import { setReactHookFormError } from 'lib/helpers/react-hook-form-helper';
+import toast from 'lib/hooks/toast';
 import useTranslation from 'lib/hooks/useTranslation';
 import translations from 'lib/translations/form';
 import messagesTranslations from 'lib/translations/messages';
@@ -145,7 +145,7 @@ const Form = <
   const [initialValues, setInitialValues] = useState(props.initialValues);
 
   const methods = useForm({
-    defaultValues: props.initialValues as DeepPartial<D>,
+    defaultValues: props.initialValues as DefaultValues<D>,
     resolver: schema && transformableResolver(yupResolver(schema), transformer),
     context: schema && validationContext,
   });
@@ -241,7 +241,7 @@ const Form = <
               </Button>
 
               <Button
-                className={`${props.disabled && 'bg-neutral-500'}`}
+                className={props.disabled ? 'bg-neutral-500' : ''}
                 disabled={props.disabled}
                 disableElevation
                 type="submit"

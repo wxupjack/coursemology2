@@ -9,6 +9,7 @@ import {
   CardHeader,
   FormControlLabel,
   Switch,
+  Typography,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import withHeartbeatWorker from 'workers/withHeartbeatWorker';
@@ -234,15 +235,18 @@ class VisibleSubmissionEditIndex extends Component {
 
     return (
       <Card style={{ marginBottom: 20 }}>
-        <CardHeader title={<h3>{assessment.title}</h3>} />
+        <CardHeader title={assessment.title} />
         {assessment.description ? (
-          <CardContent
-            dangerouslySetInnerHTML={{ __html: assessment.description }}
-          />
-        ) : null}
-        {assessment.files.length > 0 && (
           <CardContent>
-            <h4>Files</h4>
+            <Typography
+              dangerouslySetInnerHTML={{ __html: assessment.description }}
+              variant="body2"
+            />
+          </CardContent>
+        ) : null}
+        {assessment.files?.length > 0 && (
+          <CardContent>
+            <Typography variant="h6">Files</Typography>
             {assessment.files.map(renderFile)}
           </CardContent>
         )}
@@ -264,8 +268,6 @@ class VisibleSubmissionEditIndex extends Component {
         skippable,
         questionIds,
         passwordProtected,
-        categoryId,
-        tabId,
         allowPartialSubmission,
         showMcqAnswer,
         showMcqMrqSolution,
@@ -282,9 +284,6 @@ class VisibleSubmissionEditIndex extends Component {
       topics,
       isAutograding,
       isSaving,
-      match: {
-        params: { courseId },
-      },
     } = this.props;
 
     if (Object.values(questions).length === 0) {
@@ -292,8 +291,6 @@ class VisibleSubmissionEditIndex extends Component {
         <SubmissionEmptyForm
           attempting={workflowState === workflowStates.Attempting}
           canUpdate={canUpdate}
-          categoryId={categoryId}
-          courseId={courseId}
           graderView={graderView}
           handleSaveGrade={() => this.handleSaveGrade()}
           handleUnsubmit={() => this.handleUnsubmit()}
@@ -301,7 +298,6 @@ class VisibleSubmissionEditIndex extends Component {
           onSubmit={() => this.onSubmit()}
           published={workflowState === workflowStates.Published}
           submitted={workflowState === workflowStates.Submitted}
-          tabId={tabId}
         />
       );
     }
@@ -428,7 +424,7 @@ class VisibleSubmissionEditIndex extends Component {
     if (isLoading) return <LoadingIndicator />;
     if (isSubmissionBlocked) return <BlockedSubmission />;
     return (
-      <Page>
+      <Page className="space-y-5">
         {this.renderAssessment()}
         {this.renderProgress()}
         {this.renderContent()}

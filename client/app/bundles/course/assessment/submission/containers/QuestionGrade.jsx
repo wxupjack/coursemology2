@@ -1,19 +1,16 @@
 import { Component } from 'react';
+import { injectIntl } from 'react-intl';
 import { connect } from 'react-redux';
-import { Paper } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { Chip, Paper, Tooltip, Typography } from '@mui/material';
 import PropTypes from 'prop-types';
+
+import TextField from 'lib/components/core/fields/TextField';
 
 import actionTypes from '../constants';
 import { questionGradeShape, questionShape } from '../propTypes';
+import translations from '../translations';
 
 const GRADE_STEP = 1;
-
-const styles = {
-  container: {
-    marginTop: 20,
-  },
-};
 
 /**
  * Checks if the given value is a valid decimal of the form `0.00`.
@@ -60,63 +57,100 @@ class VisibleQuestionGrade extends Component {
 
   renderQuestionGrade() {
     const { question, grading } = this.props;
+
     return (
-      <div style={{ display: 'inline-block', paddingLeft: 10 }}>
+      <Typography variant="body2">
         {`${grading.grade} / ${question.maximumGrade}`}
-      </div>
+      </Typography>
     );
   }
 
-  renderQuestionGradeField() {
-    const { question, grading } = this.props;
-    const initialGrade = grading.grade;
+  renderQuestionGradeField(dirty) {
+    const { question, grading, intl } = this.props;
+
     const maxGrade = question.maximumGrade;
 
     return (
-      <div style={{ display: 'inline-block', paddingLeft: 10 }}>
-        <input
-          className="grade"
-          onBlur={(e) => this.processValue(e.target.value)}
-          onChange={(e) => this.processValue(e.target.value, true)}
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowUp') {
-              e.preventDefault();
-              this.stepGrade(GRADE_STEP);
-            }
+      <div className="flex w-full items-center space-x-2">
+        <div className="flex items-center space-x-4">
+          <TextField
+            className="w-40"
+            hiddenLabel
+            inputProps={{ className: 'grade' }}
+            onBlur={(e) => this.processValue(e.target.value)}
+            onChange={(e) => this.processValue(e.target.value, true)}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.stepGrade(GRADE_STEP);
+              }
 
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              this.stepGrade(-GRADE_STEP);
-            }
-          }}
-          style={{ width: 100 }}
-          value={initialGrade ?? ''}
-        />
-        {` / ${maxGrade}`}
+              if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                this.stepGrade(-GRADE_STEP);
+              }
+            }}
+            placeholder={grading.originalGrade}
+            size="small"
+            value={grading.grade ?? ''}
+            variant="filled"
+          />
+
+          <Typography color="text.disabled" variant="body2">
+            /
+          </Typography>
+
+          <Typography variant="body2">{maxGrade}</Typography>
+        </div>
+
+        <div className="px-4 space-x-4">
+          {grading.prefilled && (
+            <Tooltip
+              title={intl.formatMessage(translations.gradePrefilledHint)}
+            >
+              <Chip
+                className="slot-1-neutral-400 border-slot-1 text-slot-1"
+                label={intl.formatMessage(translations.gradePrefilled)}
+                size="small"
+                variant="outlined"
+              />
+            </Tooltip>
+          )}
+
+          {dirty && (
+            <Tooltip title={intl.formatMessage(translations.gradeUnsavedHint)}>
+              <Chip
+                color="warning"
+                label={intl.formatMessage(translations.gradeUnsaved)}
+                size="small"
+              />
+            </Tooltip>
+          )}
+        </div>
       </div>
     );
   }
 
   render() {
-    const { grading, editable } = this.props;
+    const { grading, editable, intl } = this.props;
 
-    if (!grading) {
-      return null;
-    }
+    if (!grading) return null;
+
+    const dirty = +grading.originalGrade !== +grading.grade;
 
     return (
-      <Paper style={styles.container}>
-        <div
-          style={{
-            backgroundColor: grey[100],
-            display: 'inline-block',
-            padding: 20,
-          }}
-        >
-          Grading
-        </div>
+      <Paper
+        className={`transition-none flex items-center space-x-5 px-5 py-4 ring-2 ${
+          dirty ? 'ring-2 ring-warning border-transparent' : 'ring-transparent'
+        }`}
+        variant="outlined"
+      >
+        <Typography color="text.secondary" variant="body1">
+          {intl.formatMessage(translations.grade)}
+        </Typography>
+
         {editable
-          ? this.renderQuestionGradeField()
+          ? this.renderQuestionGradeField(dirty)
           : this.renderQuestionGrade()}
       </Paper>
     );
@@ -130,6 +164,7 @@ VisibleQuestionGrade.propTypes = {
   question: questionShape,
   updateGrade: PropTypes.func.isRequired,
   bonusAwarded: PropTypes.number,
+  intl: PropTypes.object.isRequired,
 };
 
 function mapStateToProps({ assessments: { submission } }, ownProps) {
@@ -160,4 +195,5 @@ const QuestionGrade = connect(
   mapStateToProps,
   mapDispatchToProps,
 )(VisibleQuestionGrade);
-export default QuestionGrade;
+
+export default injectIntl(QuestionGrade);

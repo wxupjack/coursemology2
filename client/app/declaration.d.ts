@@ -15,5 +15,24 @@ declare module '*.svg?url' {
   export default svg;
 }
 
+declare module '*.csv?url' {
+  const csv: string;
+  export default csv;
+}
+
+declare module '*.png?url' {
+  const png: string;
+  export default png;
+}
+
 declare const FIRST_BUILD_YEAR: string;
 declare const LATEST_BUILD_YEAR: string;
+
+declare module '*.md' {
+  const markdown: string;
+  export default markdown;
+}
+
+interface Window {
+  _CSRF_TOKEN?: string;
+}

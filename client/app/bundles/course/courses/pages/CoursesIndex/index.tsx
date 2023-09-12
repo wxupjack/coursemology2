@@ -1,12 +1,13 @@
 import { FC, ReactElement, useEffect, useState } from 'react';
 import { defineMessages } from 'react-intl';
 import { useSearchParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { Button } from '@mui/material';
 
+import AddButton from 'lib/components/core/buttons/AddButton';
 import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
+import toast from 'lib/hooks/toast';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import InstanceUserRoleRequestForm from '../../../../system/admin/instance/instance/components/forms/InstanceUserRoleRequestForm';
@@ -18,13 +19,6 @@ import {
   getCoursePermissions,
 } from '../../selectors';
 import CoursesNew from '../CoursesNew';
-
-const styles = {
-  newButton: {
-    background: 'white',
-    fontSize: 14,
-  },
-};
 
 const translations = defineMessages({
   header: {
@@ -79,20 +73,17 @@ const CoursesIndex: FC = () => {
       .catch(() => toast.error(t(translations.fetchCoursesFailure)));
   }, [dispatch]);
 
+  useEffect(() => {
+    setIsNewCourseDialogOpen(shouldOpenNewCourseDialog);
+  }, [shouldOpenNewCourseDialog]);
+
   // Adding appropriate button to the header
   const headerToolbars: ReactElement[] = [];
   if (coursesPermissions?.canCreate) {
     headerToolbars.push(
-      <Button
-        key="new-course-button"
-        className="new-course-button"
-        color="primary"
-        onClick={(): void => setIsNewCourseDialogOpen(true)}
-        style={styles.newButton}
-        variant="outlined"
-      >
+      <AddButton onClick={(): void => setIsNewCourseDialogOpen(true)}>
         {t(translations.newCourse)}
-      </Button>,
+      </AddButton>,
     );
   } else if (!isLoading && coursesPermissions?.isCurrentUser) {
     headerToolbars.push(
@@ -101,7 +92,6 @@ const CoursesIndex: FC = () => {
         color="primary"
         id="role-request-button"
         onClick={(): void => setRoleRequestDialogOpen(true)}
-        style={styles.newButton}
         variant="outlined"
       >
         {instanceUserRoleRequest

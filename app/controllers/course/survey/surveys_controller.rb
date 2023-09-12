@@ -6,12 +6,8 @@ class Course::Survey::SurveysController < Course::Survey::Controller
   build_and_authorize_new_lesson_plan_item :survey, class: Course::Survey, through: :course, only: [:new, :create]
 
   def index
-    respond_to do |format|
-      format.html
-      format.json do
-        @surveys = @surveys.includes(responses: { experience_points_record: :course_user })
-      end
-    end
+    @surveys = @surveys.includes(responses: { experience_points_record: :course_user })
+    preload_student_submitted_responses_counts
   end
 
   def create
@@ -23,10 +19,7 @@ class Course::Survey::SurveysController < Course::Survey::Controller
   end
 
   def show
-    respond_to do |format|
-      format.html { render 'index' }
-      format.json { render_survey_with_questions_json }
-    end
+    render_survey_with_questions_json
   end
 
   def update
@@ -46,10 +39,7 @@ class Course::Survey::SurveysController < Course::Survey::Controller
   end
 
   def results
-    respond_to do |format|
-      format.html { render 'index' }
-      format.json { preload_questions_results }
-    end
+    preload_questions_results
   end
 
   def remind
@@ -64,7 +54,6 @@ class Course::Survey::SurveysController < Course::Survey::Controller
     job = Course::Survey::SurveyDownloadJob.
           perform_later(@survey).job
     respond_to do |format|
-      format.html { redirect_to(job_path(job)) }
       format.json { render partial: 'jobs/submitted', locals: { job: job } }
     end
   end
@@ -95,5 +84,11 @@ class Course::Survey::SurveysController < Course::Survey::Controller
     ]
     fields << :anonymous if action_name == 'create' || @survey.can_toggle_anonymity?
     params.require(:survey).permit(*fields)
+  end
+
+  def preload_student_submitted_responses_counts
+    @student_submitted_responses_counts_hash = @surveys.calculated(:student_submitted_responses_count).to_h do |survey|
+      [survey.id, survey.student_submitted_responses_count]
+    end
   end
 end

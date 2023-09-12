@@ -1,6 +1,5 @@
-import { MouseEventHandler, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import {
   Assessment,
   Create,
@@ -15,9 +14,10 @@ import {
 
 import DeleteButton from 'lib/components/core/buttons/DeleteButton';
 import { PromptText } from 'lib/components/core/dialogs/Prompt';
+import toast from 'lib/hooks/toast';
 import useTranslation from 'lib/hooks/useTranslation';
 
-import { attemptAssessment, deleteAssessment } from '../../operations';
+import { deleteAssessment } from '../../operations';
 import translations from '../../translations';
 import { ACTION_LABELS } from '../AssessmentsIndex/ActionButtons';
 
@@ -31,31 +31,7 @@ const AssessmentShowHeader = (
   const { with: assessment } = props;
   const { t } = useTranslation();
   const [deleting, setDeleting] = useState(false);
-  const [attempting, setAttempting] = useState(false);
   const navigate = useNavigate();
-
-  const actionButtonUrl =
-    assessment.status === 'open' ? '#' : assessment.actionButtonUrl;
-
-  const handleActionButton: MouseEventHandler<HTMLButtonElement> = (e) => {
-    if (assessment.status !== 'open') return;
-    setAttempting(true);
-    e.preventDefault();
-    e.stopPropagation();
-    toast
-      .promise(attemptAssessment(assessment.id), {
-        pending: t(translations.attemptingAssessment),
-        success: t(translations.createSubmissionSuccessful),
-        error: {
-          render: ({ data }) => {
-            const error = (data as Error)?.message;
-            return t(translations.createSubmissionFailed, { error });
-          },
-        },
-      })
-      .then((data) => navigate(data.redirectUrl))
-      .catch(() => setAttempting(false));
-  };
 
   const handleDelete = (): Promise<void> => {
     const deleteUrl = assessment.deleteUrl;
@@ -70,15 +46,14 @@ const AssessmentShowHeader = (
       .promise(deleteAssessment(deleteUrl), {
         pending: t(translations.deletingAssessment),
         success: t(translations.assessmentDeleted),
-        error: {
-          render: ({ data }) => {
-            const error = (data as Error)?.message;
-            return error || t(translations.errorDeletingAssessment);
-          },
-        },
       })
       .then((data: AssessmentDeleteResult) => navigate(data.redirect))
-      .catch(() => setDeleting(false));
+      .catch((error) => {
+        const message = (error as Error)?.message;
+        toast.error(message || t(translations.errorDeletingAssessment));
+
+        setDeleting(false);
+      });
   };
 
   return (
@@ -140,13 +115,11 @@ const AssessmentShowHeader = (
         </Tooltip>
       )}
 
-      {actionButtonUrl && (
-        <Link to={actionButtonUrl}>
+      {assessment.actionButtonUrl && (
+        <Link to={assessment.actionButtonUrl}>
           <Button
             aria-label={t(ACTION_LABELS[assessment.status])}
             className="ml-4"
-            disabled={attempting}
-            onClick={handleActionButton}
             variant="contained"
           >
             {t(ACTION_LABELS[assessment.status])}

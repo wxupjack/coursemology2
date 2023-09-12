@@ -1,11 +1,11 @@
 import { FC, ReactElement, useEffect, useState } from 'react';
 import { defineMessages } from 'react-intl';
-import { toast } from 'react-toastify';
 
 import AddButton from 'lib/components/core/buttons/AddButton';
 import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
+import toast from 'lib/hooks/toast';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import AchievementReordering from '../../components/misc/AchievementReordering';
@@ -75,11 +75,11 @@ const AchievementsIndex: FC = () => {
   if (achievementPermissions?.canCreate) {
     headerToolbars.push(
       <AddButton
-        key="new-achievement-button"
         className="new-achievement-button"
         onClick={(): void => setIsOpen(true)}
-        tooltip={t(translations.newAchievement)}
-      />,
+      >
+        {t(translations.newAchievement)}
+      </AddButton>,
     );
   }
 

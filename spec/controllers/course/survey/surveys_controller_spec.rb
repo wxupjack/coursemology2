@@ -33,24 +33,6 @@ RSpec.describe Course::Survey::SurveysController do
     describe '#index' do
       let!(:published_survey) { create(:survey, :published, course: course) }
 
-      context 'when html page is requested' do
-        let(:user) { student.user }
-        subject { get :index, params: { course_id: course.id } }
-
-        it { is_expected.to render_template('index') }
-
-        context 'when survey component is disabled' do
-          before do
-            allow(controller).
-              to receive_message_chain('current_component_host.[]').and_return(nil)
-          end
-
-          it 'raises an component not found error' do
-            expect { subject }.to raise_error(ComponentNotFoundError)
-          end
-        end
-      end
-
       context 'when json data is requested' do
         render_views
         subject { get :index, as: :json, params: { course_id: course.id } }
@@ -99,13 +81,6 @@ RSpec.describe Course::Survey::SurveysController do
 
     describe '#show' do
       let(:survey_traits) { :published }
-
-      context 'when html page is requested' do
-        let(:user) { student.user }
-        subject { get :show, params: { course_id: course.id, id: survey.id } }
-
-        it { is_expected.to render_template('index') }
-      end
 
       context 'when json data is requested' do
         render_views
@@ -222,12 +197,6 @@ RSpec.describe Course::Survey::SurveysController do
 
     describe '#results' do
       let(:user) { admin }
-
-      context 'when html page is requested' do
-        subject { get :results, params: { course_id: course.id, id: survey.id } }
-
-        it { is_expected.to render_template('index') }
-      end
 
       context 'when json data is requested' do
         render_views
@@ -359,13 +328,13 @@ RSpec.describe Course::Survey::SurveysController do
       let(:user) { admin }
 
       subject do
-        get :download, params: { course_id: course.id, id: survey.id }
+        get :download, as: :json, params: { course_id: course.id, id: survey.id }
       end
 
-      it 'returns a html file' do
+      it 'renders a submitted job response' do
         subject
-        expect(response.header['Content-Type']).to include('text/html')
-        expect(response.status).to eq(302)
+        expect(response).to render_template(partial: 'jobs/_submitted')
+        expect(response).to have_http_status(:ok)
       end
     end
   end

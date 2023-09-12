@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import { createSurvey, showSurveyForm } from 'course/survey/actions/surveys';
-import AddButton from 'course/survey/components/AddButton';
+import AddButton from 'lib/components/core/buttons/AddButton';
 import moment from 'lib/moment';
 
 import { formatSurveyFormData } from '../../utils';
@@ -41,11 +41,11 @@ const aWeekStartingTomorrow = () => {
 };
 
 const NewSurveyButton = (props) => {
-  const { canCreate } = props;
+  const { canCreate, intl } = props;
   const navigate = useNavigate();
 
   const createSurveyHandler = (data, setError) => {
-    const { dispatch, intl } = props;
+    const { dispatch } = props;
 
     const payload = formatSurveyFormData(data);
     const successMessage = intl.formatMessage(translations.success, data);
@@ -56,7 +56,7 @@ const NewSurveyButton = (props) => {
   };
 
   const showNewSurveyForm = () => {
-    const { dispatch, intl } = props;
+    const { dispatch } = props;
 
     return dispatch(
       showSurveyForm({
@@ -78,7 +78,13 @@ const NewSurveyButton = (props) => {
     );
   };
 
-  return canCreate ? <AddButton onClick={showNewSurveyForm} /> : <div />;
+  if (!canCreate) return null;
+
+  return (
+    <AddButton onClick={showNewSurveyForm}>
+      {intl.formatMessage(translations.newSurvey)}
+    </AddButton>
+  );
 };
 
 NewSurveyButton.propTypes = propTypes;

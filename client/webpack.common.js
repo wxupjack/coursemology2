@@ -5,8 +5,10 @@ const {
   DefinePlugin,
 } = require('webpack');
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
-const Dotenv = require('dotenv-webpack');
+const DotenvPlugin = require('dotenv-webpack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 const packageJSON = require('./package.json');
 
@@ -20,7 +22,8 @@ module.exports = {
     ],
   },
   output: {
-    path: join(__dirname, '..', 'public', 'webpack'),
+    path: join(__dirname, 'build'),
+    publicPath: '/',
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -67,12 +70,14 @@ module.exports = {
     moduleIds: 'deterministic',
   },
   plugins: [
-    new Dotenv(),
+    new DotenvPlugin(),
     new IgnorePlugin({ resourceRegExp: /__test__/ }),
     new WebpackManifestPlugin({
       publicPath: '/webpack/',
       writeToFileEmit: true,
     }),
+    new HtmlWebpackPlugin({ template: './public/index.html' }),
+    new FaviconsWebpackPlugin({ logo: './favicon.svg', inject: true }),
     // Do not require all locales in moment
     new ContextReplacementPlugin(/moment\/locale$/, /^\.\/(en-.*|zh-.*)$/),
     new ForkTsCheckerWebpackPlugin({
@@ -136,9 +141,9 @@ module.exports = {
         exclude: [/node_modules/, resolve(__dirname, 'app/lib/styles')],
       },
       {
-        test: /\.svg$/i,
+        test: /\.(csv|png|svg)$/i,
         type: 'asset',
-        resourceQuery: /url/, // *.svg?url
+        resourceQuery: /url/, // *.(csv|png|svg)?url
         exclude: /node_modules/,
       },
       {
@@ -169,6 +174,10 @@ module.exports = {
         options: {
           exposes: 'moment',
         },
+      },
+      {
+        test: /\.md$/,
+        type: 'asset/source',
       },
     ],
   },

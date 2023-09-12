@@ -8,6 +8,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Typography,
 } from '@mui/material';
 import { yellow } from '@mui/material/colors';
 import PropTypes from 'prop-types';
@@ -42,7 +43,12 @@ class PastAnswers extends Component {
         );
       case questionTypes.Comprehension:
       case questionTypes.TextResponse:
-        return <div dangerouslySetInnerHTML={{ __html: answer.answer_text }} />;
+        return (
+          <Typography
+            dangerouslySetInnerHTML={{ __html: answer.answer_text }}
+            variant="body2"
+          />
+        );
       default:
         return (
           <Card style={{ backgroundColor: yellow[100] }}>
@@ -101,12 +107,12 @@ class PastAnswers extends Component {
 
     return (
       <div key={answer.id}>
-        <h4>
+        <Typography variant="h6">
           {answer.isDraftAnswer
             ? intl.formatMessage(translations.savedAt)
             : intl.formatMessage(translations.submittedAt)}
           : {date}
-        </h4>
+        </Typography>
         {this.getAnswersHistory(question, answer)}
         <hr style={styles.horizontalRule} />
       </div>

@@ -17,8 +17,11 @@ RSpec.feature 'System: Administration: Masquerade', js: true do
 
       scenario 'I can masquerade a user' do
         visit admin_users_path
+
         find(".user-masquerade-#{user_to_masquerade.id}").click
-        expect(page).to have_selector('li', text: user_to_masquerade.name)
+        wait_for_page
+
+        expect(page).to have_text("Masquerading as #{user_to_masquerade.name}")
       end
     end
 
@@ -26,10 +29,9 @@ RSpec.feature 'System: Administration: Masquerade', js: true do
       let(:user) { create(:instance_user, role: :administrator).user }
 
       scenario 'I cannot masquerade a user' do
-        visit masquerade_path(user_to_masquerade)
+        visit admin_users_path
 
-        expect(page).not_to have_selector('li', text: user_to_masquerade.name)
-        expect(page).to have_selector('div', text: 'pages.403.header')
+        expect_forbidden
       end
     end
 
@@ -37,10 +39,9 @@ RSpec.feature 'System: Administration: Masquerade', js: true do
       let(:user) { create(:instance_user).user }
 
       scenario 'I cannot masquerade a user' do
-        visit masquerade_path(user_to_masquerade)
+        visit admin_users_path
 
-        expect(page).not_to have_selector('li', text: user_to_masquerade.name)
-        expect(page).to have_selector('div', text: 'pages.403.header')
+        expect_forbidden
       end
     end
   end

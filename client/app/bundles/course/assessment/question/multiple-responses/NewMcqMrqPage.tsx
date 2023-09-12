@@ -1,6 +1,5 @@
 import { ElementType } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import {
   McqMrqData,
   McqMrqFormData,
@@ -9,6 +8,7 @@ import {
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import Preload from 'lib/components/wrappers/Preload';
 import { DataHandle } from 'lib/hooks/router/dynamicNest';
+import toast from 'lib/hooks/toast';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import translations from '../../translations';
@@ -34,7 +34,9 @@ const NEW_MCQ_MRQ_TEMPLATE: McqMrqData['question'] = {
   randomizeOptions: false,
 };
 
-const getMcqMrqType = (params: URLSearchParams): McqMrqFormData['mcqMrqType'] =>
+const getMcqMrqType = (
+  params: URLSearchParams,
+): McqMrqFormData['mcqMrqType'] =>
   params.get('multiple_choice') === 'true' ? 'mcq' : 'mrq';
 
 const NewMcqMrqPage = (): JSX.Element => {

@@ -361,16 +361,13 @@ const translations = defineMessages({
   },
   questionDuplicated: {
     id: 'course.assessment.show.questionDuplicated',
-    defaultMessage: 'Your question has been duplicated.',
+    defaultMessage:
+      'Your question has been duplicated. <link>Go to the assessment</link>',
   },
   questionDuplicatedRefreshing: {
     id: 'course.assessment.show.questionDuplicatedRefreshing',
     defaultMessage:
       'Your question has been duplicated. We are refreshing to show you the latest changes.',
-  },
-  goToAssessment: {
-    id: 'course.assessment.show.goToAssessment',
-    defaultMessage: 'Go to the assessment',
   },
   errorDuplicatingQuestion: {
     id: 'course.assessment.show.errorDuplicatingQuestion',
@@ -715,9 +712,9 @@ const translations = defineMessages({
     id: 'course.assessment.question.multipleResponses.mustSpecifyPositiveMaximumGrade',
     defaultMessage: 'Maximum grade has to be non-negative.',
   },
-  cannotBeMoreThanMaxMaximumGrade: {
-    id: 'course.assessment.question.multipleResponses.cannotBeMoreThanMaxMaximumGrade',
-    defaultMessage: 'Cannot be more than 1000.',
+  mustBeLessThanMaxMaximumGrade: {
+    id: 'course.assessment.question.multipleResponses.mustBeLessThanMaxMaximumGrade',
+    defaultMessage: 'Must be less than 1000.',
   },
   mustSpecifyResponse: {
     id: 'course.assessment.question.multipleResponses.mustSpecifyResponse',

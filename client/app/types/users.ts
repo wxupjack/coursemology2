@@ -86,7 +86,7 @@ export type Locale = 'en' | 'zh';
 export interface ProfileData {
   id: string;
   name: string;
-  timezone: string;
+  timeZone: string;
   locale: string;
   imageUrl: string;
   availableLocales: Locale[];
@@ -114,7 +114,7 @@ export interface PasswordData {
 export interface ProfilePostData {
   user: {
     name?: ProfileData['name'];
-    time_zone?: ProfileData['timezone'];
+    time_zone?: ProfileData['timeZone'];
     locale?: ProfileData['locale'];
     profile_photo?: ProfileData['imageUrl'];
   };
@@ -132,4 +132,11 @@ export interface PasswordPostData {
     password?: PasswordData['password'];
     password_confirmation?: PasswordData['passwordConfirmation'];
   };
+}
+
+export interface InvitedSignUpData {
+  name: string;
+  email: string;
+  courseTitle: string;
+  courseId: string;
 }

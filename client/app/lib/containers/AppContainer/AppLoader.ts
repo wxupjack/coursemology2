@@ -1,18 +1,55 @@
 import { useLoaderData, useOutletContext } from 'react-router-dom';
+import { AxiosError } from 'axios';
 import { AnnouncementMiniEntity } from 'types/course/announcements';
 import { HomeLayoutData } from 'types/home';
 
 import GlobalAPI from 'api';
+import {
+  DEFAULT_LOCALE,
+  DEFAULT_TIME_ZONE,
+} from 'lib/constants/sharedConstants';
+import { imperativeAuthenticator, setI18nConfig } from 'lib/hooks/session';
 
 interface AppLoaderData {
   home: HomeLayoutData;
-  announcements: AnnouncementMiniEntity[];
+  announcements?: AnnouncementMiniEntity[];
+  serverErroring?: boolean;
 }
 
-export const loader = async (): Promise<AppLoaderData> => ({
-  home: (await GlobalAPI.home.fetch()).data,
-  announcements: (await GlobalAPI.announcements.index(true)).data.announcements,
-});
+export const loader = async (): Promise<AppLoaderData> => {
+  try {
+    const { data: home } = await GlobalAPI.home.fetch();
+    const { data: announcements } = await GlobalAPI.announcements.index(true);
+
+    setI18nConfig({
+      locale: home.locale,
+      timeZone: home.timeZone ?? undefined,
+    });
+
+    if (home.user) {
+      imperativeAuthenticator.authenticate();
+    } else {
+      imperativeAuthenticator.deauthenticate();
+    }
+
+    return { home, announcements: announcements.announcements };
+  } catch (error) {
+    if (
+      error instanceof AxiosError &&
+      error.response &&
+      error.response?.status >= 500
+    )
+      return {
+        home: {
+          locale: DEFAULT_LOCALE,
+          timeZone: DEFAULT_TIME_ZONE,
+        },
+        serverErroring: true,
+      };
+
+    throw error;
+  }
+};
 
 export const useAppLoader = (): AppLoaderData =>
   useLoaderData() as AppLoaderData;

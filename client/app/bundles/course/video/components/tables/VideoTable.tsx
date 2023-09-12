@@ -40,6 +40,27 @@ const VideoTable: FC<Props> = (props) => {
     return <Note message={intl.formatMessage(translations.noVideo)} />;
   }
 
+  const videoSortMethodByDate = (
+    video1: VideoListData,
+    video2: VideoListData,
+  ): number => {
+    const time1 = video1.startTimeInfo;
+    const time2 = video2.startTimeInfo;
+
+    const date1 = time1.referenceTime
+      ? new Date(time1.referenceTime)
+      : new Date(0);
+    const date2 = time2.referenceTime
+      ? new Date(time2.referenceTime)
+      : new Date(0);
+    if (date1.getTime() - date2.getTime() === 0) {
+      return video1.title.localeCompare(video2.title);
+    }
+    return date1.getTime() - date2.getTime();
+  };
+
+  videos.sort(videoSortMethodByDate);
+
   const options: TableOptions = {
     download: false,
     filter: false,
@@ -223,7 +244,13 @@ const VideoTable: FC<Props> = (props) => {
   }
 
   return (
-    <DataTable columns={columns} data={videos} options={options} withMargin />
+    <DataTable
+      columns={columns}
+      data={videos}
+      includeRowNumber
+      options={options}
+      withMargin
+    />
   );
 };
 

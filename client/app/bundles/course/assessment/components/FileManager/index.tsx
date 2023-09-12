@@ -1,6 +1,5 @@
 import { CSSProperties, useState } from 'react';
 import { injectIntl, WrappedComponentProps } from 'react-intl';
-import { toast } from 'react-toastify';
 import { Checkbox, CircularProgress } from '@mui/material';
 import { AxiosError } from 'axios';
 
@@ -10,6 +9,7 @@ import DataTable from 'lib/components/core/layouts/DataTable';
 import Link from 'lib/components/core/Link';
 import { getWorkbinFileURL } from 'lib/helpers/url-builders';
 import { getCourseId } from 'lib/helpers/url-helpers';
+import toast from 'lib/hooks/toast';
 import { formatLongDateTime } from 'lib/moment';
 
 import Toolbar from './Toolbar';
@@ -108,8 +108,9 @@ const FileManager = (props: FileManagerProps): JSX.Element => {
   const deleteFileWithRowIndex = async (index: number): Promise<void> => {
     const { id, name } = materials[index];
 
-    setMaterials((current) =>
-      current?.map((m) => (m.id === id ? { ...m, deleting: true } : m)),
+    setMaterials(
+      (current) =>
+        current?.map((m) => (m.id === id ? { ...m, deleting: true } : m)),
     );
 
     try {
@@ -117,8 +118,9 @@ const FileManager = (props: FileManagerProps): JSX.Element => {
       setMaterials((current) => current?.filter((m) => m.id !== id));
       toast.success(intl.formatMessage(t.deleteSuccess, { name }));
     } catch (error) {
-      setMaterials((current) =>
-        current?.map((m) => (m.id === id ? { ...m, deleting: false } : m)),
+      setMaterials(
+        (current) =>
+          current?.map((m) => (m.id === id ? { ...m, deleting: false } : m)),
       );
       toast.error(intl.formatMessage(t.deleteFail, { name }));
     }

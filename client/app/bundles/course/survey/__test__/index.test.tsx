@@ -1,4 +1,4 @@
-import MockAdapter from 'axios-mock-adapter';
+import { createMockAdapter } from 'mocks/axiosMock';
 import { render, waitFor } from 'test-utils';
 
 import CourseAPI from 'api/course';
@@ -18,7 +18,7 @@ const SURVEYS = [
   },
 ];
 
-const mock = new MockAdapter(CourseAPI.survey.surveys.client);
+const mock = createMockAdapter(CourseAPI.survey.surveys.client);
 
 beforeEach(() => {
   mock.reset();
@@ -40,6 +40,5 @@ describe('Surveys', () => {
     await waitFor(() => expect(spyIndex).toHaveBeenCalled());
 
     expect(page.getByText(SURVEYS[0].title)).toBeVisible();
-    expect(page.getByTestId('AddIcon')).toBeVisible();
   });
 });

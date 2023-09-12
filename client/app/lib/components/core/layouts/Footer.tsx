@@ -1,7 +1,10 @@
 import { defineMessages } from 'react-intl';
+import { FacebookOutlined, GitHub } from '@mui/icons-material';
 import { Typography } from '@mui/material';
 
 import Link from 'lib/components/core/Link';
+import { useAttributions } from 'lib/components/wrappers/AttributionsProvider';
+import { SUPPORT_EMAIL } from 'lib/constants/sharedConstants';
 import useTranslation from 'lib/hooks/useTranslation';
 
 const translations = defineMessages({
@@ -27,62 +30,84 @@ const translations = defineMessages({
   },
   copyright: {
     id: 'app.Footer.copyright',
-    defaultMessage:
-      'Copyright © {from}–{to} Coursemology. All rights reserved.',
+    defaultMessage: '© {from}–{to} Coursemology.',
   },
 });
 
 const Footer = (): JSX.Element => {
   const { t } = useTranslation();
 
+  const attributions = useAttributions();
+
   return (
-    <footer className="flex max-w-[1000px] flex-col space-y-5 p-5 border-only-t-neutral-200">
-      <div className="-mx-3 -my-1 flex flex-wrap">
-        <Link
-          className="mx-3 my-1"
-          href="/pages/terms_of_service"
-          opensInNewTab
-        >
-          {t(translations.termsOfService)}
-        </Link>
+    <footer className="bg-neutral-50 p-5 border-only-t-neutral-200">
+      <div className="m-auto flex flex-col space-y-5">
+        <section className="-mx-3 -my-1 flex flex-wrap">
+          <Link
+            className="mx-3 my-1"
+            opensInNewTab
+            to="/pages/terms_of_service"
+          >
+            {t(translations.termsOfService)}
+          </Link>
 
-        <Link className="mx-3 my-1" href="/pages/privacy_policy" opensInNewTab>
-          {t(translations.privacyPolicy)}
-        </Link>
+          <Link className="mx-3 my-1" opensInNewTab to="/pages/privacy_policy">
+            {t(translations.privacyPolicy)}
+          </Link>
 
-        <Link
-          className="mx-3 my-1"
-          external
-          href="mailto:coursemology@gmail.com"
-        >
-          {t(translations.contactUs)}
-        </Link>
+          <Link className="mx-3 my-1" external href={`mailto:${SUPPORT_EMAIL}`}>
+            {t(translations.contactUs)}
+          </Link>
 
-        <Link
-          className="mx-3 my-1"
-          external
-          href="https://coursemology.github.io/coursemology-help/"
-          opensInNewTab
-        >
-          {t(translations.instructorsGuide)}
-        </Link>
+          <Link
+            className="mx-3 my-1"
+            external
+            href="https://coursemology.github.io/coursemology-help/"
+            opensInNewTab
+          >
+            {t(translations.instructorsGuide)}
+          </Link>
+        </section>
 
-        <Link
-          className="mx-3 my-1"
-          external
-          href="https://github.com/Coursemology/coursemology2"
-          opensInNewTab
-        >
-          {t(translations.github)}
-        </Link>
+        <section className="flex flex-col">
+          {attributions.map((attribution) => (
+            <Typography
+              key={attribution.name}
+              color="text.secondary"
+              variant="caption"
+            >
+              {attribution.content}
+            </Typography>
+          ))}
+        </section>
+
+        <section className="flex items-end justify-between">
+          <Typography color="text.secondary" variant="caption">
+            {t(translations.copyright, {
+              from: FIRST_BUILD_YEAR,
+              to: LATEST_BUILD_YEAR,
+            })}
+          </Typography>
+
+          <div className="space-x-3 text-neutral-500">
+            <Link
+              color="inherit"
+              href="https://www.facebook.com/coursemology"
+              opensInNewTab
+            >
+              <FacebookOutlined className="translate-y-[0.1rem] text-[3.3rem]" />
+            </Link>
+
+            <Link
+              color="inherit"
+              href="https://github.com/Coursemology/coursemology2"
+              opensInNewTab
+            >
+              <GitHub className="text-[3rem]" fontSize="large" />
+            </Link>
+          </div>
+        </section>
       </div>
-
-      <Typography variant="caption">
-        {t(translations.copyright, {
-          from: FIRST_BUILD_YEAR,
-          to: LATEST_BUILD_YEAR,
-        })}
-      </Typography>
     </footer>
   );
 };

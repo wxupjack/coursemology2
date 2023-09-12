@@ -1,7 +1,7 @@
 import { FC, memo } from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import { DragIndicator } from '@mui/icons-material';
-import { Switch } from '@mui/material';
+import { Switch, Typography } from '@mui/material';
 import equal from 'fast-deep-equal';
 import { TableColumns, TableOptions } from 'types/components/DataTable';
 import {
@@ -9,6 +9,7 @@ import {
   AchievementPermissions,
 } from 'types/course/achievements';
 
+import { getAchievementBadgeUrl } from 'course/helper/achievements';
 import DataTable from 'lib/components/core/layouts/DataTable';
 import Link from 'lib/components/core/Link';
 import Note from 'lib/components/core/Note';
@@ -109,11 +110,16 @@ const AchievementTable: FC<Props> = (props) => {
         sort: false,
         customBodyRenderLite: (dataIndex): JSX.Element => {
           const badge = achievements[dataIndex].badge;
+          const badgeUrl = getAchievementBadgeUrl(
+            badge.url,
+            achievements[dataIndex].permissions.canDisplayBadge,
+          );
+
           return (
             <img
               key={achievements[dataIndex].id}
               alt={badge.name}
-              src={badge.url}
+              src={badgeUrl}
               style={styles.badge}
             />
           );
@@ -152,10 +158,11 @@ const AchievementTable: FC<Props> = (props) => {
         customBodyRenderLite: (dataIndex): JSX.Element => {
           const achievement = achievements[dataIndex];
           return (
-            <p
+            <Typography
               key={achievements[dataIndex].id}
               dangerouslySetInnerHTML={{ __html: achievement.description }}
               style={{ whiteSpace: 'normal' }}
+              variant="body2"
             />
           );
         },
@@ -173,7 +180,9 @@ const AchievementTable: FC<Props> = (props) => {
           return (
             <div key={achievements[dataIndex].id}>
               {conditions.map((condition) => (
-                <li key={condition.id}>{condition.description}</li>
+                <Typography key={condition.id} component="li" variant="body2">
+                  {condition.description}
+                </Typography>
               ))}
             </div>
           );

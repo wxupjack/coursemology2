@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
-  # root 'welcome#index'
+  root 'application#index'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
@@ -55,6 +55,8 @@ Rails.application.routes.draw do
   #     resources :products
   #   end
 
+  get '/health_check', to: 'health_check#show'
+
   concern :conditional do
     namespace :condition do
       resources :achievements, except: [:new, :edit]
@@ -71,8 +73,12 @@ Rails.application.routes.draw do
   devise_for :users, controllers: {
     registrations: 'user/registrations',
     sessions: 'user/sessions',
-    masquerades: 'user/masquerades'
+    masquerades: 'user/masquerades',
+    passwords: 'user/passwords',
+    confirmations: 'user/confirmations'
   }
+
+  get 'csrf_token' => 'csrf_token#csrf_token'
 
   resources :announcements, only: [:index] do
     post 'mark_as_read'
@@ -460,4 +466,12 @@ Rails.application.routes.draw do
   end
 
   resources :attachment_references, path: 'attachments', only: [:create, :show, :destroy]
+
+  if Rails.env.test?
+    namespace :test do
+      post 'create' => 'factories#create'
+      delete 'clear_emails' => 'mailer#clear'
+      get 'last_sent_email' => 'mailer#last_sent'
+    end
+  end
 end

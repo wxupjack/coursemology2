@@ -1,6 +1,5 @@
 import { FC, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { toast } from 'react-toastify';
 import { ArrowBack, Check, Clear, Reply } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import {
@@ -17,6 +16,7 @@ import { CommentPostMiniEntity } from 'types/course/comments';
 
 import ConfirmationDialog from 'lib/components/core/dialogs/ConfirmationDialog';
 import { useAppDispatch } from 'lib/hooks/store';
+import toast from 'lib/hooks/toast';
 import { formatLongDateTime } from 'lib/moment';
 
 import { deletePost, updatePostCodaveri } from '../../operations';
@@ -235,7 +235,10 @@ const CodaveriCommentCard: FC<Props> = (props) => {
     }
     return (
       <>
-        <div dangerouslySetInnerHTML={{ __html: post.text }} />
+        <Typography
+          dangerouslySetInnerHTML={{ __html: post.text }}
+          variant="body2"
+        />
         {renderRating()}
       </>
     );

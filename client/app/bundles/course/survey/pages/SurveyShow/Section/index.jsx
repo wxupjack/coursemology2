@@ -8,10 +8,11 @@ import {
   CardContent,
   CardHeader,
   ListSubheader,
+  Typography,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 
-import { sectionShape, surveyShape } from 'course/survey/propTypes';
+import { sectionShape } from 'course/survey/propTypes';
 
 import DeleteSectionButton from './DeleteSectionButton';
 import EditSectionButton from './EditSectionButton';
@@ -62,7 +63,10 @@ class Section extends Component {
       <Card>
         <CardHeader
           subheader={
-            <div dangerouslySetInnerHTML={{ __html: section.description }} />
+            <Typography
+              dangerouslySetInnerHTML={{ __html: section.description }}
+              variant="body2"
+            />
           }
           title={
             <div className="flex justify-between">
@@ -113,7 +117,6 @@ class Section extends Component {
 }
 
 Section.propTypes = {
-  survey: surveyShape,
   section: sectionShape,
   index: PropTypes.number.isRequired,
   first: PropTypes.bool.isRequired,

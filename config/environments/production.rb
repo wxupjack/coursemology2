@@ -31,8 +31,6 @@ Rails.application.configure do
   # Apache or NGINX already handles this.
   config.public_file_server.enabled = ENV['RAILS_SERVE_STATIC_FILES'].present?
 
-  # Compress JavaScripts and CSS.
-  config.assets.js_compressor = Uglifier.new(harmony: true)
   # config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
@@ -134,4 +132,11 @@ Rails.application.configure do
   # config.active_record.yaml_column_permitted_classes = [ActiveSupport::HashWithIndifferentAccess,
   #                                                       ActiveSupport::Duration]
   config.active_record.use_yaml_unsafe_load = true
+
+  config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins(/coursemology\.org:([0-9]+)/, /(.*?)\.coursemology\.org:([0-9]+)/)
+      resource '*', headers: :any, methods: [:get, :post, :patch, :put], credentials: true
+    end
+  end
 end

@@ -1,13 +1,13 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
-import { toast } from 'react-toastify';
-import { Button } from '@mui/material';
 
 import AnnouncementsDisplay from 'bundles/course/announcements/components/misc/AnnouncementsDisplay';
 import AnnouncementNew from 'bundles/course/announcements/pages/AnnouncementNew';
+import AddButton from 'lib/components/core/buttons/AddButton';
 import Page from 'lib/components/core/layouts/Page';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
+import toast from 'lib/hooks/toast';
 
 import {
   createAnnouncement,
@@ -54,16 +54,14 @@ const AnnouncementsIndex: FC<Props> = (props) => {
 
   return (
     <Page>
-      <Button
-        key="new-announcement-button"
+      <AddButton
+        className="float-right"
+        fixed
         id="new-announcement-button"
-        onClick={(): void => {
-          setIsOpen(true);
-        }}
-        variant="outlined"
+        onClick={(): void => setIsOpen(true)}
       >
         {intl.formatMessage(translations.newAnnouncement)}
-      </Button>
+      </AddButton>
 
       <AnnouncementsDisplay
         announcementPermissions={{ canCreate: true }}

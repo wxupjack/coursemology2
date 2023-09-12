@@ -5,7 +5,6 @@ import { FormControlLabel, Switch } from '@mui/material';
 import DataTable from 'lib/components/core/layouts/DataTable';
 import LinearProgressWithLabel from 'lib/components/core/LinearProgressWithLabel';
 import Link from 'lib/components/core/Link';
-import { DEFAULT_TABLE_ROWS_PER_PAGE } from 'lib/constants/sharedConstants';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import { studentsStatisticsTableShape } from '../../../propTypes/students';
@@ -41,7 +40,8 @@ const translations = defineMessages({
   },
   tableTitle: {
     id: 'course.statistics.StatisticsIndex.students.tableTitle',
-    defaultMessage: 'Student Statistics',
+    defaultMessage:
+      'Student Statistics ({numStudents} students, {numPhantom} phantom)',
   },
   tutorFilter: {
     id: 'course.statistics.StatisticsIndex.students.tutorFilter',
@@ -68,6 +68,16 @@ const StudentsStatisticsTable = ({ metadata, students }) => {
     }
     return students;
   }, [showMyStudentsOnly, students]);
+  const numStudentType = useMemo(() => {
+    const numStudents = filteredStudents.filter(
+      (s) => s.studentType === 'Normal',
+    ).length;
+    const numPhantom = filteredStudents.filter(
+      (s) => s.studentType === 'Phantom',
+    ).length;
+
+    return { numStudents, numPhantom };
+  }, [filteredStudents]);
 
   const { t } = useTranslation();
 
@@ -89,10 +99,8 @@ const StudentsStatisticsTable = ({ metadata, students }) => {
       downloadOptions: {
         filename: 'students_statistics',
       },
-      jumpToPage: true,
+      pagination: false,
       print: false,
-      rowsPerPage: DEFAULT_TABLE_ROWS_PER_PAGE,
-      rowsPerPageOptions: [DEFAULT_TABLE_ROWS_PER_PAGE],
       selectableRows: 'none',
       sortOrder: {
         name: 'experiencePoints',
@@ -160,7 +168,7 @@ const StudentsStatisticsTable = ({ metadata, students }) => {
             <>
               {groupManagers.map((m, index) => (
                 <span key={m.id}>
-                  <Link href={m.nameLink} opensInNewTab>
+                  <Link opensInNewTab to={m.nameLink}>
                     {m.name}
                   </Link>
                   {index < groupManagers.length - 1 && ', '}
@@ -193,8 +201,8 @@ const StudentsStatisticsTable = ({ metadata, students }) => {
           return (
             <Link
               key={student.id}
-              href={student.experiencePointsLink}
               opensInNewTab
+              to={student.experiencePointsLink}
             >
               {student.experiencePoints}
             </Link>
@@ -216,8 +224,8 @@ const StudentsStatisticsTable = ({ metadata, students }) => {
           return (
             <Link
               key={student.id}
-              href={student.videoSubmissionLink}
               opensInNewTab
+              to={student.videoSubmissionLink}
             >
               {student.videoSubmissionCount}
             </Link>
@@ -244,7 +252,7 @@ const StudentsStatisticsTable = ({ metadata, students }) => {
       height="30px"
       includeRowNumber
       options={options}
-      title={t(translations.tableTitle)}
+      title={t(translations.tableTitle, numStudentType)}
     />
   );
 };

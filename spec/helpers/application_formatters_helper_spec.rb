@@ -120,6 +120,81 @@ RSpec.describe ApplicationFormattersHelper do
           expect(helper.format_html(html)).to be_empty
         end
       end
+
+      context 'when oembed tags are present' do
+        it 'transforms embedded content from youtube' do
+          html = <<-HTML
+            <oembed url="https://www.youtube.com/watch?v=jNQXAC9IVRw"></oembed>
+            <oembed url="https://youtube.com/watch?v=jNQXAC9IVRw"></oembed>
+            <oembed url="https://m.youtube.com/watch?v=jNQXAC9IVRw"></oembed>
+            <oembed url="https://youtu.be/jNQXAC9IVRw"></oembed>
+            <oembed url="http://www.youtube.com/watch?v=jNQXAC9IVRw"></oembed>
+            <oembed url="http://youtube.com/watch?v=jNQXAC9IVRw"></oembed>
+            <oembed url="http://m.youtube.com/watch?v=jNQXAC9IVRw"></oembed>
+            <oembed url="http://youtu.be/jNQXAC9IVRw"></oembed>
+          HTML
+
+          embed_count = html.scan('<oembed').size
+          result = helper.format_html(html)
+
+          expect(result.scan('<iframe').size).to eq(embed_count)
+          expect(result.scan('src="https://www.youtube.com/embed/jNQXAC9IVRw').size).to eq(embed_count)
+        end
+
+        it 'transforms embedded content from dailymotion' do
+          html = <<-HTML
+            <oembed url="https://www.dailymotion.com/video/x3k7o56"></oembed>
+            <oembed url="https://dailymotion.com/video/x3k7o56"></oembed>
+            <oembed url="https://dai.ly/x3k7o56"></oembed>
+            <oembed url="http://www.dailymotion.com/video/x3k7o56"></oembed>
+            <oembed url="http://dailymotion.com/video/x3k7o56"></oembed>
+            <oembed url="http://dai.ly/x3k7o56"></oembed>
+          HTML
+
+          embed_count = html.scan('<oembed').size
+          result = helper.format_html(html)
+
+          expect(result.scan('<iframe').size).to eq(embed_count)
+          expect(result.scan('src="https://geo.dailymotion.com/player.html?video=x3k7o56').size).to eq(embed_count)
+        end
+
+        it 'transforms embedded content from vimeo' do
+          html = <<-HTML
+            <oembed url="https://vimeo.com/channels/staffpicks/852794606"></oembed>
+            <oembed url="https://vimeo.com/852794606"></oembed>
+            <oembed url="https://www.vimeo.com/channels/staffpicks/852794606"></oembed>
+            <oembed url="https://www.vimeo.com/852794606"></oembed>
+            <oembed url="http://vimeo.com/channels/staffpicks/852794606"></oembed>
+            <oembed url="http://vimeo.com/852794606"></oembed>
+            <oembed url="http://www.vimeo.com/channels/staffpicks/852794606"></oembed>
+            <oembed url="http://www.vimeo.com/852794606"></oembed>
+          HTML
+
+          embed_count = html.scan('<oembed').size
+          result = helper.format_html(html)
+
+          expect(result.scan('<iframe').size).to eq(embed_count)
+          expect(result.scan('src="https://player.vimeo.com/video/852794606').size).to eq(embed_count)
+        end
+
+        it 'removes forbidden embedded content' do
+          html = <<-HTML
+            <oembed url="//beta.coursemology.org"></oembed>
+            <oembed url="//www.youtubeXcom.com"></oembed>
+            <oembed url="//wwwXinstagram.com"></oembed>
+            <oembed url="//vine.com"></oembed>
+            <oembed url="//dailymotion.co"></oembed>
+            <oembed url="//vimeo.org"></oembed>
+          HTML
+
+          expect(helper.format_html(html).squish).to be_empty
+        end
+
+        it 'removes oembed tags without url attribute' do
+          html = '<oembed></oembed>'
+          expect(helper.format_html(html)).to be_empty
+        end
+      end
     end
 
     describe '#format_code_block' do
@@ -195,37 +270,6 @@ RSpec.describe ApplicationFormattersHelper do
       end
     end
 
-    describe '#display_user_image' do
-      let(:user) { build_stubbed(:user) }
-      subject { helper.display_user_image(user) }
-
-      context "when the user doesn't have a profile photo" do
-        it 'displays the default image' do
-          expect(subject).to have_tag('img', with: { 'src^': '/assets/user_silhouette-' })
-        end
-      end
-
-      context 'when the user has a profile photo' do
-        let(:image) { File.join(Rails.root, '/spec/fixtures/files/picture.jpg') }
-        before do
-          file = File.open(image, 'rb')
-          user.profile_photo = file
-          file.close
-        end
-
-        it { is_expected.to include(user.profile_photo.medium.url) }
-      end
-
-      context 'when the user is nil' do
-        let(:image) { File.join(Rails.root, '/spec/fixtures/files/picture.jpg') }
-        subject { helper.display_user_image(nil) }
-
-        it 'displays the default image' do
-          expect(subject).to have_tag('img', with: { 'src^': '/assets/user_silhouette-' })
-        end
-      end
-    end
-
     describe '#link_to_user' do
       let(:user) { build_stubbed(:user) }
       subject { helper.link_to_user(user) }
@@ -260,50 +304,6 @@ RSpec.describe ApplicationFormattersHelper do
         result.define_singleton_method(:ended?) { Time.zone.now > end_at }
       end
     end
-
-    describe '#time_period_class' do
-      subject { helper.time_period_class(stub) }
-
-      context 'when the object is not started' do
-        let(:start_at) { Time.zone.now + 1.day }
-        let(:end_at) { Time.zone.now + 2.days }
-        it { is_expected.to eq(['not-started']) }
-      end
-
-      context 'when the object is currently active' do
-        let(:start_at) { Time.zone.now - 1.day }
-        let(:end_at) { Time.zone.now + 1.day }
-        it { is_expected.to eq(['currently-active']) }
-      end
-
-      context 'when the object is ended' do
-        let(:start_at) { Time.zone.now - 1.week }
-        let(:end_at) { Time.zone.now - 1.day }
-        it { is_expected.to eq(['ended']) }
-      end
-    end
-
-    describe '#time_period_message' do
-      subject { helper.time_period_message(stub) }
-
-      context 'when the object is not started' do
-        let(:start_at) { Time.zone.now + 1.day }
-        let(:end_at) { Time.zone.now + 2.days }
-        it { is_expected.to eq(I18n.t('common.not_started')) }
-      end
-
-      context 'when the object is currently active' do
-        let(:start_at) { Time.zone.now - 1.day }
-        let(:end_at) { Time.zone.now + 1.day }
-        it { is_expected.to be_nil }
-      end
-
-      context 'when the object is ended' do
-        let(:start_at) { Time.zone.now - 1.week }
-        let(:end_at) { Time.zone.now - 1.day }
-        it { is_expected.to eq(I18n.t('common.ended')) }
-      end
-    end
   end
 
   describe 'draft helper' do
@@ -311,34 +311,6 @@ RSpec.describe ApplicationFormattersHelper do
       Object.new.tap do |result|
         published = self.published
         result.define_singleton_method(:published?) { published }
-      end
-    end
-  end
-
-  describe 'unread helper' do
-    let(:stub) do
-      double.tap do |result|
-        me = self
-        result.define_singleton_method(:unread?) { |_| !me.read_status }
-      end
-    end
-
-    describe '#unread_class' do
-      subject { helper.unread_class(stub) }
-      before { controller.define_singleton_method(:current_user) { nil } }
-
-      context 'when the user has not read the item' do
-        let(:read_status) { false }
-        it 'returns ["unread"]' do
-          expect(subject).to eq(['unread'])
-        end
-      end
-
-      context 'when the user has read the item' do
-        let(:read_status) { true }
-        it 'returns an empty array' do
-          expect(subject).to eq([])
-        end
       end
     end
   end

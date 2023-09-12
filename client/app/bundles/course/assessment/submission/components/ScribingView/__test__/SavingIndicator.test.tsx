@@ -1,4 +1,4 @@
-import MockAdapter from 'axios-mock-adapter';
+import { createMockAdapter } from 'mocks/axiosMock';
 import { dispatch } from 'store';
 import { render, waitFor } from 'test-utils';
 
@@ -8,7 +8,7 @@ import ScribingView from 'course/assessment/submission/containers/ScribingView';
 import { updateScribingAnswer } from '../../../actions/scribing';
 import actionTypes from '../../../constants';
 
-const mock = new MockAdapter(CourseAPI.assessment.answer.scribing.client);
+const mock = createMockAdapter(CourseAPI.assessment.answer.scribing.client);
 
 const assessmentId = 1;
 const submissionId = 2;
@@ -53,12 +53,6 @@ const mockSubmission = {
     },
   ],
 };
-
-// stub import function
-jest.mock(
-  'course/assessment/submission/loaders/ScribingViewLoader',
-  () => (): Promise<void> => Promise.resolve(),
-);
 
 beforeEach(() => {
   mock.reset();

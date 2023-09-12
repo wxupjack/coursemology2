@@ -9,7 +9,6 @@ class Course::CoursesController < Course::Controller
 
   def show
     respond_to do |format|
-      format.html { render layout: 'course' }
       format.json do
         @currently_active_announcements = current_course.announcements.
                                           currently_active.includes(:creator)
@@ -39,7 +38,7 @@ class Course::CoursesController < Course::Controller
   protected
 
   def publicly_accessible?
-    params[:action] == 'index'
+    Set[:index].include?(action_name.to_sym)
   end
 
   private

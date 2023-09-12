@@ -43,11 +43,10 @@ const PopupMenu = (props: PopupMenuProps): JSX.Element => {
       anchorEl={anchorEl}
       anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       classes={{
-        paper: 'max-w-[50rem] sm:max-w-full rounded-xl shadow-lg mr-[1.6rem]',
+        paper: 'max-w-[50rem] sm:max-w-full rounded-xl shadow-lg',
       }}
       onClose={onClose}
       open={Boolean(anchorEl)}
-      PaperProps={{ variant: 'outlined' }}
     >
       {/* eslint-disable-next-line react/jsx-no-constructed-context-values */}
       <PopupMenuContext.Provider value={{ close: onClose }}>
@@ -59,14 +58,16 @@ const PopupMenu = (props: PopupMenuProps): JSX.Element => {
 
 interface PopupMenuButtonProps {
   onClick?: () => void;
-  to?: string;
+  linkProps?: ComponentProps<typeof Link>;
   children?: ReactNode;
   textProps?: ComponentProps<typeof Typography>;
   disabled?: boolean;
+  secondary?: ReactNode;
+  secondaryAction?: ReactNode;
 }
 
 const PopupMenuButton = (props: PopupMenuButtonProps): JSX.Element => {
-  const { to: href } = props;
+  const { linkProps } = props;
 
   const { close } = useContext(PopupMenuContext);
 
@@ -76,17 +77,25 @@ const PopupMenuButton = (props: PopupMenuButtonProps): JSX.Element => {
   };
 
   const button = (
-    <ListItem disablePadding>
-      <ListItemButton disabled={props.disabled} onClick={handleClick}>
-        <ListItemText primaryTypographyProps={props.textProps}>
+    <ListItem disablePadding secondaryAction={props.secondaryAction}>
+      <ListItemButton
+        disabled={props.disabled}
+        onClick={handleClick}
+        tabIndex={-1}
+      >
+        <ListItemText
+          primaryTypographyProps={props.textProps}
+          secondary={props.secondary}
+          secondaryTypographyProps={{ variant: 'caption' }}
+        >
           {props.children}
         </ListItemText>
       </ListItemButton>
     </ListItem>
   );
 
-  return href && !props.disabled ? (
-    <Link to={href} underline="hover">
+  return linkProps && !props.disabled ? (
+    <Link color="inherit" {...linkProps} underline="none">
       {button}
     </Link>
   ) : (

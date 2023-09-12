@@ -1,10 +1,10 @@
 import { FC, useEffect, useState } from 'react';
 import { defineMessages } from 'react-intl';
-import { toast } from 'react-toastify';
-import { Button } from '@mui/material';
 
+import AddButton from 'lib/components/core/buttons/AddButton';
 import LoadingIndicator from 'lib/components/core/LoadingIndicator';
 import { useAppDispatch, useAppSelector } from 'lib/hooks/store';
+import toast from 'lib/hooks/toast';
 import useTranslation from 'lib/hooks/useTranslation';
 
 import InstancesButtons from '../components/buttons/InstancesButtons';
@@ -58,14 +58,13 @@ const InstancesIndex: FC = () => {
         instances={instances}
         newInstanceButton={
           permissions.canCreateInstances && (
-            <Button
+            <AddButton
               className="whitespace-nowrap"
               id="new-instance-button"
               onClick={(): void => setIsOpen(true)}
-              variant="outlined"
             >
               {t(translations.newInstance)}
-            </Button>
+            </AddButton>
           )
         }
         renderRowActionComponent={(instance): JSX.Element => (

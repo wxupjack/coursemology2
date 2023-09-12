@@ -15,7 +15,6 @@
 # users commonly want.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
-require 'coverage_helper'
 require 'rspec/retry' if ENV['CI']
 require File.expand_path('../config/environment', __dir__)
 
@@ -125,4 +124,5 @@ Capybara.configure do |config|
   config.server = :puma, { Silent: true }
   config.default_max_wait_time = 5
   config.enable_aria_label = true
+  config.server_port = Application::Application.config.x.server_port
 end

@@ -6,7 +6,6 @@ class Course::Video::VideosController < Course::Video::Controller
 
   def index
     respond_to do |format|
-      format.html
       format.json do
         @can_analyze = can_for_videos_in_current_course? :analyze
         @can_manage = can_for_videos_in_current_course? :manage
@@ -15,7 +14,6 @@ class Course::Video::VideosController < Course::Video::Controller
         preload_video_item
         @videos = @videos.
                   from_tab(current_tab).
-                  ordered_by_date_and_title.
                   includes(:statistic).
                   with_submissions_by(current_user)
 
@@ -26,7 +24,6 @@ class Course::Video::VideosController < Course::Video::Controller
 
   def show
     respond_to do |format|
-      format.html { render 'index' }
       format.json { render 'show' }
     end
   end

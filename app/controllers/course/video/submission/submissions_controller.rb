@@ -6,7 +6,6 @@ class Course::Video::Submission::SubmissionsController < Course::Video::Submissi
 
   def index
     respond_to do |format|
-      format.html
       format.json do
         @submissions = @submissions.includes([{ experience_points_record: :course_user }, :statistic])
         @my_students = current_course_user.try(:my_students) || []
@@ -17,7 +16,6 @@ class Course::Video::Submission::SubmissionsController < Course::Video::Submissi
 
   def show
     respond_to do |format|
-      format.html { render 'index' }
       format.json do
         @sessions = @submission.sessions.with_events_present
       end
@@ -26,18 +24,9 @@ class Course::Video::Submission::SubmissionsController < Course::Video::Submissi
 
   def create
     if @submission.save
-      respond_to do |format|
-        format.json do
-          render json: { submissionId: @submission.id,
-                         submissionUrl: edit_course_video_submission_path(current_course, @submission.video,
-                                                                          @submission) },
-                 status: :ok
-        end
-      end
+      render json: { submissionId: @submission.id }
     elsif @submission.existing_submission.present?
-      respond_to do |format|
-        format.json { render json: { submissionId: @submission.existing_submission.id }, status: :ok }
-      end
+      render json: { submissionId: @submission.existing_submission.id }
     else
       render json: { errors: @submission.errors.full_messages.to_sentence }, status: :bad_request
     end
@@ -49,7 +38,6 @@ class Course::Video::Submission::SubmissionsController < Course::Video::Submissi
     authorize!(:edit, @submission)
 
     respond_to do |format|
-      format.html { render 'index' }
       format.json do
         @topics = @video.topics.includes(posts: :children).order(:timestamp)
         @topics = @topics.reject { |topic| topic.posts.empty? }

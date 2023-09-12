@@ -65,6 +65,24 @@ const translations = defineMessages({
     id: 'course.assessment.submission.autograde',
     defaultMessage: 'Evaluate Answers',
   },
+  gradeUnsaved: {
+    id: 'course.assessment.submission.gradeUnsaved',
+    defaultMessage: 'Unsaved',
+  },
+  gradeUnsavedHint: {
+    id: 'course.assessment.submission.gradeUnsavedHint',
+    defaultMessage:
+      'This grade is not yet saved. Click Save Grade at the end of the page to save all grade changes.',
+  },
+  gradePrefilled: {
+    id: 'course.assessment.submission.gradePrefilled',
+    defaultMessage: 'Pre-filled',
+  },
+  gradePrefilledHint: {
+    id: 'course.assessment.submission.gradePrefilledHint',
+    defaultMessage:
+      'The maximum grade has been pre-filled for you because it was deemed correct by the autograder.',
+  },
   submit: {
     id: 'course.asssessment.submission.submit',
     defaultMessage: 'Submit',

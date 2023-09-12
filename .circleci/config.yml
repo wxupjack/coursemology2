@@ -1,98 +1,89 @@
-# Ruby CircleCI 2.1 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details
-#
 version: 2.1
+
+orbs:
+  codecov: codecov/codecov@3.2.5
+
+executors:
+  node:
+    docker:
+      - image: cimg/node:18.17.0
+
+    working_directory: ~/repo
+    resource_class: large
+
+  ruby_with_postgres:
+    parameters:
+      collects_rails_coverage:
+        type: boolean
+        default: false
+
+    docker:
+      - image: cimg/ruby:3.0.5-browsers
+        environment:
+          PG_HOST: localhost
+          PG_USER: ubuntu
+          RAILS_ENV: test
+          BUNDLE_APP_CONFIG: ~/repo/.bundle
+          DATABASE_URL: "postgres://ubuntu@localhost:5432/coursemology_test"
+          COLLECT_COVERAGE: << parameters.collects_rails_coverage >>
+
+      - image: cimg/postgres:14.5
+        environment:
+          POSTGRES_USER: ubuntu
+          POSTGRES_DB: coursemology_test
+
+    working_directory: ~/repo
+    resource_class: large
 
 commands:
   checkout_with_submodules:
     steps:
       - checkout
 
-      # Checkout submodules
       - run:
           name: Checkout submodules
           command: git submodule update --init --recursive
 
-  restore_ruby_cache:
+  rehydrate_ruby_deps:
     steps:
-      # Install bundler version
-      - run:
-          name: Install bundler version 2.2.33
-          command: gem install bundler:2.2.33
-
-      # Restore cached Ruby dependencies
       - restore_cache:
+          name: Restore Ruby dependencies cache
           keys:
             - v3.0.5-ruby-{{ checksum "Gemfile.lock" }}
-            # Fallback to using the latest cache if no exact match is found
             - v3.0.5-ruby-
 
-      # Update Ruby dependencies
       - run:
-          name: Install dependencies
-          command: |
-            bundle install --jobs=4 --retry=3 --path vendor/bundle --without development:production --deployment
+          name: Install Bundler
+          command: gem install bundler:2.2.33
 
-      # Recache the updated Ruby dependencies
+      - run:
+          name: Install Ruby dependencies
+          command: bundle install --jobs=4 --retry=3 --path vendor/bundle --without development:production --deployment
+
       - save_cache:
           paths:
             - ./vendor/bundle
             - ./.bundle
           key: v3.0.5-ruby-{{ checksum "Gemfile.lock" }}
 
-  build_and_restore_node_cache:
+  rehydrate_node_deps:
     steps:
-      # Use the desired Node version
-      - run:
-          name: Swap Node versions
-          command: |
-            set +e
-            wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-            nvm install v18.12.1
-            nvm alias default 18.12.1
-
-            echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
-            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
-
-      # Restore cached Node dependencies
       - restore_cache:
+          name: Restore client Yarn dependencies cache
           keys:
-            - v18.12.1-node-{{ checksum "client/yarn.lock" }}
-            # Fallback to using the latest cache if no exact match is found
-            - v18.12.1-node-
+            - v18.17.0-node-{{ checksum "client/yarn.lock" }}-{{ checksum "client/vendor/recorderjs/package.json" }}
+            - v18.17.0-node-
 
-      # Update Node dependencies
-      - run: cd client && yarn install && cd -
+      - run:
+          name: Install client Yarn dependencies
+          working_directory: client
+          command: yarn install
 
-      # Recache the updated Node dependencies
       - save_cache:
           paths:
             - ./client/node_modules
-          key: v18.12.1-node-{{ checksum "client/yarn.lock" }}
-
-  restore_node_cache:
-    steps:
-      - restore_cache:
-          name: Restore Node cache
-          keys:
-            - v18.12.1-node-{{ checksum "client/yarn.lock" }}
-            # Fallback to using the latest cache if no exact match is found
-            - v18.12.1-node-
-
-  build_and_cache_client:
-    steps:
-      - run:
-          name: Build client
-          command: cd client && yarn build:production && cd -
-      - save_cache:
-          paths:
-            - ./client/build
-            - ./public/webpack
-          key: v1-yarn-build-{{ .Revision }}
+            - ./client/vendor/recorderjs/node_modules
+          key: v18.17.0-node-{{ checksum "client/yarn.lock" }}-{{ checksum "client/vendor/recorderjs/package.json" }}
 
   restore_client_cache:
     steps:
@@ -101,215 +92,289 @@ commands:
           keys:
             - v1-yarn-build-{{ .Revision }}
 
+  build_and_cache_client:
+    steps:
+      - restore_client_cache
+
+      - run:
+          name: Add env file to client folder
+          working_directory: client
+          command: |
+            touch .env
+            echo GOOGLE_RECAPTCHA_SITE_KEY="${GOOGLE_RECAPTCHA_SITE_KEY}" >> .env
+            echo ROLLBAR_POST_CLIENT_ITEM_KEY="${ROLLBAR_POST_CLIENT_ITEM_KEY}" >> .env
+            echo SUPPORT_EMAIL="${SUPPORT_EMAIL}" >> .env
+            echo DEFAULT_LOCALE="${DEFAULT_LOCALE}" >> .env
+            echo DEFAULT_TIME_ZONE="${DEFAULT_TIME_ZONE}" >> .env
+
+      - run:
+          name: Build client
+          working_directory: client
+          command: yarn build:test
+          environment:
+            AVAILABLE_CPUS: 4
+
+      - save_cache:
+          paths:
+            - ./client/build
+          key: v1-yarn-build-{{ .Revision }}
+
   setup_db:
     steps:
       - run:
-          name: Setup DB
-          command: |
-            bundle exec rake db:setup
+          name: Set up test database
+          command: bundle exec rake db:setup
           environment:
-            DATABASE_URL: "postgres://ubuntu@localhost:5432/coursemology_test"
+            COLLECT_COVERAGE: false
 
-jobs:
-  test:
-    docker:
-      # specify the version you desire here
-      - image: cimg/ruby:3.0.5-browsers
-        environment:
-          PG_HOST: localhost
-          PG_USER: ubuntu
-          RAILS_ENV: test
-          BUNDLE_APP_CONFIG: ~/repo/.bundle
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      - image: cimg/postgres:14.5
-        environment:
-          POSTGRES_USER: ubuntu
-          POSTGRES_DB: coursemology_test
-
-    parallelism: 25
-
-    working_directory: ~/repo
-
+  serve_static_site:
     steps:
-      - checkout_with_submodules
+      - run:
+          name: Download dirt-cheap-rocket
+          command: curl https://github.com/Coursemology/dirt-cheap-rocket/releases/latest/download/dirt-cheap-rocket.cjs -o dirt-cheap-rocket.cjs -L
+      - run:
+          name: Serve static site
+          command: node dirt-cheap-rocket.cjs
+          background: true
+          environment:
+            DCR_CLIENT_PORT: 3200
+            DCR_SERVER_PORT: 7979
+            DCR_PUBLIC_PATH: /static
+            DCR_ASSETS_DIR: client/build
 
-      - restore_ruby_cache
-      - restore_node_cache
+  serve_rails_server:
+    steps:
+      - run:
+          name: Serve Rails server
+          command: bundle exec rails s -p 7979
+          background: true
 
-      - restore_client_cache
+      - run:
+          name: Wait for Rails server
+          command: curl -s --retry 1000 --retry-delay 1 --retry-connrefused http://lvh.me:7979
 
-      # Install ghostscript so `identify` in ImageMagick works with PDF files.
-      # Remove pdf security policy for imagemagick (ubuntu 20.04)
-      # https://stackoverflow.com/questions/52998331/imagemagick-security-policy-pdf-blocking-conversion
-      # Installations below are currently disabled as CircleCI would fail to install occasionally
-      # - run:
-      #     name: install ghostscript and imagemagick
-      #     command: |
-      #       sudo apt update
-      #       sudo apt install imagemagick
-      #       sudo apt install ghostscript
-      #       sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
+  terminate_rails_and_wait_for_coverage_results:
+    steps:
+      - run:
+          name: Terminate Rails server
+          command: pkill -SIGTERM -f puma
 
+      - run:
+          name: Wait for Rails coverage results
+          no_output_timeout: 5m
+          command: until [ -f coverage/codecov-result.json ]; do sleep 1; done
+
+  setup_docker_layer_cache:
+    steps:
       - setup_remote_docker:
           version: 20.10.18
           docker_layer_caching: true
 
-      - setup_db
-
-      # Run tests!
+  # Install Ghostscript so `identify` in ImageMagick works with PDF files.
+  # To remove PDF security policy for ImageMagick (Ubuntu 20.04), see https://stackoverflow.com/questions/52998331/imagemagick-security-policy-pdf-blocking-conversion
+  # This is currently not used as CircleCI would fail to install occasionally.
+  install_ghostscript_and_imagemagick:
+    steps:
       - run:
-          name: run
+          name: Install Ghostscript and ImageMagick
+          command: |
+            sudo apt update
+            sudo apt install imagemagick
+            sudo apt install ghostscript
+            sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
+
+jobs:
+  build_client:
+    executor: node
+
+    steps:
+      - checkout_with_submodules
+      - rehydrate_node_deps
+      - build_and_cache_client
+
+  test_playwright:
+    executor:
+      name: ruby_with_postgres
+      collects_rails_coverage: true
+
+    parallelism: 10
+
+    steps:
+      - checkout_with_submodules
+      - setup_docker_layer_cache
+
+      - rehydrate_ruby_deps
+      - restore_client_cache
+
+      - setup_db
+      - serve_static_site
+      - serve_rails_server
+
+      - run:
+          name: Install Playwright dependencies
+          working_directory: tests
+          command: yarn install; yarn prepare
+
+      - run:
+          name: Run Playwright tests
+          working_directory: tests
+          command: |
+            SHARD="$((${CIRCLE_NODE_INDEX}+1))"; npx playwright test --shard=${SHARD}/${CIRCLE_NODE_TOTAL} --reporter=junit
+            zip -r test-results.zip playright-report test-results
+          environment:
+            PLAYWRIGHT_JUNIT_OUTPUT_NAME: results.xml
+
+      - run:
+          name: Generate code coverage
+          working_directory: tests
+          command: yarn coverage
+
+      - terminate_rails_and_wait_for_coverage_results
+
+      - codecov/upload:
+          upload_name: playwright-client
+          file: tests/coverage/lcov.info
+
+      - codecov/upload:
+          upload_name: playwright-rails
+          file: coverage/codecov-result.json
+
+      - store_test_results:
+          path: ~/repo/tests/results.xml
+
+      - store_artifacts:
+          path: ~/repo/tests/results.xml
+
+      - store_artifacts:
+          path: ~/repo/tests/test-results.zip
+
+  test_rspec:
+    executor:
+      name: ruby_with_postgres
+      collects_rails_coverage: true
+
+    parallelism: 30
+
+    steps:
+      - checkout_with_submodules
+      - setup_docker_layer_cache
+
+      - rehydrate_ruby_deps
+      - restore_client_cache
+
+      - setup_db
+      - serve_static_site
+
+      - run:
+          name: Run RSpec tests
           no_output_timeout: 10m
           command: |
             mkdir /tmp/test-results
-            TEST_FILES="$(circleci tests glob "spec/**/*_spec.rb" | \
-              circleci tests split --split-by=timings)"
+            TEST_FILES="$(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)"
 
             bundle exec rspec \
               --format progress \
               --format RspecJunitFormatter \
               --out /tmp/test-results/rspec.xml \
-              --format progress \
-              $TEST_FILES
-          environment:
-            DATABASE_URL: "postgres://ubuntu@localhost:5432/coursemology_test"
+              -- ${TEST_FILES}
 
-      # Collect reports
       - store_test_results:
           path: /tmp/test-results
+
       - store_artifacts:
           path: /tmp/test-results
           destination: test-results
-    # The resource_class feature allows configuring CPU and RAM resources for each job. Different resource classes are available for different executors. https://circleci.com/docs/2.0/configuration-reference/#resourceclass
-    resource_class: large
 
-  lint:
-    docker:
-      - image: cimg/ruby:3.0.5-browsers
-        environment:
-          PG_HOST: localhost
-          PG_USER: ubuntu
-          RAILS_ENV: test
-          BUNDLE_APP_CONFIG: ~/repo/.bundle
-
-      - image: cimg/postgres:14.5
-        environment:
-          POSTGRES_USER: ubuntu
-          POSTGRES_DB: coursemology_test
-
-    working_directory: ~/repo
+  factorybot_lint:
+    executor: ruby_with_postgres
 
     steps:
       - checkout
-
-      - restore_ruby_cache
-
+      - rehydrate_ruby_deps
       - setup_db
 
       - run:
           name: Run FactoryBot lint
-          command: |
-            bundle exec rake factory_bot:lint
-          environment:
-            DATABASE_URL: "postgres://ubuntu@localhost:5432/coursemology_test"
+          command: bundle exec rake factory_bot:lint
 
   jslint:
-    docker:
-      # specify the version you desire here
-      - image: cimg/ruby:3.0.5-browsers
-        environment:
-          RAILS_ENV: test
-
-    working_directory: ~/repo
+    executor: node
 
     steps:
       - checkout_with_submodules
-
-      - build_and_restore_node_cache
-
-      - build_and_cache_client
+      - rehydrate_node_deps
 
       - run:
-          name: Run yarn checks
-          command: |
-            cd client
-            yarn lint
-    resource_class: large
+          name: Run ESLint and Prettier checks
+          working_directory: client
+          command: yarn lint
 
   jstest:
-    docker:
-      # specify the version you desire here
-      - image: cimg/ruby:3.0.5-browsers
-        environment:
-          RAILS_ENV: test
-
-    working_directory: ~/repo
+    executor: node
 
     steps:
       - checkout_with_submodules
+      - rehydrate_node_deps
 
-      - build_and_restore_node_cache
-
-      - build_and_cache_client
-
-      # Build frontend JS
       - run:
-          name: Run yarn checks
-          command: |
-            cd client && yarn
-            yarn testci
-    resource_class: large
+          name: Build translations
+          working_directory: client
+          command: yarn run build:translations
 
-  i18n:
-    docker:
-      # specify the version you desire here
-      - image: cimg/ruby:3.0.5-browsers
-        environment:
-          PG_HOST: localhost
-          PG_USER: ubuntu
-          RAILS_ENV: test
-          BUNDLE_APP_CONFIG: ~/repo/.bundle
+      - run:
+          name: Run Jest tests
+          working_directory: client
+          command: yarn testci
 
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      - image: cimg/postgres:14.5
-        environment:
-          POSTGRES_USER: ubuntu
-          POSTGRES_DB: coursemology_test
+      - codecov/upload:
+          upload_name: jest
+          file: client/coverage/lcov.info
 
-    working_directory: ~/repo
+  i18n_en:
+    executor: ruby_with_postgres
 
     steps:
       - checkout
-
-      - restore_ruby_cache
-
+      - rehydrate_ruby_deps
       - setup_db
 
-      # Run i18n checks!
       - run:
-          name: Run i18n checks
-          command: |
-            bundle exec i18n-tasks unused
-            bundle exec i18n-tasks missing
-          environment:
-            DATABASE_URL: "postgres://ubuntu@localhost:5432/coursemology_test"
-    resource_class: large
+          name: Check for unused translations (English)
+          command: bundle exec i18n-tasks unused --locales en
+
+      - run:
+          name: Check for missing translations (English)
+          command: bundle exec i18n-tasks missing --locales en
+
+  i18n_zh:
+    executor: ruby_with_postgres
+
+    steps:
+      - checkout
+      - rehydrate_ruby_deps
+      - setup_db
+
+      - run:
+          name: Check for unused translations (Mandarin)
+          command: bundle exec i18n-tasks unused --locales zh
+
+      - run:
+          name: Check for missing translations (Mandarin)
+          command: bundle exec i18n-tasks missing --locales zh
 
 workflows:
-  version: 2
   build_and_test_and_lint:
     jobs:
-      - lint
       - jslint
       - jstest
-      - i18n
-      - test:
+      - build_client
+      - i18n_en
+      - i18n_zh
+      - factorybot_lint
+      - test_rspec:
           requires:
-            - lint
-            - jslint
-            - jstest
+            - build_client
+            - factorybot_lint
+      - test_playwright:
+          requires:
+            - build_client

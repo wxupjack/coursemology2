@@ -75,11 +75,12 @@ class Course::AssessmentsComponent < SimpleDelegator
 
   # Returns the number of pending submissions based on roles:
   #   course_teacher_assistant: Number of submissions from students in my group
-  #   course_owner & course_manager: Number of pending submissions in the course
+  #   course_owner & course_manager: Number of submissions from students in my group if it's nonzero,
+  #       otherwise number of submissions from all students in the course
   #   course_student or other users: 0
   def submission_count
     if current_course_user&.manager_or_owner?
-      pending_submissions_count
+      my_students_pending_submissions_count > 0 ? my_students_pending_submissions_count : pending_submissions_count
     elsif current_course_user&.staff?
       my_students_pending_submissions_count
     else

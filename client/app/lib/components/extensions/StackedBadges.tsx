@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Avatar, Tooltip, Typography } from '@mui/material';
 import { AchievementBadgeData } from 'types/course/assessment/assessments';
 
+import { getAchievementBadgeUrl } from 'course/helper/achievements';
 import Link from 'lib/components/core/Link';
 
 interface StackableBadgeProps {
@@ -36,16 +37,19 @@ const StackedBadges = (props: StackedBadgesProps): JSX.Element => (
         <Link
           key={badge.url}
           className="transition-margin hoverable:group-hover/badges:-ml-1"
-          href={badge.url}
           opensInNewTab
+          to={badge.url}
           underline="hover"
         >
-          <StackableBadge src={badge.badgeUrl} title={badge.title} />
+          <StackableBadge
+            src={getAchievementBadgeUrl(badge.badgeUrl, true)}
+            title={badge.title}
+          />
         </Link>
       ))}
 
-      {props.remainingCount && (
-        <Link href={props.seeRemainingUrl} opensInNewTab underline="hover">
+      {Boolean(props.remainingCount) && (
+        <Link opensInNewTab to={props.seeRemainingUrl} underline="hover">
           <Tooltip disableInteractive title={props.seeRemainingTooltip}>
             <Typography
               className="ml-6 hoverable:group-hover/badges:ml-3"

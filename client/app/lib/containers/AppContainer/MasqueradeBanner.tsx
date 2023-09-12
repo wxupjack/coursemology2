@@ -1,8 +1,10 @@
 import { defineMessages } from 'react-intl';
 import { TheaterComedy } from '@mui/icons-material';
-import { Typography } from '@mui/material';
 
+import GlobalAPI from 'api';
+import Banner from 'lib/components/core/layouts/Banner';
 import Link from 'lib/components/core/Link';
+import toast from 'lib/hooks/toast/toast';
 import useTranslation from 'lib/hooks/useTranslation';
 
 const translations = defineMessages({
@@ -13,6 +15,11 @@ const translations = defineMessages({
   stopMasquerading: {
     id: 'lib.components.core.banners.MasqueradeBanner.stopMasquerading',
     defaultMessage: 'Stop masquerading',
+  },
+  errorStoppingMasquerade: {
+    id: 'lib.components.core.banners.MasqueradeBanner.errorStoppingMasquerade',
+    defaultMessage:
+      'An error occurred while stopping masquerade. Try again later.',
   },
 });
 
@@ -25,30 +32,30 @@ const MasqueradeBanner = (props: MasqueradeBannerProps): JSX.Element => {
   const { as: userName, stopMasqueradingUrl } = props;
 
   const { t } = useTranslation();
+  const handleClick = async (): Promise<void> => {
+    try {
+      await GlobalAPI.users.stopMasquerade(stopMasqueradingUrl);
+      window.location.href = '/admin/users';
+    } catch {
+      toast.error(t(translations.errorStoppingMasquerade));
+    }
+  };
 
   return (
-    <div className="flex flex-wrap items-center justify-between space-x-4 bg-fuchsia-700 px-5 py-1 text-white border-only-b-fuchsia-300">
-      <div className="flex items-center space-x-4">
-        <TheaterComedy />
-
-        <Typography variant="body2">
-          {t(translations.masquerading, {
-            as: userName,
-            strong: (chunk) => (
-              <strong className="font-semibold">{chunk}</strong>
-            ),
-          })}
-        </Typography>
-      </div>
-
-      <Link
-        className="text-inherit"
-        href={stopMasqueradingUrl}
-        underline="hover"
-      >
-        {t(translations.stopMasquerading)}
-      </Link>
-    </div>
+    <Banner
+      actions={
+        <Link className="text-inherit" onClick={handleClick} underline="hover">
+          {t(translations.stopMasquerading)}
+        </Link>
+      }
+      className="bg-fuchsia-700 text-white border-only-b-fuchsia-200"
+      icon={<TheaterComedy />}
+    >
+      {t(translations.masquerading, {
+        as: userName,
+        strong: (chunk) => <strong className="font-semibold">{chunk}</strong>,
+      })}
+    </Banner>
   );
 };
 

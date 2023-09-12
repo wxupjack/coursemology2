@@ -61,3 +61,11 @@ export default {
   STAFF_ROLES,
   AVAILABLE_LOCALES,
 };
+
+export const SUPPORT_EMAIL =
+  process.env.SUPPORT_EMAIL ?? 'coursemology@gmail.com';
+
+export const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE ?? 'en';
+
+export const DEFAULT_TIME_ZONE =
+  process.env.DEFAULT_TIME_ZONE ?? 'Asia/Singapore';

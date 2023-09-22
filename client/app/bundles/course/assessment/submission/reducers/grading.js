@@ -16,7 +16,7 @@ const computeExp = (
   bonusAwarded = 0,
 ) => {
   const totalGrade = sum(
-    Object.values(questions).map((q) => parseInt(q.grade, 10)),
+    Object.values(questions).map((q) => parseFloat(q.grade)),
   );
   return Math.round(
     (totalGrade / maximumGrade) * (basePoints + bonusAwarded) * expMultiplier,
@@ -94,8 +94,12 @@ export default function (state = initialState, action) {
   switch (action.type) {
     case actions.FETCH_SUBMISSION_SUCCESS: {
       const { expMultiplier } = state;
-      const basePoints = action.payload.submission.basePoints;
-      const bonusAwarded = action.bonusAwarded;
+      const submission = action.payload.submission;
+      const { submittedAt, bonusEndAt, bonusPoints } = submission;
+
+      const basePoints = submission.basePoints;
+      const bonusAwarded =
+        new Date(submittedAt) < new Date(bonusEndAt) ? bonusPoints : 0;
       const questionWithGrades = extractPrefillableGrades(action.payload);
       const maxGrade = sum(
         Object.values(action.payload.questions).map((q) => q.maximumGrade),
@@ -104,13 +108,15 @@ export default function (state = initialState, action) {
       return {
         ...state,
         questions: questionWithGrades,
-        exp: computeExp(
-          questionWithGrades,
-          maxGrade,
-          basePoints,
-          expMultiplier,
-          bonusAwarded,
-        ),
+        exp:
+          action.payload.submission.pointsAwarded ??
+          computeExp(
+            questionWithGrades,
+            maxGrade,
+            basePoints,
+            expMultiplier,
+            bonusAwarded,
+          ),
         basePoints,
         maximumGrade: maxGrade,
       };

@@ -8,7 +8,7 @@
     "en": "All Announcements"
   },
   "app.BrandingItem.coursemology": {
-    "defaultMessage": "Coursemolog",
+    "defaultMessage": "Coursemology",
     "en": "Coursemology"
   },
   "app.BrandingItem.goToOtherCourses": {
@@ -52,7 +52,7 @@
     "en": "Graphic of a fire ball is created by <author>Storyset</author> from <source>www.storyset.com</source>, with modifications."
   },
   "app.ErrorPage.errorSubtitle": {
-    "defaultMessage":"发生严重错误，请稍后重试。如果问题仍然存在，请联系您的课程讲师或 coursemology 管理员。",
+    "defaultMessage": "发生严重错误，请稍后重试。如果问题仍然存在，请联系您的课程讲师或 coursemology 管理员。",
     "en": "A fatal error has occurred. You may try again later. If the problem persists, <contact>contact us</contact>."
   },
   "app.ErrorPage.forbidden": {
@@ -623,7 +623,7 @@
     "defaultMessage": "到 {tab}",
     "en": "to {tab}"
   },
-  "course.admin.CodaveriSettings.codaverSettingsSubtitle": {
+  "course.admin.CodaveriSettings.codaveriSettingsSubtitle": {
     "defaultMessage": "目前这是一项实验性功能。 Codaveri 为学生的代码提供代码测验和自动代码反馈服务。",
     "en": "This is currently an experimental feature. Codaveri provides code evaluation and automated code feedback services for students' codes."
   },
